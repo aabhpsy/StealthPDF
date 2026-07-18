@@ -1,13 +1,37 @@
 # Changelog
 
-All notable changes to KillerPDF are documented here.
+All notable changes to StealthPDF are documented here.
+
+StealthPDF is a fork of [StealthPDF](https://github.com/SteveTheKiller/StealthPDF) by Steve the Killer, maintained by [@aabhpsy](https://github.com/aabhpsy).
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.6.1] - unreleased
+## [2.0.0] - 2026-07-18
 
+### Added
+- **Bundled OCR models**: English (`eng`) and Nepali (`nep`) Tesseract traineddata now ship embedded inside the EXE (High Quality, tessdata_best), so OCR works fully offline for both — no download required, ever. Other languages still download on demand and are cached. Adds ~27 MB to the EXE.
+- **Nepali (np-NP) UI locale** added to the Settings language picker (scaffold — falls back to English until translated; contributes via `Strings/TRANSLATING.md`).
+- **English (UK) UI locale** added — British-spelling override (colour, centre, recognise) on top of the en-US base.
+### Added
+- **TWAIN scanner support**: a bundled x86 helper (`StealthPDF.TwainHelper.exe`, built from the new `TwainHelper` project) bridges to the 32-bit TWAIN Data Source Manager. The main 64-bit app launches it out-of-process to enumerate and acquire from every installed TWAIN scanner — including TWAIN-only drivers that WIA (and therefore the previous WIA-only build) could not see at all. The scanner dropdown now lists **`[TWAIN] <name>`** and **`[WIA] <name>`** entries; TWAIN acquisition shows the scanner's own native UI (same dialog Adobe/Fax & Scan present). Uses the MIT-licensed [NTwain](https://github.com/soukoku/ntwain) library.
+- **Traditional menu bar** (File / Edit / View / Tools / Help) at the top of the window, Adobe-style, in addition to the icon toolbar. Every action is reachable from the keyboard via Alt + underlined letter.
 ### Fixed
+- **Scanner selection (WIA)**: the scanner dropdown now also accepts WIA devices that report `Type 0` (some stacks enumerate image devices as untyped). Added a **"Choose at scan time…"** fallback entry in the scan dialog that defers the pick to Windows' native Select-Device dialog, which can surface scanners that WIA enumeration missed. If a previously chosen scanner is unplugged, acquisition now falls back to the native picker instead of failing silently. Rebranded the scan temp-file prefix (`StealthPDF-scan` → `StealthPDF-scan`) and dialog titles. (TWAIN-only scanners are now supported via the new x86 helper — see above.)
+- **Menu headers**: removed the literal `_` prefix that was showing in front of menu names (`_File`, `_Edit`, …). Menus now read as clean "File / Edit / View / Tools / Help".
+- **Compress PDF reworked (rotation + size)**: replaced the old page-rasterize approach with **image-level compression** via a bundled [PyMuPDF](https://github.com/pymupdf/PyMuPDF) helper (AGPL-3.0, compatible with this GPL-3.0 fork). This fixes two serious bugs: (1) **rotation was being changed** — the old code rendered pages through PDFium's unrotated space and re-drew the JPEG full-page, flipping landscape/sideways pages; now only image XObjects are swapped in place and the page `/Rotate`, content stream and text are never touched, so orientation is preserved exactly. (2) **the compressed file was often larger than the source** — the old code re-rasterized the whole page (text + images) at a fixed DPI and re-encoded as one JPEG, which upsamples already-small images and compresses crisp text poorly; now each image is judged at its real on-page DPI and only downsampled if above the target (never upsamples), text-only pages pass through untouched, and the output is linearized + garbage-collected + deflated. Adds a ~55 MB bundled portable Python + PyMuPDF runtime (deployed under `PdfHelper\` next to the app; built via `PdfHelper/fetch-pdfhelper.ps1`).
+- **Compress PDF no longer hangs on large files**: the PyMuPDF helper called `page.get_image_rects()` **per image**, which re-parses the page content and MD5-decodes every image on the page on each call (O(images²) full image decodes per page), decoded every image ~2× even when nothing needed doing, and saved with `clean=True` + `linear=True` (a full content-stream sanitize plus a second full write pass). The reworked pipeline does one metadata-only content pass per page (pages with nothing to compress cost **zero** image decodes), computes effective DPI exactly from each image's transform matrix, decodes each processed image exactly once, skips already-compact bitonal scans, never replaces an image with a larger stream, and linearizes only files ≤ 32 MB. The helper now also streams per-page progress to the busy overlay, and the app no longer freezes the UI on a PdfSharp snapshot save when the document is unmodified — clean documents are compressed straight from the on-disk file. Follow-up hardening for book-scale files: text-only pages are now skipped without any content parsing (the per-page TextPage extraction was the dominant cost on text-heavy books), bitonal (JBIG2/CCITT) scans are left untouched (already optimal — re-encoding them as JPEG used to *grow* them), multi-image pages no longer decode images that can't be over target, and the runaway ceiling is 60 minutes with the last reported page included in the timeout message.
+
+- **Menu headers**: removed the literal `_` prefix that was showing in front of menu names (`_File`, `_Edit`, …). Menus now read as clean "File / Edit / View / Tools / Help".
+- Menu strings for all five menus in en-US (English). Other locales fall back to English until translated.
 - Open menu: the remove (X) button on each recent-files entry was clipped off the right edge of the dropdown; it now stays inside the frame.
+### Changed
+- **Professional UI refresh**: the default Dark and Light themes are now neutral graphite/paper palettes with a single restrained **blue accent** and a flat, clean finish - the film grain, icon glow, and header drop shadows are gone, and the Consolas "terminal" chrome is replaced by the app UI font (Segoe UI) throughout. The look borrows the restraint of professional PDF tools without losing the StealthPDF identity. The legacy KillerTools green survives as an accent choice (Dark/Light), and every accent hue now also drives the wordmark and install-button colour. Black stays the high-contrast theme; Blood/Greed/Cyanotic keep their personalities but lose the grain.
+- **stealthpdf.com is the download home**: the downloadable build now lives on the website; GitHub hosts the source. Landing site, README, Chocolatey package (`stealthpdf`) and WinGet id (`aabhpsy.StealthPDF`) updated to match; release workflows point at the fork.
+- **Rebrand StealthPDF → StealthPDF** (user-visible only): app title, window title, wordmark, About box, tagline, install/uninstall dialogs, install path (`%LOCALAPPDATA%\Programs\StealthPDF\`), Start Menu / Desktop shortcuts, PDF file-handler ProgID (`StealthPDF.pdf`), registry keys, update-check URLs, and the launcher dialog. The internal C# namespace `StealthPDF` is intentionally kept to avoid a risky deep rename.
+- Footer credit now shows: "StealthPDF · fork of StealthPDF by Steve the Killer · maintainer @aabhpsy".
+- About box tagline link points to the StealthPDF GitHub repo.
+- Output binary is now `StealthPDF.exe` (via `<AssemblyName>StealthPDF</AssemblyName>`).
+- README rewritten for StealthPDF with an install-vs-portable comparison table and credits.
 
 ## [1.6.0] - 2026-06-27
 
@@ -61,7 +85,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ## [1.5.1] - 2026-06-14
 
 ### Fixed
-- PDFs that opened fine in browsers and Acrobat/Foxit but failed in KillerPDF with "Unexpected EOF" now open. PdfSharpCore rejected them during parsing; KillerPDF now falls back to re-saving the file losslessly through PDFium (which reads them) and opening that copy (Issue #72).
+- PDFs that opened fine in browsers and Acrobat/Foxit but failed in StealthPDF with "Unexpected EOF" now open. PdfSharpCore rejected them during parsing; StealthPDF now falls back to re-saving the file losslessly through PDFium (which reads them) and opening that copy (Issue #72).
 - Files opened from UNC / network shares (including the WSL `\\wsl$` filesystem) are now copied to a local temp before opening, avoiding partial-read failures on network filesystems.
 - Grid view now renders every page, and tiles stream in progressively as they render instead of blocking until the whole document is done. Grid was previously capped at the first 26 pages, so longer documents stopped loading partway through.
 - Ctrl+Scroll in grid view no longer re-renders every page when the zoom is already at its limit (the column count cannot change), which made large documents reload pointlessly.
@@ -95,8 +119,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Settings and keyboard shortcut overlay borders widened to 2px for better visibility.
 - Text tool size value is now interpreted as points. A size of 14 renders and exports as roughly 14pt instead of about 5pt of internal render units.
 - Placing an image now switches to the Select tool with the image selected, so you can immediately drag to reposition or use the corner handle to resize instead of the next click reopening the image picker (matching signature placement).
-- Extracted SignatureStore and SearchService into Services/ with unit tests (KillerPDF.Tests).
-- Encrypted PDF temp files written to `%LOCALAPPDATA%\KillerPDF\Temp\` instead of `%TEMP%`.
+- Extracted SignatureStore and SearchService into Services/ with unit tests (StealthPDF.Tests).
+- Encrypted PDF temp files written to `%LOCALAPPDATA%\StealthPDF\Temp\` instead of `%TEMP%`.
 - Reopens last file on startup; ESC closes the app when no overlay is active (Issue #69).
 - Grid view mode moved from a toolbar toggle to the Settings panel alongside Theme and Language. Four modes: Single Page, Continuous, Two-Page, Grid. Selection persists across sessions.
 - Switching to Single or Two-Page view fits the page to the window, Continuous opens fit-to-width, and Grid opens at its column-fit default, rather than carrying the previous mode's zoom level.
@@ -117,10 +141,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ## [1.4.3] - 2026-06-08
 
 ### Fixed
-- Encrypted PDFs (owner-restricted RC4) no longer fail with "Unexpected token 'xref'" when rotating pages. PdfSharpCore can silently produce a broken cross-reference entry after saving encrypted files; KillerPDF now pipes the file through PDFium to repair the XRef and retries the open automatically.
+- Encrypted PDFs (owner-restricted RC4) no longer fail with "Unexpected token 'xref'" when rotating pages. PdfSharpCore can silently produce a broken cross-reference entry after saving encrypted files; StealthPDF now pipes the file through PDFium to repair the XRef and retries the open automatically.
 - Page view now fits to page after a rotation so the full rotated page is visible without manual rezoom.
-- Mailto and other link annotations with visible borders (e.g. colored rectangles that looked like strikethroughs) no longer render those borders in saved PDFs. KillerPDF strips `/AP`, `/C`, and `/BS` from link annotations and sets an invisible border on save.
-- Right-click a link annotation to remove it from the PDF entirely ("Remove Link from PDF"). Previously, clearing annotations only removed the KillerPDF overlay; the native PDF link remained active.
+- Mailto and other link annotations with visible borders (e.g. colored rectangles that looked like strikethroughs) no longer render those borders in saved PDFs. StealthPDF strips `/AP`, `/C`, and `/BS` from link annotations and sets an invisible border on save.
+- Right-click a link annotation to remove it from the PDF entirely ("Remove Link from PDF"). Previously, clearing annotations only removed the StealthPDF overlay; the native PDF link remained active.
 - Right-click a mailto link to copy just the email address; right-click an http/https link to copy the URL.
 
 ---
@@ -191,7 +215,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 - Windows Program Compatibility Assistant popup on first launch. Added an app manifest declaring Windows 10/11 compatibility, which suppresses PCA when the app writes to uninstall registry keys.
-- "Set as default PDF viewer" prompt now only appears if KillerPDF is not already the default handler. Previously showed on every install/update regardless.
+- "Set as default PDF viewer" prompt now only appears if StealthPDF is not already the default handler. Previously showed on every install/update regardless.
 - "Set as default PDF viewer" prompt now uses the dark KillerDialog instead of a native Windows message box.
 
 ## [1.3.1] - 2026-05-11
@@ -232,8 +256,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ## [1.2.0] - 2026-04-24
 
 ### Added
-- Self-installing EXE. Running the downloaded binary now shows an Install / Run dialog. Install copies the EXE to `%LOCALAPPDATA%\Programs\KillerPDF\` (no UAC required), creates Start Menu and optional Desktop shortcuts, registers as a PDF file handler, and adds an uninstall entry to Add/Remove Programs. Uninstall self-deletes via a deferred batch file. Running a newer version from outside the install path shows an Update prompt instead.
-- Command-line file argument support so file associations work: `KillerPDF.exe "file.pdf"` opens the file directly.
+- Self-installing EXE. Running the downloaded binary now shows an Install / Run dialog. Install copies the EXE to `%LOCALAPPDATA%\Programs\StealthPDF\` (no UAC required), creates Start Menu and optional Desktop shortcuts, registers as a PDF file handler, and adds an uninstall entry to Add/Remove Programs. Uninstall self-deletes via a deferred batch file. Running a newer version from outside the install path shows an Update prompt instead.
+- Command-line file argument support so file associations work: `StealthPDF.exe "file.pdf"` opens the file directly.
 - Password-protected PDF support. Opening an encrypted PDF now prompts for the password instead of showing a generic error. The decrypted copy is held in a temp file for the session so all rendering and editing works normally.
 - Save Flattened PDF (photo icon in toolbar). Rasterizes every page at 150 DPI via PDFium and writes them as embedded images into a new PDF, producing a fully uneditable document. Pending annotations are burned in before rasterization.
 

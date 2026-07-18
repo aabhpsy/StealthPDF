@@ -1,9 +1,9 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!-- ================================================================
-         KillerPDF  —  Spanish (es) strings
+         StealthPDF  —  Spanish (es) strings
          ================================================================ -->
 
     <!-- ── Toolbar tooltips ─────────────────────────────────────────── -->
@@ -44,7 +44,7 @@
     <sys:String x:Key="Str_TT_ExpandSidebar">Expandir barra lateral</sys:String>
     <sys:String x:Key="Str_TT_KeyboardShortcuts">Atajos de teclado (Ctrl+?)</sys:String>
     <sys:String x:Key="Str_TT_Settings">Configuración</sys:String>
-    <sys:String x:Key="Str_TT_About">Acerca de KillerPDF</sys:String>
+    <sys:String x:Key="Str_TT_About">Acerca de StealthPDF</sys:String>
 
     <!-- ── About overlay ─────────────────────────────────────────────── -->
     <sys:String x:Key="Str_About_Version">VERSIÓN</sys:String>
@@ -107,7 +107,7 @@
     <!-- ── Status bar ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ready">Listo</sys:String>
     <sys:String x:Key="Str_Portable">PORTÁTIL</sys:String>
-    <sys:String x:Key="Str_InstallBtn">Instalar KillerPDF...</sys:String>
+    <sys:String x:Key="Str_InstallBtn">Instalar StealthPDF...</sys:String>
 
     <!-- ── Status messages (format strings — use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">Abierto {0} - {1} página(s)</sys:String>
@@ -136,16 +136,16 @@
     <sys:String x:Key="Str_RotateFailed">Error al rotar: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Dlg_InstallTitle">Instalar KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg">¿Instalar KillerPDF en su perfil de usuario?
+    <sys:String x:Key="Str_Dlg_InstallTitle">Instalar StealthPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">¿Instalar StealthPDF en su perfil de usuario?
 
-Esto copiará la aplicación a %LocalAppData%\KillerPDF y creará un acceso directo en el menú Inicio.
+Esto copiará la aplicación a %LocalAppData%\StealthPDF y creará un acceso directo en el menú Inicio.
 Puede desinstalarla en cualquier momento desde Agregar o quitar programas.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedClose">Tiene cambios sin guardar. ¿Cerrar este archivo sin guardar?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Tiene cambios sin guardar. ¿Cerrar KillerPDF sin guardar?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Tiene cambios sin guardar. ¿Cerrar StealthPDF sin guardar?</sys:String>
     <sys:String x:Key="Str_Dlg_FailedOpen">Error al abrir PDF:
 {0}</sys:String>
-    <sys:String x:Key="Str_Dlg_AppTitle">KillerPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_AppTitle">StealthPDF</sys:String>
 
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
@@ -256,7 +256,7 @@ Puede desinstalarla en cualquier momento desde Agregar o quitar programas.</sys:
     <sys:String x:Key="Str_Pos_TopLeft">Arriba izquierda</sys:String>
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Print_Title">KillerPDF - Imprimir</sys:String>
+    <sys:String x:Key="Str_Print_Title">StealthPDF - Imprimir</sys:String>
     <sys:String x:Key="Str_Print_Printer">Impresora</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Orientación</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Vertical</sys:String>
@@ -307,7 +307,7 @@ Puede desinstalarla en cualquier momento desde Agregar o quitar programas.</sys:
     <sys:String x:Key="Str_Drop_Separate">Abrir por separado</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">No se encontraron PDF ni imágenes para abrir.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Esto abrirá {0} pestañas separadas. ¿Continuar?</sys:String>
-    <sys:String x:Key="Str_Drop_TooMany">Esta carpeta o archivo tiene {0} archivos. KillerPDF abrirá solo los primeros {1}. ¿Continuar?</sys:String>
+    <sys:String x:Key="Str_Drop_TooMany">Esta carpeta o archivo tiene {0} archivos. StealthPDF abrirá solo los primeros {1}. ¿Continuar?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} archivos combinados - sin guardar todavía</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Combinando archivos...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCancelled">Combinación cancelada</sys:String>
@@ -436,4 +436,5 @@ Puede desinstalarla en cualquier momento desde Agregar o quitar programas.</sys:
     <sys:String x:Key="Str_KS_View">Vista</sys:String>
     <sys:String x:Key="Str_KS_FullScreen">Pantalla completa</sys:String>
     <sys:String x:Key="Str_FullScreen_Hint">Pulsa F11 o Esc para salir de pantalla completa</sys:String>
+    <sys:String x:Key="Str_Stamp_CertLogoScale">Logo size (%)</sys:String>
 </ResourceDictionary>

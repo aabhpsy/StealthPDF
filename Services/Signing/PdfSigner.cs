@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Security.Cryptography.X509Certificates;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Signatures;
 
-namespace KillerPDF.Services.Signing
+namespace StealthPDF.Services.Signing
 {
     /// <summary>
     /// Cryptographic (PAdES / PKCS#7) PDF signing, isolated from the rest of the app. Everything else
-    /// in KillerPDF uses PdfSharpCore; this module uses PDFsharp 6.2 (the <c>PdfSharp.*</c> namespace),
+    /// in StealthPDF uses PdfSharpCore; this module uses PDFsharp 6.2 (the <c>PdfSharp.*</c> namespace),
     /// and the two coexist without clashing. There are deliberately no WPF or Windows-only types here,
     /// so the whole module ports to Avalonia / Linux / Mac unchanged.
     ///

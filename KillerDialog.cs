@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -10,9 +10,9 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using KillerPDF.Services;
+using StealthPDF.Services;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // ============================================================
     // Themed dialog - replaces MessageBox for dark-UI consistency
@@ -27,7 +27,7 @@ namespace KillerPDF
         public static MessageBoxResult Show(
             Window? owner,
             string message,
-            string title = "KillerPDF",
+            string title = "StealthPDF",
             MessageBoxButton buttons = MessageBoxButton.OK,
             MessageBoxImage image = MessageBoxImage.None,
             bool fadeClose = true)
@@ -72,14 +72,14 @@ namespace KillerPDF
                 CornerRadius = new CornerRadius(5, 5, 0, 0)
             };
             titleBar.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) win.DragMove(); };
-            // When the title is just "KillerPDF", render it as the main window's wordmark - "Killer"
+            // When the title is just "StealthPDF", render it as the main window's wordmark - "Stealth"
             // in the primary text color and "PDF" in the green logo accent, bold, with a soft shadow.
-            if (title == "KillerPDF")
+            if (title == "StealthPDF")
             {
                 var wm = new StackPanel { Orientation = Orientation.Horizontal };
                 var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 15, Foreground = R("TextPrimary") });
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Bold, FontSize = 18, Foreground = R("AccentLogo") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("Stealth") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.SemiBold, FontSize = 16, Foreground = R("TextPrimary") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Bold, FontSize = 19, Foreground = R("AccentLogo") });
                 wm.Children.Add(wmTb);
                 // No DropShadowEffect on the text - it rasterizes and blurs the wordmark. Kept crisp.
                 titleBar.Child = wm;
@@ -92,7 +92,7 @@ namespace KillerPDF
                     Foreground = R("Accent"),
                     FontWeight = FontWeights.Bold,   // blue title -> bold
                     FontSize = 14,
-                    FontFamily = UiKit.MonoFont
+                    FontFamily = UiKit.UiFont
                 };
             }
             root.Children.Add(titleBar);
@@ -194,7 +194,7 @@ namespace KillerPDF
             string message,
             string[] labels,
             int accentIndex = 0,
-            string title = "KillerPDF")
+            string title = "StealthPDF")
         {
             int result = -1;
 
@@ -216,16 +216,16 @@ namespace KillerPDF
 
             var titleBar = new Border { Background = Brushes.Transparent, Padding = new Thickness(16, 10, 16, 10) };
             titleBar.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) win.DragMove(); };
-            if (title == "KillerPDF")
+            if (title == "StealthPDF")
             {
                 var wmTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.Normal, FontSize = 15, Foreground = R("TextPrimary") });
-                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Bold, FontSize = 18, Foreground = R("AccentLogo") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("Stealth") { FontFamily = UiKit.WordmarkFont, FontWeight = FontWeights.SemiBold, FontSize = 16, Foreground = R("TextPrimary") });
+                wmTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = UiKit.WordmarkFontPdf, FontWeight = FontWeights.Bold, FontSize = 19, Foreground = R("AccentLogo") });
                 titleBar.Child = wmTb;
             }
             else
             {
-                titleBar.Child = new TextBlock { Text = title, Foreground = R("Accent"), FontWeight = FontWeights.Bold, FontSize = 14, FontFamily = UiKit.MonoFont };
+                titleBar.Child = new TextBlock { Text = title, Foreground = R("Accent"), FontWeight = FontWeights.Bold, FontSize = 14, FontFamily = UiKit.UiFont };
             }
             root.Children.Add(titleBar);
 
@@ -283,7 +283,7 @@ namespace KillerPDF
             Window? owner,
             string message,
             string checkboxText,
-            string title = "KillerPDF",
+            string title = "StealthPDF",
             MessageBoxButton buttons = MessageBoxButton.OKCancel)
         {
             var result = MessageBoxResult.Cancel;
@@ -318,7 +318,7 @@ namespace KillerPDF
                 Foreground = R("Accent"),
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 13,
-                FontFamily = UiKit.MonoFont
+                FontFamily = UiKit.UiFont
             };
             root.Children.Add(titleBar);
 

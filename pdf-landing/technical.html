@@ -5,9 +5,9 @@
 <script>/* Apply saved theme + accent before first paint to avoid a reload flash */(function(){try{var d=document.documentElement,t=localStorage.getItem('kpdf-theme');if(t){d.setAttribute('data-theme',t);if({dark:1,light:1,hc:1}[t]){var v=localStorage.getItem('kpdf-av');if(v){var s=v.split('|');d.style.setProperty('--accent',s[0]);d.style.setProperty('--btn',s[1]);}}}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="darkreader-lock">
-<title>KillerPDF - Technical</title>
-<link rel="canonical" href="https://killerpdf.net/technical.html">
-<meta name="description" content="A deep technical explanation of how KillerPDF renders, zooms, and stays robust.">
+<title>StealthPDF - Technical</title>
+<link rel="canonical" href="https://StealthPDF.net/technical.html">
+<meta name="description" content="A deep technical explanation of how StealthPDF renders, zooms, and stays robust.">
 <link rel="icon" type="image/x-icon" href="kp-icon.ico">
 <script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
 <link rel="stylesheet" href="kp.css?v=5">
@@ -36,11 +36,11 @@
 </defs></svg>
 
 <div class="topbar">
-<a href="index.html" class="tb-home" title="KillerPDF home">
-<img class="tb-icon" src="kp-icon.png" alt="KillerPDF" width="44" height="44">
-<img class="wm-logo tb-wm" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF">
+<a href="index.html" class="tb-home" title="StealthPDF home">
+<img class="tb-icon" src="kp-icon.png" alt="StealthPDF" width="44" height="44">
+<img class="wm-logo tb-wm" src="brand/StealthPDF-logo-dark-green.svg" alt="StealthPDF">
 </a>
-<a class="tb-dl" href="https://github.com/SteveTheKiller/KillerPDF/releases/latest/download/KillerPDF.exe"><svg viewBox="0 0 24 24"><path d="M11 4h2v7h3l-4 5-4-5h3V4zM5 18h14v2H5z"/></svg><span data-i18n="nav_dl">Download</span></a>
+<a class="tb-dl" href="/download/StealthPDF.exe"><svg viewBox="0 0 24 24"><path d="M11 4h2v7h3l-4 5-4-5h3V4zM5 18h14v2H5z"/></svg><span data-i18n="nav_dl">Download</span></a>
 <span class="tb-spacer"></span>
 <nav class="tb-nav">
 <a href="about.html" data-i18n="nav_about">About</a>
@@ -105,13 +105,13 @@
 
 <section class="page-hero">
 <span class="page-title">The Tech of</span>
-<img class="wm-logo" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF">
-<p>A plain-English look at how KillerPDF works under the hood, with the deeper detail kept for the nerds who want it.</p>
+<img class="wm-logo" src="brand/StealthPDF-logo-dark-green.svg" alt="StealthPDF">
+<p>A plain-English look at how StealthPDF works under the hood, with the deeper detail kept for the nerds who want it.</p>
 </section>
 
 <div class="tech-sec" id="stack">
 <h2>Tech stack</h2>
-<p>KillerPDF is a native Windows app. There is no Electron, no browser engine, and no runtime to install. It relies on a small set of focused libraries, each handling one job:</p>
+<p>StealthPDF is a native Windows app. There is no Electron, no browser engine, and no runtime to install. It relies on a small set of focused libraries, each handling one job:</p>
 <table class="spec-table"><tr><th>Component</th><th>Library</th></tr>
 <tr><td>UI</td><td>WPF on .NET Framework 4.8 (net48), x64, custom window chrome</td></tr>
 <tr><td>Rendering</td><td>PDFium via Docnet.Core 2.6 - every page bitmap and thumbnail</td></tr>
@@ -125,32 +125,32 @@
 
 <div class="tech-sec" id="install">
 <h2>Install, folders &amp; data</h2>
-<p>KillerPDF is portable first - the single exe runs from anywhere with nothing to install. Installing is opt-in, per-user, and needs no administrator rights: it never writes to Program Files or HKLM.</p>
+<p>StealthPDF is portable first - the single exe runs from anywhere with nothing to install. Installing is opt-in, per-user, and needs no administrator rights: it never writes to Program Files or HKLM.</p>
 <h3 id="what-the-installer-does">What the installer does</h3>
-<p>It copies the running exe to <code>%LOCALAPPDATA%\Programs\KillerPDF\</code>, drops a Start Menu shortcut (and an optional desktop one), registers itself as a per-user PDF handler, and writes an Add/Remove Programs entry so Windows can uninstall it cleanly. Uninstalling (<code>KillerPDF.exe /uninstall</code>) removes the folder, shortcuts, and registry keys.</p>
+<p>It copies the running exe to <code>%LOCALAPPDATA%\Programs\StealthPDF\</code>, drops a Start Menu shortcut (and an optional desktop one), registers itself as a per-user PDF handler, and writes an Add/Remove Programs entry so Windows can uninstall it cleanly. Uninstalling (<code>StealthPDF.exe /uninstall</code>) removes the folder, shortcuts, and registry keys.</p>
 <h3 id="where-things-live">Where things live</h3>
 <table class="spec-table"><tr><th>Location</th><th>Holds</th></tr>
-<tr><td><code>%LOCALAPPDATA%\Programs\KillerPDF\</code></td><td>the installed exe and its PDF-file icon</td></tr>
-<tr><td><code>%LOCALAPPDATA%\KillerPDF\Temp\</code></td><td>session working files - decrypted copies, repaired files, rotation snapshots</td></tr>
-<tr><td><code>%LOCALAPPDATA%\KillerPDF\tessdata\</code></td><td>OCR language data (see below)</td></tr>
-<tr><td><code>%LOCALAPPDATA%\KillerPDF\ocr\&lt;version&gt;\x64\</code></td><td>OCR native engine libraries</td></tr>
-<tr><td><code>%LOCALAPPDATA%\KillerPDF\Logs\</code></td><td>crash logs</td></tr>
-<tr><td><code>HKCU\Software\KillerPDF\Settings</code></td><td>your settings - in the registry, not a file</td></tr>
+<tr><td><code>%LOCALAPPDATA%\Programs\StealthPDF\</code></td><td>the installed exe and its PDF-file icon</td></tr>
+<tr><td><code>%LOCALAPPDATA%\StealthPDF\Temp\</code></td><td>session working files - decrypted copies, repaired files, rotation snapshots</td></tr>
+<tr><td><code>%LOCALAPPDATA%\StealthPDF\tessdata\</code></td><td>OCR language data (see below)</td></tr>
+<tr><td><code>%LOCALAPPDATA%\StealthPDF\ocr\&lt;version&gt;\x64\</code></td><td>OCR native engine libraries</td></tr>
+<tr><td><code>%LOCALAPPDATA%\StealthPDF\Logs\</code></td><td>crash logs</td></tr>
+<tr><td><code>HKCU\Software\StealthPDF\Settings</code></td><td>your settings - in the registry, not a file</td></tr>
 </table>
 <p>Everything sits under <code>%LOCALAPPDATA%</code> on purpose: it is per-user (no admin), user-private, and not indexed by Windows Search - so temporary copies of your documents never surface in search or another account.</p>
 <h3 id="where-ocr-files-go">Where OCR files go</h3>
-<p>OCR is bundled in the exe but unpacks on first use. The Tesseract <b>native libraries</b> extract to a per-version cache at <code>%LOCALAPPDATA%\KillerPDF\ocr\&lt;version&gt;\x64\</code> (version-stamped, so an update gets fresh binaries). The <b>language data</b> lives in <code>%LOCALAPPDATA%\KillerPDF\tessdata\</code>: English ships inside the exe and is written there the first time you OCR, and any extra languages you pick are downloaded into that same folder. It is version-independent, so downloaded languages survive app updates. Both are read from these locations on every OCR run.</p>
+<p>OCR is bundled in the exe but unpacks on first use. The Tesseract <b>native libraries</b> extract to a per-version cache at <code>%LOCALAPPDATA%\StealthPDF\ocr\&lt;version&gt;\x64\</code> (version-stamped, so an update gets fresh binaries). The <b>language data</b> lives in <code>%LOCALAPPDATA%\StealthPDF\tessdata\</code>: English ships inside the exe and is written there the first time you OCR, and any extra languages you pick are downloaded into that same folder. It is version-independent, so downloaded languages survive app updates. Both are read from these locations on every OCR run.</p>
 <h3 id="temp-files">Temp files</h3>
-<p>Working files are written as <code>killerpdf_&lt;tag&gt;_&lt;guid&gt;.pdf</code> and tracked for the session. They are deleted when you close the app; anything a crash leaves behind is swept on the next launch (both the current Temp folder and the legacy <code>%TEMP%</code> location). Files still open in another instance are skipped and cleared later.</p>
+<p>Working files are written as <code>StealthPDF_&lt;tag&gt;_&lt;guid&gt;.pdf</code> and tracked for the session. They are deleted when you close the app; anything a crash leaves behind is swept on the next launch (both the current Temp folder and the legacy <code>%TEMP%</code> location). Files still open in another instance are skipped and cleared later.</p>
 <h3 id="clear-all-data">Clear all data</h3>
-<p>The <b>Clear all Data</b> link in the About window wipes everything KillerPDF has stored: the registry settings, the downloaded OCR languages and native cache, and the temp folder. It is best-effort - anything locked by the running session (a loaded native DLL, say) is skipped and clears on the next restart. Your actual PDFs are never touched.</p>
+<p>The <b>Clear all Data</b> link in the About window wipes everything StealthPDF has stored: the registry settings, the downloaded OCR languages and native cache, and the temp folder. It is best-effort - anything locked by the running session (a loaded native DLL, say) is skipped and clears on the next restart. Your actual PDFs are never touched.</p>
 </div>
 
 <div class="tech-sec" id="arch">
 <h2>Architecture</h2>
 <p>The whole interface is built as one large class (<b>MainWindow</b>) split across roughly forty source files, about 27,000 lines of C# on WPF and .NET Framework 4.8. Each pop-up dialog is its own class, and shared background work lives under <code>Services/</code>.</p>
 <h3 id="two-render-pipelines">Two render pipelines</h3>
-<p>KillerPDF draws pages in two different ways depending on the view you are in. Single, Two-Page and Grid views draw into one main tile (<b>RenderPage</b>). Continuous scrolling uses a separate path (<b>RenderContinuousPages</b>) that streams page images in the background as you scroll. RenderPage is deliberately switched off during Continuous so the two systems never fight over the same tile.</p>
+<p>StealthPDF draws pages in two different ways depending on the view you are in. Single, Two-Page and Grid views draw into one main tile (<b>RenderPage</b>). Continuous scrolling uses a separate path (<b>RenderContinuousPages</b>) that streams page images in the background as you scroll. RenderPage is deliberately switched off during Continuous so the two systems never fight over the same tile.</p>
 <h3 id="per-tab-sessions-an-lru-cache">Per-tab sessions &amp; an LRU cache</h3>
 <p>Each open document is a <b>DocumentSession</b> that remembers its own zoom, fit and view mode, grid columns, current tool, page, and scroll position, along with its per-document data (annotations, page sizes, rotations, form values, and undo history). Switching tabs simply points the app back at that session. Each session also keeps a cache of already-drawn page images, so flipping back to a recent tab is instant and skips the renderer entirely. To keep memory in check, only the three most recently used tabs hold on to that cache.</p>
 <h3 id="canvas-overlay-maps">Canvas &amp; overlay maps</h3>
@@ -270,7 +270,7 @@
 
 <div class="tech-sec" id="coverpair">
 <h2>Editing existing text</h2>
-<p>Double-click a line of real PDF text and KillerPDF reads the words underneath, then drops <b>two linked annotations</b> as a single undo: an opaque <b>Cover</b> that blocks the original, and an editable <b>Text</b> box on top. A shared <code>PairId</code> locks them together.</p>
+<p>Double-click a line of real PDF text and StealthPDF reads the words underneath, then drops <b>two linked annotations</b> as a single undo: an opaque <b>Cover</b> that blocks the original, and an editable <b>Text</b> box on top. A shared <code>PairId</code> locks them together.</p>
 <figure class="diagram">
 <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -307,14 +307,14 @@
 
 <div class="tech-sec" id="saving">
 <h2>Saving &amp; the temp-reload dance</h2>
-<p>Saving never changes the document you are looking at. KillerPDF writes a clean copy with no annotations, then permanently bakes in <b>stamps first, then annotations</b>, and reopens that fresh copy. Starting from a clean base every time means it can never accidentally bake the same thing in twice.</p>
+<p>Saving never changes the document you are looking at. StealthPDF writes a clean copy with no annotations, then permanently bakes in <b>stamps first, then annotations</b>, and reopens that fresh copy. Starting from a clean base every time means it can never accidentally bake the same thing in twice.</p>
 <h3 id="why-structural-edits-reload">Why structural edits reload</h3>
 <p>Rotation, page operations and decryption route through <b>SaveTempAndReload</b>. It zeroes every page's <code>/Rotate</code> entry before writing, because Docnet (PDFium) sizes the page bitmap from the <i>unrotated</i> MediaBox - leave the rotation in and the rendered content clips. The file is written flat, reopened in Modify mode, and the rotations are re-applied in memory so the page still reads right.</p>
 </div>
 
 <div class="tech-sec" id="robust">
 <h2>Robustness</h2>
-<p>KillerPDF is built to open the PDFs other viewers choke on. It tries a normal open first, then catches each kind of failure and routes it to a specific recovery. Two rules hold throughout: heavy recovery work runs off the UI thread behind the busy overlay, and a repair never edits your file - it always produces a copy.</p>
+<p>StealthPDF is built to open the PDFs other viewers choke on. It tries a normal open first, then catches each kind of failure and routes it to a specific recovery. Two rules hold throughout: heavy recovery work runs off the UI thread behind the busy overlay, and a repair never edits your file - it always produces a copy.</p>
 <h3 id="the-open-fallback-ladder">The open fallback ladder</h3>
 <p>The open path is a chain of typed exception handlers, each rung catching one class of failure:</p>
 <table class="spec-table"><tr><th>Failure</th><th>Recovery</th></tr>
@@ -327,7 +327,7 @@
 <h3 id="encryption-is-stripped-at-open">Encryption is stripped at open</h3>
 <p>PdfSharpCore can read an encrypted PDF but cannot re-serialize a modified one - it would write back stale encrypted bytes and fail. So when a file is encrypted, the encryption is removed at open time (PDFium, lossless, with a PdfSharpCore Import fallback). That pass is CPU-heavy, so it runs on a background thread behind the busy overlay; every later edit and save then behaves like a normal document.</p>
 <h3 id="network-and-partial-reads">Network and partial reads</h3>
-<p>UNC shares and the WSL <code>\\wsl$</code> 9P filesystem sometimes hand back partial reads, which the parser sees as a truncated file. Before opening anything on a network path, KillerPDF copies it to a local temp with a single read-to-EOF, then opens the complete copy - while keeping your original path for display and Save.</p>
+<p>UNC shares and the WSL <code>\\wsl$</code> 9P filesystem sometimes hand back partial reads, which the parser sees as a truncated file. Before opening anything on a network path, StealthPDF copies it to a local temp with a single read-to-EOF, then opens the complete copy - while keeping your original path for display and Save.</p>
 <h3 id="repair-works-on-a-copy">Repair works on a copy</h3>
 <p>When recovery falls through to a repair, the file is piped through PDFium, which has aggressive error recovery and rewrites a correct cross-reference table into a brand-new file. The original on disk is never touched. Repaired copies can lose bookmarks, forms and other interactive features, and the dialog says so before proceeding.</p>
 </div>
@@ -351,14 +351,14 @@
 <tr><td>Signature reservation</td><td>16,384 bytes, SHA-256, whole chain</td></tr>
 <tr><td>Languages / themes</td><td>8 locales / 6 themes + accent variants</td></tr>
 </table>
-<p style="margin-top:14px">A full 41-page technical brochure (the same facts, with the interactive forms and theme gallery) ships in the repo as <a href="https://github.com/SteveTheKiller/KillerPDF/blob/main/KillerPDF.pdf" target="_blank" rel="noopener"><code style="color:inherit">KillerPDF.pdf</code></a> - open it in KillerPDF itself.</p>
+<p style="margin-top:14px">A full 41-page technical brochure (the same facts, with the interactive forms and theme gallery) ships in the repo as <a href="https://github.com/aabhpsy/StealthPDF/blob/main/StealthPDF.pdf" target="_blank" rel="noopener"><code style="color:inherit">StealthPDF.pdf</code></a> - open it in StealthPDF itself.</p>
 </div>
 
 </div>
 </div>
 </div>
 <footer class="statusbar">
-<span class="left"><a href="https://github.com/SteveTheKiller/KillerPDF" target="_blank" rel="noopener">Source on GitHub</a> &middot; GPLv3 &middot; Part of <a href="https://killertools.net" target="_blank" rel="noopener">killertools.net</a></span>
+<span class="left"><a href="https://github.com/aabhpsy/StealthPDF" target="_blank" rel="noopener">Source on GitHub</a> &middot; GPLv3 &middot; <a href="https://stealthpdf.com" target="_blank" rel="noopener">stealthpdf.com</a></span>
 <span class="right"><span id="verEgg" title="click me">v1.6.0</span> &middot; &copy; 2026 <b><a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></b></span>
 </footer>
 <div class="egg-toast" id="eggToast"></div>

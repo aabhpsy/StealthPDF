@@ -30,4 +30,18 @@ obj/
 # Heavy source art - stored locally only, not shipped and not part of the project.
 # Anchored with a leading slash so it only ignores KillerPDF/brand, NOT pdf-landing/brand
 # (the small web logos the landing site links to).
+# Heavy source art - stored locally only, not shipped and not part of the project.
+# Anchored with a leading slash so it only ignores KillerPDF/brand, NOT pdf-landing/brand
+# (the small web logos the landing site links to).
 /brand/
+
+# PyMuPDF compression helper bundle (~55 MB of binaries: portable Python + PyMuPDF).
+# Built locally by PdfHelper/fetch-pdfhelper.ps1 and deployed by the build's
+# CopyPdfHelperOutput target. Only the small compress_pdf.py script is tracked in git.
+/PdfHelper/bundle/
+/PdfHelper/.venv/
+/PdfHelper/.venv-build/
+/brand/
+
+# Python bytecode
+__pycache__/

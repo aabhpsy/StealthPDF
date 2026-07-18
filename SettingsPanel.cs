@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -43,15 +43,19 @@ namespace KillerPDF
             UpdateAccentDotSelection();
             UpdateAccentRowsVisibility(animate: false);
             // Sync language picker
-            var curLoc = KillerPDF.Services.LocaleManager.Current;
-            LangEnRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.EnUS;
-            LangEsRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.Es;
-            LangFrRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.Fr;
-            LangZhTWRadio.IsChecked = curLoc == KillerPDF.Services.Locale.ZhTW;
-            LangZhCNRadio.IsChecked = curLoc == KillerPDF.Services.Locale.ZhCN;
-            LangBnRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.Bn;
-            LangTrRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.TrTR;
-            LangDeRadio.IsChecked   = curLoc == KillerPDF.Services.Locale.De;
+            var curLoc = StealthPDF.Services.LocaleManager.Current;
+            LangEnRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.EnUS;
+            LangEnUKRadio.IsChecked = curLoc == StealthPDF.Services.Locale.EnUK;
+            LangNpNPRadio.IsChecked = curLoc == StealthPDF.Services.Locale.NpNP;
+            LangEsRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.Es;
+            LangEnRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.EnUS;
+            LangEsRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.Es;
+            LangFrRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.Fr;
+            LangZhTWRadio.IsChecked = curLoc == StealthPDF.Services.Locale.ZhTW;
+            LangZhCNRadio.IsChecked = curLoc == StealthPDF.Services.Locale.ZhCN;
+            LangBnRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.Bn;
+            LangTrRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.TrTR;
+            LangDeRadio.IsChecked   = curLoc == StealthPDF.Services.Locale.De;
             LangCurrentLabel.Text   = LangDisplayName(curLoc);
             // Sync view mode radios
             ViewSingleRadio.IsChecked     = _viewMode == ViewMode.Single;
@@ -438,18 +442,20 @@ namespace KillerPDF
             _                  => Loc("Str_Theme_Dark"),
         };
 
-        private void LangEnRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.EnUS);
-        private void LangEsRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.Es);
-        private void LangFrRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.Fr);
-        private void LangZhTWRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(KillerPDF.Services.Locale.ZhTW);
-        private void LangZhCNRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(KillerPDF.Services.Locale.ZhCN);
-        private void LangBnRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.Bn);
-        private void LangTrRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.TrTR);
-        private void LangDeRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(KillerPDF.Services.Locale.De);
+        private void LangEnRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(StealthPDF.Services.Locale.EnUS);
+        private void LangEnUKRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(StealthPDF.Services.Locale.EnUK);
+        private void LangNpNPRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(StealthPDF.Services.Locale.NpNP);
+        private void LangEsRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(StealthPDF.Services.Locale.Es);
+        private void LangFrRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(StealthPDF.Services.Locale.Fr);
+        private void LangZhTWRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(StealthPDF.Services.Locale.ZhTW);
+        private void LangZhCNRadio_Checked(object sender, RoutedEventArgs e) => SelectLocale(StealthPDF.Services.Locale.ZhCN);
+        private void LangBnRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(StealthPDF.Services.Locale.Bn);
+        private void LangTrRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(StealthPDF.Services.Locale.TrTR);
+        private void LangDeRadio_Checked(object sender, RoutedEventArgs e)   => SelectLocale(StealthPDF.Services.Locale.De);
 
-        private void SelectLocale(KillerPDF.Services.Locale loc)
+        private void SelectLocale(StealthPDF.Services.Locale loc)
         {
-            KillerPDF.Services.LocaleManager.Apply(loc);
+            StealthPDF.Services.LocaleManager.Apply(loc);
             ApplyToolNumberTooltips();   // re-append the numbers to the now-localized tool tooltips
             LangCurrentLabel.Text = LangDisplayName(loc);
             // The Theme and Toolbar picker labels are set imperatively (not DynamicResource), so the
@@ -525,15 +531,17 @@ namespace KillerPDF
         }
 
         // Native name (autonym) for each language, shown in the picker regardless of UI locale.
-        private static string LangDisplayName(KillerPDF.Services.Locale loc) => loc switch
+        private static string LangDisplayName(StealthPDF.Services.Locale loc) => loc switch
         {
-            KillerPDF.Services.Locale.Es   => "Español",
-            KillerPDF.Services.Locale.Fr   => "Français",
-            KillerPDF.Services.Locale.ZhTW => "中文 (繁體)",
-            KillerPDF.Services.Locale.ZhCN => "中文 (简体)",
-            KillerPDF.Services.Locale.Bn   => "বাংলা",
-            KillerPDF.Services.Locale.TrTR => "Türkçe",
-            KillerPDF.Services.Locale.De   => "Deutsch",
+            StealthPDF.Services.Locale.Es   => "Español",
+            StealthPDF.Services.Locale.Fr   => "Français",
+            StealthPDF.Services.Locale.ZhTW => "中文 (繁體)",
+            StealthPDF.Services.Locale.ZhCN => "中文 (简体)",
+            StealthPDF.Services.Locale.Bn   => "বাংলা",
+            StealthPDF.Services.Locale.TrTR => "Türkçe",
+            StealthPDF.Services.Locale.De   => "Deutsch",
+            StealthPDF.Services.Locale.EnUK => "English (UK)",
+            StealthPDF.Services.Locale.NpNP => "नेपाली",
             _                              => "English",
         };
 
@@ -587,7 +595,10 @@ namespace KillerPDF
             [""] = "Str_Lbl_ZoomOut",   // boxed minus (RemoveFrom) - new zoom-out glyph
             [""] = "Str_Lbl_ZoomIn",    // boxed plus  (AddTo)      - new zoom-in glyph
             [""] = "Str_Lbl_Search",    // magnifier - toolbar search button
-            [""] = "Str_Lbl_Stamp",     // page-number / watermark stamp tool
+            [""] = "Str_Lbl_Stamp",   // rubber-stamp glyph
+            [""] = "Str_Lbl_Compress",   // zip-folder glyph for image-level compression
+            [""] = "Str_Lbl_FillSign",   // pen-in-hand glyph for the Fill & Sign tool
+            [""] = "Str_Lbl_Unlock",     // padlock-key glyph for Remove Password     // page-number / watermark stamp tool
         };
 
         // Walks LeftBar + RightBar once and records each icon button with its glyph + label key.
@@ -625,7 +636,7 @@ namespace KillerPDF
             bool beside = mode == ToolbarStyle.TextBeside;
             bool under = mode == ToolbarStyle.TextUnder;
             bool textOnly = mode == ToolbarStyle.TextOnly;
-            double glyphSize = (large || under) ? 20 : (beside ? 16 : 14);
+            double glyphSize = (large || under) ? 22 : (beside ? 18 : 18);
             btn.FontSize = glyphSize;
 
             // Text only: caption, no icon (nothing to shed - there'd be nothing left).
@@ -692,10 +703,10 @@ namespace KillerPDF
             }
 
             // Icon only: the icon modes, or Text-beside / Text-under after a caption was shed.
-            btn.Width = (large || under) ? 46 : (beside ? 40 : 36);
+            btn.Width = (large || under) ? 48 : (beside ? 42 : 42);
             btn.MinWidth = 0;
-            btn.Height = under ? 52 : (beside ? 34 : (large ? 42 : 32));
-            btn.Padding = (beside || under) ? new Thickness(8, 5, 8, 5) : new Thickness(10, 6, 10, 6);
+            btn.Height = under ? 54 : (beside ? 38 : (large ? 44 : 38));
+            btn.Padding = (beside || under) ? new Thickness(8, 5, 8, 5) : new Thickness(8, 5, 8, 5);
             btn.Content = glyph;
         }
 
@@ -730,11 +741,11 @@ namespace KillerPDF
 
         // Single source of truth for the split-button chrome shared by Open, Save, and OCR. Each entry is
         // (main half, dropdown chevron, split style, plain style). In icon modes the chevron overlaps the
-        // main half (-6) for the connected split look; with a caption the button widens, so the chevron sits
+        // main half for the connected split look; with a caption the button widens, so the chevron sits
         // clear of the text (margin 1) and the main half drops its split (hover-inset) style.
         private void ApplySplitButtonChrome(bool textMode)
         {
-            var chevMargin = textMode ? new Thickness(1, 0, 0, 0) : new Thickness(-6, 0, 0, 0);
+            var chevMargin = textMode ? new Thickness(1, 0, 0, 0) : new Thickness(-7, 0, 2, 0);
             var splits = new (Button? Main, Button? Chevron, string Split, string Plain)[]
             {
                 (OpenFileBtn, OpenRecentBtn, "ToolbarSplitMain",       "ToolbarButton"),
@@ -836,6 +847,7 @@ namespace KillerPDF
                     (ToolUnderlineBtn,  new UIElement[] { MiUnderline }),   // now the Line tool
                     (ToolHighlightBtn,  new UIElement[] { MiHighlight }),
                     (ToolTextBtn,       new UIElement[] { MiText }),
+                    (ToolEditBtn,       new UIElement[] { MiEdit }),
                 };
 
                 // Start fully expanded (everything in the bar, nothing in the popup).

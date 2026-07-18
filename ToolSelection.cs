@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -32,6 +32,7 @@ namespace KillerPDF
         private static Cursor CursorForTool(EditTool tool) => tool switch
         {
             EditTool.Text => Cursors.IBeam,
+            EditTool.Edit => Cursors.IBeam,
             EditTool.Highlight => Cursors.Cross,
             EditTool.Strikethrough => Cursors.Cross,
             EditTool.Underline => Cursors.Cross,
@@ -66,6 +67,7 @@ namespace KillerPDF
             {
                 (_toolSelectBtn, EditTool.Select),
                 (_toolTextBtn, EditTool.Text),
+                (_toolEditBtn, EditTool.Edit),
                 (_toolHighlightBtn, EditTool.Highlight),
                 (_toolUnderlineBtn, EditTool.Line),          // the old Underline button is now the Line tool
                 (_toolDrawBtn, EditTool.Draw),
@@ -139,7 +141,7 @@ namespace KillerPDF
         {
             var map = new (Button mi, EditTool t)[]
             {
-                (MiText, EditTool.Text), (MiUnderline, EditTool.Line), (MiHighlight, EditTool.Highlight),
+                (MiText, EditTool.Text), (MiEdit, EditTool.Edit), (MiUnderline, EditTool.Line), (MiHighlight, EditTool.Highlight),
                 (MiDraw, EditTool.Draw), (MiImage, EditTool.Image), (MiCrop, EditTool.Crop),
                 (MiSignature, EditTool.Signature),
             };

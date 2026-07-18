@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,9 +11,11 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
+using System.Windows.Media.Imaging;
+using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -51,11 +53,13 @@ namespace KillerPDF
         // OCR languages (multi-select, on-demand download)
         // ============================================================
 
-        // Tesseract code -> display name, covering KillerPDF's 8 UI locales. English is bundled; the rest
-        // are downloaded on demand into OcrNativeBootstrap.TessDataDir.
+        // Tesseract code -> display name. English and Nepali are BUNDLED into the EXE (High Quality
+        // models) so they work fully offline; the rest download on demand into
+        // OcrNativeBootstrap.TessDataDir on first use.
         private static readonly (string Code, string Name)[] OcrLanguageCatalog =
         [
             ("eng", "English"),
+            ("nep", "Nepali (नेपाली)"),
             ("spa", "Spanish"),
             ("fra", "French"),
             ("deu", "German"),
@@ -65,11 +69,17 @@ namespace KillerPDF
             ("chi_tra", "Chinese (Traditional)"),
         ];
 
-        // True if <code>.traineddata exists in the tessdata folder. Nothing is bundled now (not even English);
-        // models are downloaded on demand, so this is a pure file-presence check.
-        private static bool IsLanguageInstalled(string code) =>
-            File.Exists(Path.Combine(OcrNativeBootstrap.TessDataDir, code + ".traineddata"));
+        // Languages whose traineddata ship embedded in the EXE (see csproj OcrTessData embeds +
+        // OcrNativeBootstrap.EnsureLanguageData). They are always present, so never offered as a
+        // download and marked HQ on extraction.
+        private static readonly HashSet<string> BundledOcrLanguages =
+            new(StringComparer.Ordinal) { "eng", "nep" };
 
+        // True if <code>.traineddata exists in the tessdata folder. Bundled languages are always
+        // considered installed (they self-extract on first OCR); others are a file-presence check.
+        private static bool IsLanguageInstalled(string code) =>
+            BundledOcrLanguages.Contains(code) ||
+            File.Exists(Path.Combine(OcrNativeBootstrap.TessDataDir, code + ".traineddata"));
         // The user's chosen OCR languages, persisted as a '+'-joined setting. Filtered to those actually
         // installed (a deleted pack can't be passed to Tesseract) and never empty - English is the floor.
         private List<string> GetSelectedOcrLanguages()
@@ -129,7 +139,10 @@ namespace KillerPDF
         // open menu; not-yet-installed ones offer a one-time download. At least one language stays selected.
         private MenuItem BuildLanguageMenu()
         {
-            string tessDir = OcrNativeBootstrap.EnsureLanguageData();   // make sure bundled English is present
+            string tessDir = OcrNativeBootstrap.EnsureLanguageData();   // self-extract bundled English + Nepali
+            // Bundled langs ship High Quality, so record them once as HQ so the HQ toggle never
+            // re-downloads them (and turning HQ off->on is a no-op for these).
+            foreach (var b in BundledOcrLanguages) MarkLanguageHq(b, true);
             var selected = GetSelectedOcrLanguages();
             bool hqPref = OcrHighQuality;
 
@@ -231,13 +244,13 @@ namespace KillerPDF
                 TryDeleteFile(dest + ".part");
                 if (ct.IsCancellationRequested) SetStatus($"{name} download cancelled");
                 else KillerDialog.Show(this, $"Downloading {name} timed out. Check your connection and try again.",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
                 TryDeleteFile(dest + ".part");
-                KillerDialog.Show(this, $"Could not download {name} language data:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"Could not download {name} language data:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -302,7 +315,7 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"High quality download failed:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"High quality download failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -316,7 +329,7 @@ namespace KillerPDF
             // Timeout covers connect + headers; the body is bounded by the cancellation token instead.
             System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12;
             var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(100) };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("KillerPDF-OCR");
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("StealthPDF-OCR");
             return http;
         }
 
@@ -374,7 +387,7 @@ namespace KillerPDF
             var choice = KillerDialog.Show(this,
                 $"A language model ({names}) will be downloaded now so OCR can run.\n\n" +
                 "You can add more languages or switch to higher quality models any time from the OCR menu.",
-                "KillerPDF", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+                "StealthPDF", MessageBoxButton.OKCancel, MessageBoxImage.Information);
             if (choice != MessageBoxResult.OK) return false;
 
             var ct = BeginCancellableOp("language download");
@@ -405,7 +418,7 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 KillerDialog.Show(this, $"Could not download the language model:\n{ex.Message}",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             finally
@@ -467,7 +480,7 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"OCR failed:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"OCR failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -536,7 +549,7 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"OCR failed:\n{ex.Message}", "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                KillerDialog.Show(this, $"OCR failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -616,7 +629,7 @@ namespace KillerPDF
             try { _doc.Save(src); }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -635,12 +648,12 @@ namespace KillerPDF
                 SetStatus($"Searchable PDF saved: {pages} pages, {words} words recognized");
                 KillerDialog.Show(this,
                     $"Saved searchable PDF:\n{outPath}\n\n{pages} pages processed, {words} words recognized.",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Information);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"Searchable PDF failed:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"Searchable PDF failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -649,9 +662,15 @@ namespace KillerPDF
             }
         }
 
-        // Renders each page, OCRs it, and appends an invisible (alpha 0) text layer positioned over the
-        // recognized words. The text is real content-stream text, so PdfPig extracts it for search/select;
-        // alpha 0 keeps it from showing or printing. Runs entirely off the UI thread.
+        // Builds a searchable PDF by rebuilding the document from rendered page images + an invisible OCR
+        // text layer, instead of modifying the source PDF in place. This bypasses PdfSharpCore's strict
+        // xref/stream parser (which fails on many "large" or non-standard files with "Unexpected token
+        // 'xref'") and works for any file PDFium can render. The output has (a) the page rendered as an
+        // image at OCR resolution and (b) real, alpha-0 text over each recognized word so PdfPig extracts
+        // it for search/select without printing.
+        //
+        // Page point size comes from PdfPig where possible (permissive parser); if that fails, we fall back
+        // to a Letter-width page and preserve the source pixel aspect ratio.
         private static (int pages, int words) BuildSearchablePdf(string src, string outPath, Action<int, int> report, CancellationToken ct, string language)
         {
             // Cache one XFont per integer point size so a page of words doesn't allocate thousands of fonts.
@@ -668,20 +687,33 @@ namespace KillerPDF
                 return f;
             }
 
+            // Resolve each page's point size via PdfPig; null on failure => aspect-preserving fallback below.
+            List<(double wPt, double hPt)>? pagePts = null;
+            try
+            {
+                using var pig = PdfPigDoc.Open(src);
+                pagePts = new List<(double, double)>(pig.NumberOfPages);
+                for (int i = 1; i <= pig.NumberOfPages; i++)
+                {
+                    var pp = pig.GetPage(i);
+                    pagePts.Add((pp.Width, pp.Height));
+                }
+            }
+            catch { pagePts = null; }
+
             int totalWords = 0;
             var invisible = new XSolidBrush(XColor.FromArgb(0, 0, 0, 0));
 
             using var docReader = DocLib.Instance.GetDocReader(src, new PageDimensions(OcrRenderMax, OcrRenderMax));
-            using var ocr = new OcrService(language: language);   // one engine reused across the whole document (single-threaded here)
+            using var ocr = new OcrService(language: language);   // one engine reused across the whole document
 
-            var outDoc = PdfReader.Open(src, PdfDocumentOpenMode.Modify);
-            int pages = outDoc.PageCount;
-            for (int i = 0; i < pages; i++)
+            var outDoc = new PdfDocument();
+            int pageCount = docReader.GetPageCount();
+
+            for (int i = 0; i < pageCount; i++)
             {
-                // Cooperative cancel: bail before the next page; the caller sees the cancelled token and the
-                // file is never saved (outDoc.Save is past the loop), so no partial output is written.
                 if (ct.IsCancellationRequested) return (i, totalWords);
-                report(i, pages);
+                report(i, pageCount);
 
                 using var pr = docReader.GetPageReader(i);
                 int w = pr.GetPageWidth();
@@ -689,16 +721,40 @@ namespace KillerPDF
                 byte[] bgra = pr.GetImage();
                 if (bgra is null || bgra.Length == 0 || w <= 0 || h <= 0) continue;
 
+                // Encode the rendered page as PNG for PdfSharpCore's XImage.
+                var wb = new WriteableBitmap(w, h, 96, 96, PixelFormats.Bgra32, null);
+                wb.WritePixels(new Int32Rect(0, 0, w, h), bgra, w * 4, 0);
+                wb.Freeze();
+                byte[] pngBytes;
+                using (var ms = new MemoryStream())
+                {
+                    var enc = new PngBitmapEncoder();
+                    enc.Frames.Add(BitmapFrame.Create(wb));
+                    enc.Save(ms);
+                    pngBytes = ms.ToArray();
+                }
+
+                // Output page point dimensions: prefer PdfPig's true page size; otherwise cap at Letter width.
+                double pageWpt, pageHpt;
+                if (pagePts != null && i < pagePts.Count && pagePts[i].wPt > 0 && pagePts[i].hPt > 0)
+                { pageWpt = pagePts[i].wPt; pageHpt = pagePts[i].hPt; }
+                else
+                { const double baseW = 612.0; pageWpt = baseW; pageHpt = baseW * h / w; }
+
+                var page = outDoc.AddPage();
+                page.Width  = XUnit.FromPoint(pageWpt);
+                page.Height = XUnit.FromPoint(pageHpt);
+
+                using var gfx = XGraphics.FromPdfPage(page);
+                using (var xImg = XImage.FromStream(() => new MemoryStream(pngBytes)))
+                    gfx.DrawImage(xImg, 0, 0, pageWpt, pageHpt);
+
                 OcrResult result = ocr.RecognizeBgra(bgra, w, h);
                 if (result.Words.Count == 0) continue;
 
-                var page = outDoc.Pages[i];
-                using var gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append);
-
-                // OCR boxes are top-left pixel space; XGraphics is top-left point space. Same convention,
-                // so mapping is a straight scale (mirrors DrawAnnotationsOnDocument).
-                double sx = page.Width.Point / w;
-                double sy = page.Height.Point / h;
+                // OCR word boxes are top-left pixel space; map to top-left point space of the output page.
+                double sx = pageWpt / w;
+                double sy = pageHpt / h;
 
                 foreach (var word in result.Words)
                 {
@@ -707,7 +763,6 @@ namespace KillerPDF
                     double bh = Math.Max(1, (word.Bottom - word.Top) * sy);
                     try
                     {
-                        // (bx, by) is the top-left of the text by default (Near/Near alignment).
                         gfx.DrawString(word.Text, FontFor(bh), invisible, bx, by);
                         totalWords++;
                     }
@@ -715,11 +770,11 @@ namespace KillerPDF
                 }
             }
 
+            if (outDoc.PageCount == 0) throw new InvalidOperationException("No pages could be rendered from the source PDF.");
             outDoc.Save(outPath);
             outDoc.Close();
-            return (pages, totalWords);
+            return (pageCount, totalWords);
         }
-
         // ============================================================
         // Extract All Text - OCR every page and save the plain text to a .txt or .md file.
         // ============================================================
@@ -747,7 +802,7 @@ namespace KillerPDF
             try { _doc.Save(src); pageCount = _doc.PageCount; }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -768,7 +823,7 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"Text extraction failed:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"Text extraction failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally

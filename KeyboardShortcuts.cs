@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -97,7 +97,7 @@ namespace KillerPDF
             {
                 // A cancellable long operation (OCR, repair) is running behind the busy overlay - offer to
                 // cancel it instead of letting Escape fall through to the app-exit handler below.
-                if (KillerDialog.Show(this, $"Cancel the current {_busyOpLabel}?", "KillerPDF",
+                if (KillerDialog.Show(this, $"Cancel the current {_busyOpLabel}?", "StealthPDF",
                         MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     _busyCts?.Cancel();
                 e.Handled = true;
@@ -282,6 +282,7 @@ namespace KillerPDF
                 // keys stay as fallbacks. Both the number-row and numpad digits map.
                 case Key.V: case Key.D1: case Key.NumPad1: SetTool(EditTool.Select); return true;
                 case Key.T: case Key.D2: case Key.NumPad2: SetTool(EditTool.Text); return true;
+                case Key.E: SetTool(EditTool.Edit); return true;
                 case Key.L: case Key.U: case Key.D3: case Key.NumPad3: SetTool(EditTool.Line); return true;
                 case Key.H: case Key.D4: case Key.NumPad4: SetTool(EditTool.Highlight); return true;
                 case Key.D: case Key.D5: case Key.NumPad5: SetTool(EditTool.Draw); return true;
@@ -304,6 +305,7 @@ namespace KillerPDF
             }
             Set(ToolSelectBtn, "Str_TT_SelectTool", 1);
             Set(ToolTextBtn, "Str_TT_TextTool", 2);
+            Set(ToolEditBtn, "Str_TT_EditTool", 2);
             Set(ToolUnderlineBtn, "Str_TT_LineTool", 3);   // repurposed to the Line tool
             Set(ToolHighlightBtn, "Str_TT_HighlightTool", 4);
             Set(ToolDrawBtn, "Str_TT_DrawTool", 5);
@@ -311,12 +313,13 @@ namespace KillerPDF
             Set(ToolSignatureBtn, "Str_TT_SignatureTool", 7);
             Set(ToolCropBtn, "Str_TT_CropTool", 8);
             Set(_toolRotateBtn, "Str_TT_RotateTool", 9);
+			Set(ToolStampBtn, "Str_TT_StampTool", 0);
         }
 
         // Opens the online help / how-to page in the user's default browser.
         private void OnlineHelp_Click(object sender, RoutedEventArgs e)
         {
-            try { Process.Start(new ProcessStartInfo("https://killerpdf.net/help.html") { UseShellExecute = true }); }
+            try { Process.Start(new ProcessStartInfo("https://StealthPDF.net/help.html") { UseShellExecute = true }); }
             catch { }
         }
     }

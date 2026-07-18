@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,7 +7,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     /// <summary>
     /// Modal "Transform" window. Renders the current page on its own canvas (so the main view's mode is
@@ -71,7 +71,8 @@ namespace KillerPDF
             _srcH = src.PixelHeight;
             _pageWpt = pageWpt;
             _pageHpt = pageHpt;
-            Title = "KillerPDF - " + S("Str_Tf_Suffix");
+            // "StealthPDF - ..." is the DialogChrome wordmark sentinel (renders as styled Killer+PDF).
+            Title = "StealthPDF - " + S("Str_Tf_Suffix");
             Width = 980;
             Height = 720;
             MinWidth = 640;
@@ -248,7 +249,8 @@ namespace KillerPDF
             previewWrap.SizeChanged += (_, _2) => SizePreviewImage();
             root.Children.Add(previewWrap);
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + S("Str_Tf_Suffix"), () => { Applied = false; Close(); }, root);
+            // Sentinel: DialogChrome swaps the "StealthPDF" substring for the styled Killer+PDF wordmark.
+            Content = DialogChrome.Frame(this, Owner, "StealthPDF - " + S("Str_Tf_Suffix"), () => { Applied = false; Close(); }, root);
             UpdatePreview();   // populate the output-size readout at the original dimensions
 
             // Esc-to-close is wired by DialogChrome.Frame; Enter commits.

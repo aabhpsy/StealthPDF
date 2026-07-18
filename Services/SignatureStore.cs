@@ -1,6 +1,6 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
-namespace KillerPDF.Services
+namespace StealthPDF.Services
 {
     internal sealed class SignatureStore
     {
@@ -9,7 +9,7 @@ namespace KillerPDF.Services
 
         private static readonly string DefaultDir  = System.IO.Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "KillerPDF");
+            "StealthPDF");
 
         public SignatureStore()
             : this(DefaultDir, System.IO.Path.Combine(DefaultDir, "signatures.json")) { }

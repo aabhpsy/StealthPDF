@@ -5,22 +5,22 @@
 <script>/* Apply saved theme + accent before first paint to avoid a reload flash */(function(){try{var d=document.documentElement,t=localStorage.getItem('kpdf-theme');if(t){d.setAttribute('data-theme',t);if({dark:1,light:1,hc:1}[t]){var v=localStorage.getItem('kpdf-av');if(v){var s=v.split('|');d.style.setProperty('--accent',s[0]);d.style.setProperty('--btn',s[1]);}}}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="darkreader-lock">
-<title>KillerPDF - Free, open-source PDF editor for Windows</title>
-<link rel="canonical" href="https://killerpdf.net/">
+<title>StealthPDF - Free, open-source PDF editor for Windows</title>
+<link rel="canonical" href="https://StealthPDF.net/">
 <meta name="description" content="One exe. Install or run portable - no account, no subscription, no telemetry. Local PDF editor. GPLv3.">
 <link rel="icon" type="image/x-icon" href="kp-icon.ico">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://killerpdf.net/">
-<meta property="og:title" content="KillerPDF - Free, open-source PDF editor for Windows">
+<meta property="og:url" content="https://StealthPDF.net/">
+<meta property="og:title" content="StealthPDF - Free, open-source PDF editor for Windows">
 <meta property="og:description" content="One exe. Install or run portable - no account, no subscription, no telemetry. Local PDF editor. GPLv3.">
-<meta property="og:image" content="https://killerpdf.net/og-image.png">
+<meta property="og:image" content="https://StealthPDF.net/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="KillerPDF - Free, open-source PDF editor for Windows">
+<meta name="twitter:title" content="StealthPDF - Free, open-source PDF editor for Windows">
 <meta name="twitter:description" content="One exe. Install or run portable - no account, no subscription, no telemetry. Local PDF editor. GPLv3.">
-<meta name="twitter:image" content="https://killerpdf.net/og-image.png">
+<meta name="twitter:image" content="https://StealthPDF.net/og-image.png">
 <script defer src="https://koya.thekiller.net/script.js" data-website-id="4036b11d-f6c0-4254-b448-933d3e38b0cb"></script>
 <link rel="stylesheet" href="kp.css?v=5">
 <style>
@@ -113,11 +113,11 @@ html[data-theme="light"] .blurb h3, html[data-theme="light"] .feature-card h3 { 
 </defs></svg>
 
 <div class="topbar">
-<a href="index.html" class="tb-home" title="KillerPDF">
-<img class="tb-icon" src="kp-icon.png" alt="KillerPDF" width="44" height="44">
-<img class="wm-logo tb-wm" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF">
+<a href="index.html" class="tb-home" title="StealthPDF">
+<img class="tb-icon" src="kp-icon.png" alt="StealthPDF" width="44" height="44">
+<img class="wm-logo tb-wm" src="brand/StealthPDF-logo-dark-green.svg" alt="StealthPDF">
 </a>
-<a class="tb-dl" href="https://github.com/SteveTheKiller/KillerPDF/releases/latest/download/KillerPDF.exe"><svg viewBox="0 0 24 24"><path d="M11 4h2v7h3l-4 5-4-5h3V4zM5 18h14v2H5z"/></svg><span data-i18n="nav_dl">Download</span></a>
+<a class="tb-dl" href="/download/StealthPDF.exe"><svg viewBox="0 0 24 24"><path d="M11 4h2v7h3l-4 5-4-5h3V4zM5 18h14v2H5z"/></svg><span data-i18n="nav_dl">Download</span></a>
 <span class="tb-spacer"></span>
 <nav class="tb-nav">
 <a href="about.html" data-i18n="nav_about">About</a>
@@ -165,7 +165,7 @@ html[data-theme="light"] .blurb h3, html[data-theme="light"] .feature-card h3 { 
 <div class="content-inner">
 
 <section class="hero">
-<img class="wm-logo" src="brand/killerpdf-logo-dark-green.svg" alt="KillerPDF">
+<img class="wm-logo" src="brand/StealthPDF-logo-dark-green.svg" alt="StealthPDF">
 <div class="hero-blurbs">
 <div class="blurb"><h3 data-i18n="b1_t">Fully featured</h3><ul class="blurb-list" data-i18n="b1_d">
 <li>Four view modes across unlimited tabs</li>
@@ -176,18 +176,18 @@ html[data-theme="light"] .blurb h3, html[data-theme="light"] .feature-card h3 { 
 <li>Crop, transform, merge and split</li>
 <li>Print with full control, or flatten</li>
 </ul></div>
-<div class="blurb"><h3 data-i18n="b2_t">Built from scratch</h3><p data-i18n="b2_d">KillerPDF is written in C# and WPF on .NET. It renders through PDFium and runs OCR on Tesseract, with extra language models downloaded only on demand so the base download stays small.<br><br>A few focused libraries handle the rest, so the whole app stays one lean native exe with no bundled browser engine. The <a href="technical.html">Technical</a> page has the full breakdown.</p></div>
-<div class="blurb"><h3 data-i18n="b3_t">The people's editor</h3><p data-i18n="b3_d">Much of what KillerPDF does was requested by the people who use it. The <a href="https://github.com/SteveTheKiller/KillerPDF/issues" target="_blank" rel="noopener">GitHub issues</a> page is open to anyone, so anybody can request a feature or report a bug.<br><br>Your suggestions genuinely shape where this goes next. Read the story behind the app on the <a href="about.html">About</a> page.</p></div>
+<div class="blurb"><h3 data-i18n="b2_t">Built from scratch</h3><p data-i18n="b2_d">StealthPDF is written in C# and WPF on .NET. It renders through PDFium and runs OCR on Tesseract, with extra language models downloaded only on demand so the base download stays small.<br><br>A few focused libraries handle the rest, so the whole app stays one lean native exe with no bundled browser engine. The <a href="technical.html">Technical</a> page has the full breakdown.</p></div>
+<div class="blurb"><h3 data-i18n="b3_t">The people's editor</h3><p data-i18n="b3_d">Much of what StealthPDF does was requested by the people who use it. The <a href="https://github.com/aabhpsy/StealthPDF/issues" target="_blank" rel="noopener">GitHub issues</a> page is open to anyone, so anybody can request a feature or report a bug.<br><br>Your suggestions genuinely shape where this goes next. Read the story behind the app on the <a href="about.html">About</a> page.</p></div>
 </div>
 <div class="hero-grid">
 <div class="hero-cta">
 <div class="cta-row">
-<a href="https://github.com/SteveTheKiller/KillerPDF/releases/latest/download/KillerPDF.exe" class="download-btn"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg><span data-i18n="download">Download for Windows</span></a>
-<a href="https://github.com/SteveTheKiller/KillerPDF" class="gh-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.29 3.44 9.77 8.2 11.36.6.11.82-.26.82-.58v-2.04c-3.34.72-4.04-1.61-4.04-1.61-.55-1.38-1.34-1.75-1.34-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.11-3.17 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0112 6.8c1.02 0 2.05.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.82.58A12 12 0 0024 12.5C24 5.87 18.63.5 12 .5z"/></svg><span data-i18n="gh_btn">Source on GitHub</span></a>
+<a href="/download/StealthPDF.exe" class="download-btn"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg><span data-i18n="download">Download for Windows</span></a>
+<a href="https://github.com/aabhpsy/StealthPDF" class="gh-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.29 3.44 9.77 8.2 11.36.6.11.82-.26.82-.58v-2.04c-3.34.72-4.04-1.61-4.04-1.61-.55-1.38-1.34-1.75-1.34-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.11-3.17 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0112 6.8c1.02 0 2.05.14 3 .4 2.29-1.55 3.3-1.23 3.3-1.23.65 1.65.24 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.82.58A12 12 0 0024 12.5C24 5.87 18.63.5 12 .5z"/></svg><span data-i18n="gh_btn">Source on GitHub</span></a>
 </div>
 </div>
 <div class="hero-info">
-<div class="row"><span class="k">version</span>&nbsp;<span class="v">KillerPDF v1.6.0</span></div>
+<div class="row"><span class="k">version</span>&nbsp;<span class="v">StealthPDF v1.6.0</span></div>
 <div class="row"><span class="k">released</span>&nbsp;<span class="v">2026-06-27</span></div>
 <div class="row"><span class="k">size</span>&nbsp;<span class="v">~14.61 MB exe</span></div>
 <div class="row"><span class="k">platform</span>&nbsp;<span class="v">Windows 10/11 x64</span></div>
@@ -211,7 +211,7 @@ html[data-theme="light"] .blurb h3, html[data-theme="light"] .feature-card h3 { 
 <div class="feature-card"><h3 data-i18n="f_docinfo_t">Document info</h3><p data-i18n="f_docinfo_d">View and edit a PDF's title, author, subject, keywords, and creator metadata, saved back into the file.</p></div>
 <div class="feature-card"><h3 data-i18n="f_stamp_t">Stamps &amp; watermarks</h3><p data-i18n="f_stamp_d">Stamp page numbers or a text watermark across any page range - positioned, sized, and styled - applied as a single undo.</p></div>
 <div class="feature-card"><h3 data-i18n="f_open_t">Opens anything</h3><p data-i18n="f_open_d">Opens password-protected PDFs by prompting instead of erroring, and repairs damaged or broken-xref files so they open and print.</p></div>
-<div class="feature-card"><h3 data-i18n="f_install_t">Install or run portable</h3><p data-i18n="f_install_d">Drop the exe anywhere and run it, or use the built-in per-user installer with no admin rights. You can also grab it from the command line:<br><code>winget install killerpdf</code></p></div>
+<div class="feature-card"><h3 data-i18n="f_install_t">Install or run portable</h3><p data-i18n="f_install_d">Drop the exe anywhere and run it, or use the built-in per-user installer with no admin rights. You can also grab it from the command line:<br><code>winget install StealthPDF</code></p></div>
 </div>
 </section>
 
@@ -224,11 +224,11 @@ html[data-theme="light"] .blurb h3, html[data-theme="light"] .feature-card h3 { 
 </div>
 
 <footer class="statusbar">
-<span class="left"><a href="https://github.com/SteveTheKiller/KillerPDF" target="_blank" rel="noopener" data-i18n="footer_src">Source on GitHub</a> &middot; GPLv3 &middot; Part of <a href="https://killertools.net" target="_blank" rel="noopener">killertools.net</a></span>
+<span class="left"><a href="https://github.com/aabhpsy/StealthPDF" target="_blank" rel="noopener" data-i18n="footer_src">Source on GitHub</a> &middot; GPLv3 &middot; <a href="https://stealthpdf.com" target="_blank" rel="noopener">stealthpdf.com</a></span>
 <span class="right"><span id="verEgg" title="click me">v1.6.0</span> &middot; &copy; 2026 <b><a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></b></span>
 </footer>
 
-<div class="lightbox" id="lightbox" hidden><img id="lightboxImg" src="" alt="KillerPDF screenshot"></div>
+<div class="lightbox" id="lightbox" hidden><img id="lightboxImg" src="" alt="StealthPDF screenshot"></div>
 <div class="egg-toast" id="eggToast"></div>
 
 <script src="kp.js?v=3"></script>
@@ -244,7 +244,7 @@ html[data-theme="light"] .blurb h3, html[data-theme="light"] .feature-card h3 { 
   SHOTS.forEach(function (src, idx) {
     var b = document.createElement('button');
     b.className = 'sb-thumb'; b.title = 'Screenshot ' + (idx + 1);
-    b.innerHTML = '<img src="' + src + '" alt="KillerPDF screenshot ' + (idx + 1) + '" loading="lazy">';
+    b.innerHTML = '<img src="' + src + '" alt="StealthPDF screenshot ' + (idx + 1) + '" loading="lazy">';
     b.addEventListener('click', function () { openLightbox(src); });
     sbThumbs.appendChild(b);
   });

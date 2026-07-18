@@ -1,6 +1,6 @@
-using UglyToad.PdfPig;
+﻿using UglyToad.PdfPig;
 
-namespace KillerPDF.Services
+namespace StealthPDF.Services
 {
     internal sealed class SearchResult
     {

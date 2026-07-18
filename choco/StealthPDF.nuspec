@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>stealthpdf</id>
+    <version>REPLACE_VERSION</version>
+    <packageSourceUrl>https://github.com/aabhpsy/StealthPDF</packageSourceUrl>
+    <owners>aabhpsy</owners>
+    <title>StealthPDF</title>
+    <authors>StealthPDF contributors / stealthpdf.com</authors>
+    <projectUrl>https://stealthpdf.com</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/aabhpsy/StealthPDF/main/KillerPDF/Resources/kp-icon.ico</iconUrl>
+    <licenseUrl>https://github.com/aabhpsy/StealthPDF/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/aabhpsy/StealthPDF</projectSourceUrl>
+    <docsUrl>https://github.com/aabhpsy/StealthPDF/blob/main/README.md</docsUrl>
+    <bugTrackerUrl>https://github.com/aabhpsy/StealthPDF/issues</bugTrackerUrl>
+    <tags>pdf viewer editor annotate ocr scan compress sign portable stealthpdf</tags>
+    <summary>Clean, professional PDF editor for Windows. No subscription, no account, no telemetry.</summary>
+    <description>StealthPDF is a clean, professional PDF editor for Windows. View, annotate, edit, OCR, scan, merge, split, compress, stamp, fill, sign, unlock, print, and flatten PDFs locally - no account, no telemetry, and no cloud upload.
+
+**Features:**
+
+- High-quality rendering via PDFium, with tabs, outlines, search, and four view modes
+- Image-level PDF compression that preserves rotation and selectable text
+- Built-in OCR (Tesseract) with bundled English/Nepali models; more languages on demand
+- Scan from WIA and TWAIN scanners straight to PDF
+- Inline text editing, annotations, stamps, watermarks, and page numbers
+- Fill &amp; Sign: forms, checkmarks, and reusable signatures; digital signing support
+- Merge, split, rotate, crop, reorder, flatten, repair, and unlock PDFs
+- Single portable Windows EXE - or a per-user install with shortcuts and file association
+- GPLv3, local-only, no account, no telemetry
+
+StealthPDF is a community fork/rebrand of KillerPDF by Steve the Killer, maintained by @aabhpsy.
+    </description>
+    <releaseNotes>https://github.com/aabhpsy/StealthPDF/releases/tag/vREPLACE_VERSION</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

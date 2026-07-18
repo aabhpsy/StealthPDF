@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -7,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // Design tokens (fonts, radii, shadows) and code-built controls (buttons, checkboxes, fields, labels)
     // for dialogs and tools. Tokens resolve from App.xaml's resource dictionary.
@@ -37,11 +37,11 @@ namespace KillerPDF
         public static FontFamily IconFont => Res("IconFont", _iconFallback);
         public static FontFamily WordmarkFont => Res("WordmarkFont", _wordmarkFallback);
         public static FontFamily WordmarkFontPdf => Res("WordmarkFontPdf", _wordmarkPdfFallback);
-        private static readonly FontFamily _uiFallback   = new("Segoe UI, Microsoft JhengHei UI, Nirmala UI");
-        private static readonly FontFamily _monoFallback = new("Consolas");
+        private static readonly FontFamily _uiFallback   = new("Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Nirmala UI");
+        private static readonly FontFamily _monoFallback = new("Cascadia Mono, Consolas");
         private static readonly FontFamily _iconFallback = new("Segoe MDL2 Assets");
-        private static readonly FontFamily _wordmarkFallback = new("Typewriter A602, Consolas");
-        private static readonly FontFamily _wordmarkPdfFallback = new("Typewriter A602, Consolas");
+        private static readonly FontFamily _wordmarkFallback = new("Segoe UI Variable Display, Segoe UI Semibold, Segoe UI");
+        private static readonly FontFamily _wordmarkPdfFallback = new("Segoe UI Variable Display, Segoe UI Semibold, Segoe UI");
 
         public static CornerRadius RadControl => Rad("RadControl", 3);
         public static CornerRadius RadCard    => Rad("RadCard", 6);

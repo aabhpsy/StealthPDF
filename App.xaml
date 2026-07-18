@@ -1,7 +1,7 @@
-<Application x:Class="KillerPDF.App"
+﻿<Application x:Class="StealthPDF.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:KillerPDF">
+             xmlns:local="clr-namespace:StealthPDF">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -24,12 +24,12 @@
                  ============================================================================ -->
 
             <!-- Type families -->
-            <FontFamily x:Key="UiFont">Segoe UI, Microsoft JhengHei UI, Nirmala UI</FontFamily>
-            <!-- The "KillerPDF" wordmark fonts (embedded, subset to the wordmark letters). "Killer" and "PDF"
-                 can use different faces. One place to change the logo typefaces everywhere. -->
-            <FontFamily x:Key="WordmarkFont">/KillerPDF;component/Fonts/#Typewriter A602</FontFamily>
-            <FontFamily x:Key="WordmarkFontPdf">/KillerPDF;component/Fonts/#Typewriter A602</FontFamily>
-            <FontFamily x:Key="MonoFont">Consolas</FontFamily>
+            <FontFamily x:Key="UiFont">Segoe UI Variable Text, Segoe UI, Microsoft JhengHei UI, Nirmala UI</FontFamily>
+            <!-- Professional system wordmark/header stack. Segoe UI Variable Display is present on modern
+                 Windows and falls back cleanly to Segoe UI Semibold / Segoe UI on older systems. -->
+            <FontFamily x:Key="WordmarkFont">Segoe UI Variable Display, Segoe UI Semibold, Segoe UI</FontFamily>
+            <FontFamily x:Key="WordmarkFontPdf">Segoe UI Variable Display, Segoe UI Semibold, Segoe UI</FontFamily>
+            <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas</FontFamily>
             <FontFamily x:Key="IconFont">Segoe MDL2 Assets</FontFamily>
 
             <!-- Corner radii (one rounding scale for the whole app) -->

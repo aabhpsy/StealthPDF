@@ -3,55 +3,59 @@
                     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- KillerTools dark/green theme -->
-    <SolidColorBrush x:Key="BgDark"         Color="#333333" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgPanel"        Color="#3a3a3a" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgHover"        Color="#404040" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgSidebar"      Color="#1c1c1c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgRecentPanel"  Color="#2f2f2f" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgFlyout"       Color="#262626" po:Freeze="True"/>
+    <!-- StealthPDF dark theme: neutral graphite panels with a single restrained blue accent.
+         Flat and clean - no film grain, no glow, no header shadows. The blue here is the base
+         accent; the other hues live in Accents/Dark/*.xaml (including the legacy green). -->
+    <SolidColorBrush x:Key="BgDark"         Color="#232629" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgPanel"        Color="#2B2F34" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgHover"        Color="#34393F" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgSidebar"      Color="#1A1C1F" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgRecentPanel"  Color="#272B30" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgFlyout"       Color="#22252A" po:Freeze="True"/>
     <LinearGradientBrush x:Key="TabStripFadeBrush" StartPoint="0,0" EndPoint="0,1" po:Freeze="True">
         <GradientStop Offset="0.0" Color="#00000000"/>
         <GradientStop Offset="0.55" Color="#1f000000"/>
         <GradientStop Offset="1.0" Color="#82000000"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="BgModal"        Color="#1e1e1e" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BorderDim"      Color="#2e2e2e" po:Freeze="True"/>
-    <SolidColorBrush x:Key="Accent"         Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="HeaderAccent"   Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="SelectionAccent" Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="AccentLogo"     Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="InstallBtnBg"   Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="AccentBorder"   Color="#404040" po:Freeze="True"/>
-    <SolidColorBrush x:Key="DropBorder"     Color="#303030" po:Freeze="True"/>
-    <SolidColorBrush x:Key="PaneBorder"     Color="#2e2e2e" po:Freeze="True"/>
-    <SolidColorBrush x:Key="AccentDim"      Color="#0d2a18" po:Freeze="True"/>
-    <SolidColorBrush x:Key="SelectionBg" Color="#1c5e38" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgModal"        Color="#1F2226" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BorderDim"      Color="#3B4046" po:Freeze="True"/>
+    <SolidColorBrush x:Key="Accent"         Color="#4C9AFF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="HeaderAccent"   Color="#6FB0FF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="SelectionAccent" Color="#4C9AFF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="AccentLogo"     Color="#4C9AFF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="InstallBtnBg"   Color="#3D7BD9" po:Freeze="True"/>
+    <SolidColorBrush x:Key="AccentBorder"   Color="#3B4046" po:Freeze="True"/>
+    <SolidColorBrush x:Key="DropBorder"     Color="#3B4046" po:Freeze="True"/>
+    <SolidColorBrush x:Key="PaneBorder"     Color="#31363C" po:Freeze="True"/>
+    <SolidColorBrush x:Key="AccentDim"      Color="#1B2A3D" po:Freeze="True"/>
+    <SolidColorBrush x:Key="SelectionBg" Color="#2E4A73" po:Freeze="True"/>
     <SolidColorBrush x:Key="SelectionFg" Color="#ffffff" po:Freeze="True"/>
     <!-- Background of an open settings row. Solid hover tint here; the RGB themes override it with their
          translucent-white SelectionBg so the accent row text reads on it like a selected page/tool. -->
-    <SolidColorBrush x:Key="SettingsOpenRowBg" Color="#404040" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextPrimary"    Color="#e0e0e0" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextSecondary"  Color="#a0a0a0" po:Freeze="True"/>
-    <SolidColorBrush x:Key="FilenameBrush"  Color="#a0a0a0" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextDim"        Color="#6a6a6a" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextFooter"     Color="#6a6a6a" po:Freeze="True"/>
-    <SolidColorBrush x:Key="DangerRed"      Color="#ef4444" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgDragHandle"   Color="#555555" po:Freeze="True"/>
-    <SolidColorBrush x:Key="DragLine"       Color="#323232" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgScrollThumb"  Color="#551ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="ScrollThumbHover" Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="SliderTrack"    Color="#505050" po:Freeze="True"/>
-    <SolidColorBrush x:Key="RadioAccent"    Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="BgOverlay"      Color="#BB000000" po:Freeze="True"/>
-    <sys:Double x:Key="GrainOpacity">0.26</sys:Double>
-    <sys:Double x:Key="IconShadowOpacity">0.9</sys:Double>
-    <sys:Double x:Key="HeaderShadowOpacity">0.5</sys:Double>
+    <SolidColorBrush x:Key="SettingsOpenRowBg" Color="#34393F" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TextPrimary"    Color="#E8EAED" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TextSecondary"  Color="#C6CBD1" po:Freeze="True"/>
+    <SolidColorBrush x:Key="FilenameBrush"  Color="#C6CBD1" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TextDim"        Color="#98A0A8" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TextFooter"     Color="#98A0A8" po:Freeze="True"/>
+    <SolidColorBrush x:Key="DangerRed"      Color="#E5534B" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgDragHandle"   Color="#565D66" po:Freeze="True"/>
+    <SolidColorBrush x:Key="DragLine"       Color="#31363C" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgScrollThumb"  Color="#664C9AFF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="ScrollThumbHover" Color="#4C9AFF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="SliderTrack"    Color="#4A5058" po:Freeze="True"/>
+    <SolidColorBrush x:Key="RadioAccent"    Color="#4C9AFF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgOverlay"      Color="#B3000000" po:Freeze="True"/>
+    <!-- Professional = flat: the film grain and the icon/header drop shadows are OFF in the
+         default themes. The texture pipeline stays in place for anyone who wants it back. -->
+    <sys:Double x:Key="GrainOpacity">0</sys:Double>
+    <sys:Double x:Key="IconShadowOpacity">0</sys:Double>
+    <sys:Double x:Key="HeaderShadowOpacity">0</sys:Double>
 
-    <SolidColorBrush x:Key="BgCanvas"                                                       Color="#3a3a3a" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#0d2a18" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#1ea54c" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"     Color="#0d2a18" po:Freeze="True"/>
-    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#1ea54c" po:Freeze="True"/>
+    <SolidColorBrush x:Key="BgCanvas"                                                       Color="#1A1C1F" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#1B2A3D" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#6FB0FF" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"     Color="#1B2A3D" po:Freeze="True"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="#6FB0FF" po:Freeze="True"/>
 
 </ResourceDictionary>

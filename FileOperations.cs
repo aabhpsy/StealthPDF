@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -121,14 +121,14 @@ namespace KillerPDF
                     SetStatus(string.Format(Loc("Str_OpenedReadOnlyXRef"), System.IO.Path.GetFileName(path), _doc.PageCount));
                     KillerDialog.Show(this,
                         $"\"{System.IO.Path.GetFileName(path)}\" has a non-standard structure and was opened read-only.\n\nEditing, saving, and some other features may not work correctly.",
-                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 catch
                 {
                     // ReadOnly also failed - offer to repair.
                     var result = KillerDialog.Show(this,
-                        $"This PDF has a damaged structure and couldn't be opened.\n\nWould you like KillerPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
-                        "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                        $"This PDF has a damaged structure and couldn't be opened.\n\nWould you like StealthPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
+                        "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                     if (result == MessageBoxResult.Yes)
                         TryRepairAndOpen(srcPath);
                 }
@@ -148,8 +148,8 @@ namespace KillerPDF
                 // we can't classify the damage, but the PDFium-based repair often recovers it anyway, so
                 // offer the repair rather than just failing outright.
                 var result = KillerDialog.Show(this,
-                    "This PDF couldn't be opened - its structure may be damaged.\n\nWould you like KillerPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    "This PDF couldn't be opened - its structure may be damaged.\n\nWould you like StealthPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
+                    "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                     TryRepairAndOpen(srcPath);   // sets _asyncOpenPending and finalizes the tab itself
             }
@@ -401,7 +401,7 @@ namespace KillerPDF
                 var doc = FPDF_LoadDocument(sourcePath, null);
                 if (doc == IntPtr.Zero)
                 {
-                    try { File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "killerpdf_pdfium_debug.txt"), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] FPDF_LoadDocument returned null for: {sourcePath}\n\n"); } catch { }
+                    try { File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "StealthPDF_pdfium_debug.txt"), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] FPDF_LoadDocument returned null for: {sourcePath}\n\n"); } catch { }
                     return false;
                 }
                 try
@@ -450,7 +450,7 @@ namespace KillerPDF
                 try
                 {
                     File.AppendAllText(
-                        System.IO.Path.Combine(System.IO.Path.GetTempPath(), "killerpdf_pdfium_debug.txt"),
+                        System.IO.Path.Combine(System.IO.Path.GetTempPath(), "StealthPDF_pdfium_debug.txt"),
                         $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] TryPdfiumSaveWithZeroRotations failed\n" +
                         $"  source: {sourcePath}\n" +
                         $"  type:   {ex.GetType().FullName}\n" +
@@ -522,7 +522,7 @@ namespace KillerPDF
                     _asyncOpenPending = false;
                     KillerDialog.Show(this,
                         "Repair failed - the file is too severely damaged to recover.\n\nTry opening the original in a different application (Adobe Acrobat, browsers) which may have additional recovery options.",
-                        "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                        "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -539,13 +539,13 @@ namespace KillerPDF
                     raster
                         ? $"\"{System.IO.Path.GetFileName(path)}\" was repaired by rasterizing through PDFium.\n\nText is not selectable in the repaired copy. Use Save As to write it to a new location."
                         : $"\"{System.IO.Path.GetFileName(path)}\" was repaired successfully.\n\nBookmarks, forms, and other interactive features may have been lost. Use Save As to write the repaired file to a new location.",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.None);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.None);
             }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
                 _asyncOpenPending = false;
-                KillerDialog.Show(this, $"Repair failed:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"Repair failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -587,7 +587,7 @@ namespace KillerPDF
                 HideBusyOverlay(busy);
                 _asyncOpenPending = false;
                 KillerDialog.Show(this, $"Could not open the protected PDF:\n{ex.Message}",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 EndCancellableOp();
             }
         }
@@ -704,7 +704,7 @@ namespace KillerPDF
             {
                 var res = KillerDialog.Show(this,
                     Loc("Str_Dlg_UnsavedClose"),
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (res != MessageBoxResult.Yes) return;
             }
             _doc.Close();
@@ -783,7 +783,7 @@ namespace KillerPDF
             {
                 AbortTabLoad(target, prev, createdNew);
                 KillerDialog.Show(this, $"Could not create new document:\n{ex.Message}",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -816,7 +816,7 @@ namespace KillerPDF
                     var item = MakeMenuItem(System.IO.Path.GetFileName(path), (_, _) =>
                     {
                         if (System.IO.File.Exists(path)) OpenInNewTab(path);
-                        else KillerDialog.Show(this, $"File not found:\n{path}", "KillerPDF",
+                        else KillerDialog.Show(this, $"File not found:\n{path}", "StealthPDF",
                             MessageBoxButton.OK, MessageBoxImage.Warning);
                     });
                     item.ToolTip = path;
@@ -1066,7 +1066,7 @@ namespace KillerPDF
                 {
                     ev.Handled = true;   // don't bubble to the DropZone "click to browse" handler
                     if (System.IO.File.Exists(path)) OpenInNewTab(path);
-                    else KillerDialog.Show(this, $"File not found:\n{path}", "KillerPDF",
+                    else KillerDialog.Show(this, $"File not found:\n{path}", "StealthPDF",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                 };
                 RecentFilesList.Items.Add(row);
@@ -1144,7 +1144,7 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Merge failed:\n{ex.Message}", "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                KillerDialog.Show(this, $"Merge failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1376,7 +1376,7 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Save failed:\n{ex.Message}", "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                KillerDialog.Show(this, $"Save failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1453,7 +1453,7 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Save failed:\n{ex.Message}", "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                KillerDialog.Show(this, $"Save failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1582,7 +1582,7 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                try { KillerDialog.Show(this, $"Flatten failed:\n{ex.GetType().Name}: {ex.Message}", "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
+                try { KillerDialog.Show(this, $"Flatten failed:\n{ex.GetType().Name}: {ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
                 catch { /* dialog failed; overlay still removed in finally */ }
             }
             finally
@@ -1702,7 +1702,7 @@ namespace KillerPDF
                         }
                         using (burnDoc)
                         {
-                            DrawStampsIntoDoc(burnDoc, stampSnap);   // stamps sit beneath annotations
+                            DrawStampsIntoDoc(burnDoc, stampSnap, _signatureStore);   // stamps sit beneath annotations
                             DrawAnnotationsIntoDoc(burnDoc, annotsSnap, dimsSnap);
                             burnDoc.Save(burnPath);
                         }
@@ -1739,7 +1739,7 @@ namespace KillerPDF
 
             // Open the preview window immediately. Pages rasterize on a background thread and
             // stream in via SetRenderedPage, so the window appears at once and the app stays
-            // responsive on large files. WPF's OS PrintDialog can't show a preview, so KillerPDF
+            // responsive on large files. WPF's OS PrintDialog can't show a preview, so StealthPDF
             // renders it and drives printing itself.
             string  renderPath = printPath;
             string? cleanup    = tempFlattened;
@@ -1788,7 +1788,7 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                try { KillerDialog.Show(this, $"Print failed:\n{ex.GetType().Name}: {ex.Message}", "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
+                try { KillerDialog.Show(this, $"Print failed:\n{ex.GetType().Name}: {ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
                 catch { }
             }
         }

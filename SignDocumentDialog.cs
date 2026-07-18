@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
@@ -7,16 +7,16 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using KillerPDF.Services.Signing;
+using StealthPDF.Services.Signing;
 using Microsoft.Win32;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     /// <summary>
     /// Themed modal dialog that cryptographically signs the open PDF with a certificate (a .pfx/.p12
     /// file, or one from the Windows store) and writes a NEW signed copy. This is the real digital
     /// signature - distinct from the drawn "Signature" stamp tool, which only places a picture.
-    /// Chrome and colors mirror PrintPreviewWindow so every KillerPDF dialog looks identical.
+    /// Chrome and colors mirror PrintPreviewWindow so every StealthPDF dialog looks identical.
     /// </summary>
     internal sealed class SignDocumentDialog : Window
     {
@@ -45,7 +45,7 @@ namespace KillerPDF
         public SignDocumentDialog(Window? owner, string sourcePdf)
         {
             _sourcePdf = sourcePdf;
-            Title = "KillerPDF - Digital Signature";
+            Title = "StealthPDF - Digital Signature";
             Width = 470;
             SizeToContent = SizeToContent.Height;
             UseLayoutRounding = true;
@@ -147,7 +147,7 @@ namespace KillerPDF
 
             SyncSource();
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + L("Str_Sign_TitleSuffix"),
+            Content = DialogChrome.Frame(this, Owner, "StealthPDF - " + L("Str_Sign_TitleSuffix"),
                 () => { DialogResult = false; Close(); }, body);
         }
 

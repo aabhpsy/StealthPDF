@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media.Animation;
 
-namespace KillerPDF
+namespace StealthPDF
 {
 
     // Fade a window out on close: cancel the first close, animate opacity to 0, then close for real.

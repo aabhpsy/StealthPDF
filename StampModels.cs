@@ -1,8 +1,8 @@
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
-namespace KillerPDF
+namespace StealthPDF
 {
-    internal enum StampKind { PageNumber, Watermark }
+    internal enum StampKind { PageNumber, Watermark, Certification }
 
     // The full configuration produced/edited by the Stamp window. One spec can drive page numbers,
     // a watermark, or both, each over its own page range. A spec is the unit that gets re-opened when
@@ -38,6 +38,35 @@ namespace KillerPDF
         public string  WmRange   = "";         // "" = all pages
         public double  WmCustomX = 0.5;        // used when WmPosH == -1 (Custom): center as a fraction of page
         public double  WmCustomY = 0.5;
+
+        // ---- Certification stamp (agency sign-off block) ----
+        // A composite, draggable block: logo + "Document seen by:" label + name + signature image +
+        // date/time. Each field is independently toggleable. Rendered and burned as ONE unit so it moves
+        // as a single block and lands identically on every page in the range. See Stamps.cs.
+        public bool    CertEnabled;
+        public bool    CertShowLogo;              // logo image on/off
+        public string? CertLogoPath;              // source image for the logo (PNG/JPG)
+        public double  CertLogoScale = 1.0;       // logo-only scale multiplier, independent of whole-block scale
+        public string  CertLabel   = "Document seen by:";   // the lead label, editable
+        public bool    CertShowName = true;
+        public string  CertName    = "";           // e.g. "John A. Smith"
+        public bool    CertShowSig = true;         // signature image on/off
+        public string? CertSignatureId;           // id of a saved SignatureStore signature to embed
+        public string? CertSigPath;               // OR a one-off image path (when not from the store)
+        public bool    CertShowDate = true;        // date line on/off
+        public bool    CertShowTime;               // time on the date line
+        public string  CertDate    = "";           // "" = today (resolved at apply time); else literal
+        // Appearance
+        public Color   CertColor   = Color.FromRgb(0x22, 0x22, 0x22);   // border + text
+        public double  CertScale   = 1.0;          // whole-block scale multiplier
+        public int      CertBorder  = 0;            // 0 rectangle, 1 rounded, 2 none
+        public bool      CertWhiteFill = false;      // off by default so the block is transparent over the page; user can enable a fill in the Stamp window
+        // Placement (one position drives all pages in the range; -1 = custom draggable)
+        public int     CertPosH    = 2;            // 0 left, 1 center, 2 right
+        public int     CertPosV    = 2;            // 0 top, 1 middle, 2 bottom
+        public double  CertCustomX = 0.78;         // fraction of page (used when CertPosH == -1)
+        public double  CertCustomY = 0.86;
+        public string  CertRange   = "";           // "" = all pages
 
         public StampSpec Clone() => (StampSpec)MemberwiseClone();
     }

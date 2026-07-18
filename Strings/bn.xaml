@@ -1,9 +1,9 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!-- ================================================================
-         KillerPDF  —  Bengali (bn) strings
+         StealthPDF  —  Bengali (bn) strings
          ================================================================ -->
 
     <!-- ── Toolbar tooltips ─────────────────────────────────────────── -->
@@ -44,7 +44,7 @@
     <sys:String x:Key="Str_TT_ExpandSidebar">সাইডবার প্রসারিত করুন</sys:String>
     <sys:String x:Key="Str_TT_KeyboardShortcuts">কীবোর্ড শর্টকাট (Ctrl+?)</sys:String>
     <sys:String x:Key="Str_TT_Settings">সেটিংস</sys:String>
-    <sys:String x:Key="Str_TT_About">KillerPDF সম্পর্কে</sys:String>
+    <sys:String x:Key="Str_TT_About">StealthPDF সম্পর্কে</sys:String>
 
     <!-- ── About overlay ─────────────────────────────────────────────── -->
     <sys:String x:Key="Str_About_Version">সংস্করণ</sys:String>
@@ -107,7 +107,7 @@
     <!-- ── Status bar ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ready">প্রস্তুত</sys:String>
     <sys:String x:Key="Str_Portable">পোর্টেবল</sys:String>
-    <sys:String x:Key="Str_InstallBtn">KillerPDF ইনস্টল করুন...</sys:String>
+    <sys:String x:Key="Str_InstallBtn">StealthPDF ইনস্টল করুন...</sys:String>
 
     <!-- ── Status messages (format strings — use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">{0} খোলা হয়েছে - {1} পৃষ্ঠা</sys:String>
@@ -136,16 +136,16 @@
     <sys:String x:Key="Str_RotateFailed">ঘোরানো ব্যর্থ হয়েছে: {0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF ইনস্টল করুন</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg">আপনার ব্যবহারকারী প্রোফাইলে KillerPDF ইনস্টল করবেন?
+    <sys:String x:Key="Str_Dlg_InstallTitle">StealthPDF ইনস্টল করুন</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">আপনার ব্যবহারকারী প্রোফাইলে StealthPDF ইনস্টল করবেন?
 
-এটি অ্যাপটি %LocalAppData%\KillerPDF-এ কপি করবে এবং স্টার্ট মেনু শর্টকাট তৈরি করবে।
+এটি অ্যাপটি %LocalAppData%\StealthPDF-এ কপি করবে এবং স্টার্ট মেনু শর্টকাট তৈরি করবে।
 যেকোনো সময় Add/Remove Programs-এর মাধ্যমে আনইনস্টল করা যাবে।</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedClose">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। সংরক্ষণ না করে এই ফাইলটি বন্ধ করবেন?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। সংরক্ষণ না করে KillerPDF বন্ধ করবেন?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। সংরক্ষণ না করে StealthPDF বন্ধ করবেন?</sys:String>
     <sys:String x:Key="Str_Dlg_FailedOpen">PDF খুলতে ব্যর্থ হয়েছে:
 {0}</sys:String>
-    <sys:String x:Key="Str_Dlg_AppTitle">KillerPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_AppTitle">StealthPDF</sys:String>
 
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
@@ -256,7 +256,7 @@
     <sys:String x:Key="Str_Pos_TopLeft">উপরে বামে</sys:String>
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Print_Title">KillerPDF - মুদ্রণ</sys:String>
+    <sys:String x:Key="Str_Print_Title">StealthPDF - মুদ্রণ</sys:String>
     <sys:String x:Key="Str_Print_Printer">প্রিন্টার</sys:String>
     <sys:String x:Key="Str_Print_Orientation">অভিমুখ</sys:String>
     <sys:String x:Key="Str_Print_Portrait">পোর্ট্রেট</sys:String>
@@ -307,7 +307,7 @@
     <sys:String x:Key="Str_Drop_Separate">আলাদাভাবে খুলুন</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">খোলার জন্য কোনো PDF বা ছবি পাওয়া যায়নি।</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">এটি {0}টি আলাদা ট্যাব খুলবে। চালিয়ে যাবেন?</sys:String>
-    <sys:String x:Key="Str_Drop_TooMany">এই ফোল্ডার বা আর্কাইভে {0}টি ফাইল আছে। KillerPDF শুধু প্রথম {1}টি খুলবে। চালিয়ে যাবেন?</sys:String>
+    <sys:String x:Key="Str_Drop_TooMany">এই ফোল্ডার বা আর্কাইভে {0}টি ফাইল আছে। StealthPDF শুধু প্রথম {1}টি খুলবে। চালিয়ে যাবেন?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0}টি ফাইল একত্র করা হয়েছে - এখনও সংরক্ষণ করা হয়নি</sys:String>
     <sys:String x:Key="Str_Drop_Merging">ফাইল একত্র করা হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCancelled">একত্রীকরণ বাতিল করা হয়েছে</sys:String>
@@ -436,4 +436,5 @@
     <sys:String x:Key="Str_KS_View">ভিউ</sys:String>
     <sys:String x:Key="Str_KS_FullScreen">পূর্ণ স্ক্রিন</sys:String>
     <sys:String x:Key="Str_FullScreen_Hint">পূর্ণ স্ক্রিন থেকে বের হতে F11 বা Esc চাপুন</sys:String>
+    <sys:String x:Key="Str_Stamp_CertLogoScale">Logo size (%)</sys:String>
 </ResourceDictionary>

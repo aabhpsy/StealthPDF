@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,10 +14,10 @@ using System.Windows.Media.Imaging;
 using Docnet.Core;
 using Docnet.Core.Models;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     /// <summary>
-    /// KillerPDF's own print dialog with a working preview. WPF's built-in PrintDialog
+    /// StealthPDF's own print dialog with a working preview. WPF's built-in PrintDialog
     /// reports "This app doesn't support print preview", so we render the rasterized
     /// pages ourselves, expose printer / orientation / copies / page-range settings,
     /// and drive the spooler via a non-UI PrintDialog when the user clicks Print.
@@ -86,7 +86,7 @@ namespace KillerPDF
             _renderPath  = renderPath;
             _cleanupPath = cleanupPath;
 
-            Title  = "KillerPDF - Print";
+            Title  = "StealthPDF - Print";
             Width  = 936;
             Height = 716;
             MinWidth  = 720;
@@ -351,7 +351,7 @@ namespace KillerPDF
             Content = outer;
 
             // Title bar (transparent so the dialog-wide grain shows through behind the title)
-            // Shared KillerPDF dialog chrome: wordmark + courier suffix + the red ChromeCloseButton.
+            // Shared StealthPDF dialog chrome: wordmark + courier suffix + the red ChromeCloseButton.
             var titleBar = DialogChrome.BuildTitleBar(this, Owner, S("Str_Print_Title"), () => { DialogResult = false; Close(); });
             DockPanel.SetDock(titleBar, Dock.Top);
             root.Children.Add(titleBar);
@@ -452,7 +452,7 @@ namespace KillerPDF
             };
             panel.Children.Add(margins);
 
-            // Pages per sheet (N-up): KillerPDF composes the sheet itself.
+            // Pages per sheet (N-up): StealthPDF composes the sheet itself.
             panel.Children.Add(Label(S("Str_Print_PagesPerSheet")));
             var nup = new ComboBox { Margin = new Thickness(0, 4, 0, 12), Height = 26 };
             ApplyComboStyle(nup);
@@ -866,7 +866,7 @@ namespace KillerPDF
         {
             if (_queue == null)
             {
-                KillerDialog.Show(this, "No printer is available.", "KillerPDF",
+                KillerDialog.Show(this, "No printer is available.", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -874,7 +874,7 @@ namespace KillerPDF
             var indices = ParseRange(_pagesBox.Text, _pages.Length);
             if (indices.Count == 0)
             {
-                KillerDialog.Show(this, "No valid pages in that range.", "KillerPDF",
+                KillerDialog.Show(this, "No valid pages in that range.", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -935,7 +935,7 @@ namespace KillerPDF
                     fixedDoc.Pages.Add(pc);
                 }
 
-                pd.PrintDocument(fixedDoc.DocumentPaginator, "KillerPDF");
+                pd.PrintDocument(fixedDoc.DocumentPaginator, "StealthPDF");
                 PrintedPageCount = indices.Count;
                 DialogResult = true;
                 Close();
@@ -943,7 +943,7 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 KillerDialog.Show(this, $"Print failed:\n{ex.GetType().Name}: {ex.Message}",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

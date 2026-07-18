@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // Chrome for modal dialog windows: Configure (borderless window setup), Frame (the rounded card +
-    // title bar + grain), and BuildTitleBar (the KillerPDF wordmark + red close button).
+    // title bar + grain), and BuildTitleBar (the StealthPDF wordmark + red close button).
     internal static class DialogChrome
     {
         public const string CloseGlyph = ""; // Segoe MDL2 ChromeClose
@@ -20,7 +20,7 @@ namespace KillerPDF
         // Builds the title bar.
         //   win       - the window being chromed (used for DragMove on the whole bar)
         //   owner      - supplies the themed brushes + the ChromeCloseButton style (pass the window's owner)
-        //   fullTitle  - the complete title, e.g. "KillerPDF - Transform"; the "KillerPDF" part becomes the
+        //   fullTitle  - the complete title, e.g. "StealthPDF - Transform"; the "StealthPDF" part becomes the
         //                wordmark and the remainder (" - Transform") is rendered in the courier title font
         //   onClose    - invoked when the red close button is clicked (e.g. set a result then Close())
         public static Border BuildTitleBar(Window win, Window? owner, string? fullTitle, Action onClose)
@@ -45,21 +45,21 @@ namespace KillerPDF
                 Brush primary   = shadow ? Brushes.Black : Brush(owner, "TextPrimary", Brushes.White);
                 Brush logo      = shadow ? Brushes.Black : Brush(owner, "AccentLogo", Brushes.LimeGreen);
                 Brush secondary = shadow ? Brushes.Black : Brush(owner, "TextSecondary", Brushes.Gray);
-                int kp = fullTitle?.IndexOf("KillerPDF", StringComparison.Ordinal) ?? -1;
+                int kp = fullTitle?.IndexOf("StealthPDF", StringComparison.Ordinal) ?? -1;
                 if (kp >= 0)
                 {
-                    // Killer + PDF in one TextBlock so the two sizes share a baseline (cohesive wordmark).
+                    // Stealth + PDF in one TextBlock so the two sizes share a baseline (cohesive wordmark).
                     var logoTb = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
-                    logoTb.Inlines.Add(new System.Windows.Documents.Run("Killer") { FontFamily = wordmark, FontWeight = FontWeights.Normal, FontSize = 16, Foreground = primary });
-                    logoTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = wordmarkPdf, FontWeight = FontWeights.Bold, FontSize = 19, Foreground = logo });
+                    logoTb.Inlines.Add(new System.Windows.Documents.Run("Stealth") { FontFamily = wordmark, FontWeight = FontWeights.SemiBold, FontSize = 17, Foreground = primary });
+                    logoTb.Inlines.Add(new System.Windows.Documents.Run("PDF") { FontFamily = wordmarkPdf, FontWeight = FontWeights.Bold, FontSize = 20, Foreground = logo });
                     sp.Children.Add(logoTb);
-                    string after = fullTitle![(kp + "KillerPDF".Length)..];
+                    string after = fullTitle![(kp + "StealthPDF".Length)..];
                     if (!string.IsNullOrEmpty(after))
-                        sp.Children.Add(new TextBlock { Text = after, FontFamily = UiKit.MonoFont, FontSize = 14, Foreground = secondary, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(4, 1, 0, 0) });
+                        sp.Children.Add(new TextBlock { Text = after, FontFamily = UiKit.UiFont, FontSize = 13, Foreground = secondary, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(4, 1, 0, 0) });
                 }
                 else
                 {
-                    sp.Children.Add(new TextBlock { Text = fullTitle ?? "", FontFamily = UiKit.MonoFont, FontSize = 14, Foreground = primary, VerticalAlignment = VerticalAlignment.Center });
+                    sp.Children.Add(new TextBlock { Text = fullTitle ?? "", FontFamily = UiKit.UiFont, FontSize = 13, Foreground = primary, VerticalAlignment = VerticalAlignment.Center });
                 }
                 return sp;
             }

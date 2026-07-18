@@ -1,4 +1,4 @@
-name: Chocolatey Release
+﻿name: Chocolatey Release
 
 on:
   release:
@@ -22,21 +22,21 @@ jobs:
         run: |
           $releaseTag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.event.inputs.tag }}" } else { "${{ github.event.release.tag_name }}" }
           $version = $releaseTag.TrimStart('v')
-          $exeUrl  = "https://github.com/SteveTheKiller/KillerPDF/releases/download/$releaseTag/KillerPDF.exe"
+          $exeUrl  = "https://github.com/aabhpsy/StealthPDF/releases/download/$releaseTag/StealthPDF.exe"
 
           # Download release EXE and compute hash
           Write-Host "Downloading $exeUrl..."
-          Invoke-WebRequest -Uri $exeUrl -OutFile "$env:RUNNER_TEMP\KillerPDF.exe"
-          $hash = (Get-FileHash "$env:RUNNER_TEMP\KillerPDF.exe" -Algorithm SHA256).Hash
+          Invoke-WebRequest -Uri $exeUrl -OutFile "$env:RUNNER_TEMP\StealthPDF.exe"
+          $hash = (Get-FileHash "$env:RUNNER_TEMP\StealthPDF.exe" -Algorithm SHA256).Hash
           Write-Host "SHA256: $hash"
 
           # Stamp version and hash into package files
-          $nuspec  = "choco\killerpdf.nuspec"
+          $nuspec  = "choco\StealthPDF.nuspec"
           $install = "choco\tools\chocolateyInstall.ps1"
 
           (Get-Content $nuspec)  -replace 'REPLACE_VERSION', $version | Set-Content $nuspec
           (Get-Content $install) -replace 'REPLACE_HASH',    $hash    | Set-Content $install
 
           # Pack and push
-          choco pack choco\killerpdf.nuspec --out "$env:RUNNER_TEMP"
-          choco push "$env:RUNNER_TEMP\killerpdf.$version.nupkg" --source https://push.chocolatey.org --api-key $env:CHOCO_API_KEY
+          choco pack choco\StealthPDF.nuspec --out "$env:RUNNER_TEMP"
+          choco push "$env:RUNNER_TEMP\StealthPDF.$version.nupkg" --source https://push.chocolatey.org --api-key $env:CHOCO_API_KEY

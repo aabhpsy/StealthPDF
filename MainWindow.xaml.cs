@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow : Window
     {
@@ -213,7 +213,7 @@ namespace KillerPDF
         private readonly List<Rect> _searchHighlights = [];
 
         // Signatures
-        private readonly SignatureStore _signatureStore = new();
+        internal readonly SignatureStore _signatureStore = new();
         private SavedSignature? _pendingSignature;
         private Border? _signaturePopup;
         // Guided AcroForm signing: "pick once, reuse" - the chosen signature/initials are remembered
@@ -249,6 +249,7 @@ namespace KillerPDF
         private readonly Grid _pageContentGrid = null!;
         private readonly Button _toolSelectBtn = null!;
         private readonly Button _toolTextBtn = null!;
+        private readonly Button _toolEditBtn = null!;
         private readonly Button _toolHighlightBtn = null!;
         private readonly Button _toolUnderlineBtn = null!;
         private readonly Button _toolDrawBtn = null!;
@@ -288,6 +289,7 @@ namespace KillerPDF
             _pageContentGrid = (Grid)FindName("PageContentGrid")!;
             _toolSelectBtn = (Button)FindName("ToolSelectBtn")!;
             _toolTextBtn = (Button)FindName("ToolTextBtn")!;
+            _toolEditBtn = (Button)FindName("ToolEditBtn")!;
             _toolHighlightBtn = (Button)FindName("ToolHighlightBtn")!;
             _toolUnderlineBtn = (Button)FindName("ToolUnderlineBtn")!;
             _toolDrawBtn = (Button)FindName("ToolDrawBtn")!;
@@ -633,11 +635,12 @@ namespace KillerPDF
         private string Loc(string key)
             => Application.Current.TryFindResource(key) as string ?? key;
 
-        private void SetStatus(string text)
+        internal void SetStatus(string text)
         {
             StatusText.Text = text;
             CrashReporter.PushStatusMessage(text);
         }
+
 
         /// <summary>
         /// Dereferences a PdfItem if it is an indirect reference (PdfReference is internal;

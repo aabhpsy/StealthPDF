@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -30,6 +30,10 @@ namespace KillerPDF
             e.Handled = true;
             ShowAboutOverlay();
         }
+
+        // Menu bar entry point: MenuItem.Click is a RoutedEventHandler, so it can't reuse the
+        // MouseLeftButtonDown overload above. Forward to the same overlay.
+        private void AboutMenu_Click(object sender, RoutedEventArgs e) => ShowAboutOverlay();
 
         private void ShowAboutOverlay()
         {
@@ -45,43 +49,45 @@ namespace KillerPDF
             // Reuse the main window's film-grain texture on the About card.
             if (GrainBrush?.ImageSource != null) AboutGrainBrush.ImageSource = GrainBrush.ImageSource;
 
-            // Logo block: "Killer" in the primary color, "PDF" in the brand green.
+            // Logo block: "Stealth" in the primary color (Typewriter wordmark), "PDF" in the brand green.
             AboutLogoBlock.Inlines.Clear();
             var logoHl = new System.Windows.Documents.Hyperlink { TextDecorations = null };
-            logoHl.Inlines.Add(new System.Windows.Documents.Run("Killer")
+            logoHl.Inlines.Add(new System.Windows.Documents.Run("Stealth")
             {
-                FontSize = 21,
-                FontWeight = System.Windows.FontWeights.Normal,
+                FontFamily = UiKit.WordmarkFont,
+                FontSize = 24,
+                FontWeight = System.Windows.FontWeights.SemiBold,
                 Foreground = (System.Windows.Media.Brush)FindResource("TextPrimary")
             });
             logoHl.Inlines.Add(new System.Windows.Documents.Run("PDF")
             {
                 FontFamily = UiKit.WordmarkFontPdf,
-                FontSize = 26,
+                FontSize = 27,
                 Foreground = (System.Windows.Media.Brush)FindResource("AccentLogo")
             });
             logoHl.Click += (_, _) =>
-                Process.Start(new ProcessStartInfo("https://killerpdf.net") { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo("https://github.com/aabhpsy/StealthPDF") { UseShellExecute = true });
             AboutLogoBlock.Inlines.Add(logoHl);
+
 
             // Tagline block
             AboutTaglineBlock.Inlines.Clear();
-            // Localized tagline. {0} is the (untranslated) brand, so splitting on the placeholder
-            // keeps "Killer Tools" a styled, clickable link while the rest translates and the brand
-            // can sit anywhere in the sentence the language needs it.
+            // Localized tagline. {0} is the (untranslated) brand link, so splitting on the
+            // placeholder keeps "StealthPDF on GitHub" a styled, clickable link while the rest
+            // translates and the link can sit anywhere in the sentence the language needs it.
             var taglineDim = (System.Windows.Media.Brush)FindResource("TextSecondary");
             var taglineText = Loc("Str_Tagline");
             int taglineBrand = taglineText.IndexOf("{0}", StringComparison.Ordinal);
             string taglinePre = taglineBrand >= 0 ? taglineText[..taglineBrand] : taglineText;
             string taglineSuf = taglineBrand >= 0 ? taglineText[(taglineBrand + 3)..] : "";
             AboutTaglineBlock.Inlines.Add(new System.Windows.Documents.Run(taglinePre) { Foreground = taglineDim });
-            var ktHl = new System.Windows.Documents.Hyperlink(new System.Windows.Documents.Run("Killer Tools"))
+            var ktHl = new System.Windows.Documents.Hyperlink(new System.Windows.Documents.Run("StealthPDF on GitHub"))
             {
                 Foreground      = (System.Windows.Media.Brush)FindResource("Accent"),
                 TextDecorations = null
             };
             ktHl.Click += (_, _) =>
-                Process.Start(new ProcessStartInfo("https://killertools.net") { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo("https://github.com/aabhpsy/StealthPDF") { UseShellExecute = true });
             AboutTaglineBlock.Inlines.Add(ktHl);
             AboutTaglineBlock.Inlines.Add(new System.Windows.Documents.Run(taglineSuf) { Foreground = taglineDim });
 
@@ -94,7 +100,7 @@ namespace KillerPDF
             };
             verHl.Click += (_, _) =>
                 Process.Start(new ProcessStartInfo(
-                    $"https://github.com/SteveTheKiller/KillerPDF/releases/tag/v{version}")
+                    $"https://github.com/aabhpsy/StealthPDF/releases/tag/v{version}")
                 { UseShellExecute = true });
             AboutVersionBlock.Inlines.Add(verHl);
 
@@ -138,10 +144,10 @@ namespace KillerPDF
             if (res != MessageBoxResult.Yes) return;
 
             App.ClearAllData();
-            SetStatus("All KillerPDF data cleared");
+            SetStatus("All StealthPDF data cleared");
             KillerDialog.Show(this,
                 "Settings, language packs, and temp files were cleared.\n\n" +
-                "Restart KillerPDF to finish clearing any files still in use this session.",
+                "Restart StealthPDF to finish clearing any files still in use this session.",
                 "Clear all Data", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -155,9 +161,9 @@ namespace KillerPDF
             {
                 System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12;
                 using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(4) };
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("KillerPDF-UpdateCheck");
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("StealthPDF-UpdateCheck");
                 var json = await http.GetStringAsync(
-                    "https://api.github.com/repos/SteveTheKiller/KillerPDF/releases/latest")
+                    "https://api.github.com/repos/aabhpsy/StealthPDF/releases/latest")
                     .ConfigureAwait(false);
 
                 using var doc = System.Text.Json.JsonDocument.Parse(json);
@@ -196,13 +202,13 @@ namespace KillerPDF
             if (_isDirty)
             {
                 KillerDialog.Show(this, "Please save your changes before updating.",
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             var confirm = KillerDialog.Show(this,
-                $"Download and install KillerPDF {tag}?\n\nThe app will close and reopen automatically.",
-                "KillerPDF", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                $"Download and install StealthPDF {tag}?\n\nThe app will close and reopen automatically.",
+                "StealthPDF", MessageBoxButton.OKCancel, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.OK) return;
 
             AboutUpdateButton.IsEnabled = false;
@@ -213,19 +219,19 @@ namespace KillerPDF
             {
                 System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12;
                 using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(90) };
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("KillerPDF-UpdateCheck");
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("StealthPDF-UpdateCheck");
 
-                var exeUrl  = $"https://github.com/SteveTheKiller/KillerPDF/releases/download/{tag}/KillerPDF.exe";
-                var sumsUrl = $"https://raw.githubusercontent.com/SteveTheKiller/KillerPDF/{tag}/SHA256SUMS.txt";
+                var exeUrl  = $"https://github.com/aabhpsy/StealthPDF/releases/download/{tag}/StealthPDF.exe";
+                var sumsUrl = $"https://raw.githubusercontent.com/aabhpsy/StealthPDF/{tag}/SHA256SUMS.txt";
 
                 var exeBytes = await http.GetByteArrayAsync(exeUrl);
                 var sumsTxt  = await http.GetStringAsync(sumsUrl);
 
-                // Find the expected hash for KillerPDF.exe
+                // Find the expected hash for StealthPDF.exe
                 string? expected = null;
                 foreach (var line in sumsTxt.Replace("\r", "").Split('\n'))
                 {
-                    if (line.TrimStart().StartsWith("KillerPDF.exe", StringComparison.OrdinalIgnoreCase))
+                    if (line.TrimStart().StartsWith("StealthPDF.exe", StringComparison.OrdinalIgnoreCase))
                     {
                         var parts = line.Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length >= 2) expected = parts[^1];
@@ -240,7 +246,7 @@ namespace KillerPDF
                 if (!actual.Equals(expected, StringComparison.OrdinalIgnoreCase))
                     throw new Exception("checksum mismatch");
 
-                newExe = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"KillerPDF_update_{Guid.NewGuid():N}.exe");
+                newExe = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"StealthPDF_update_{Guid.NewGuid():N}.exe");
                 File.WriteAllBytes(newExe, exeBytes);
             }
             catch
@@ -250,7 +256,7 @@ namespace KillerPDF
                 AboutUpdateButton.IsEnabled = true;
                 AboutUpdateText.Text = $"Update available: {tag}";
                 try { Process.Start(new ProcessStartInfo(
-                    "https://github.com/SteveTheKiller/KillerPDF/releases/latest") { UseShellExecute = true }); }
+                    "https://github.com/aabhpsy/StealthPDF/releases/latest") { UseShellExecute = true }); }
                 catch { }
                 return;
             }
@@ -262,7 +268,7 @@ namespace KillerPDF
                 var reopen = _originalFile ?? _currentFile;
                 var pid    = Process.GetCurrentProcess().Id;
                 var relArg = string.IsNullOrEmpty(reopen) ? "" : $" \"{reopen}\"";
-                var bat    = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"killerpdf_update_{Guid.NewGuid():N}.bat");
+                var bat    = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"StealthPDF_update_{Guid.NewGuid():N}.bat");
 
                 File.WriteAllText(bat,
                     "@echo off\r\n" +

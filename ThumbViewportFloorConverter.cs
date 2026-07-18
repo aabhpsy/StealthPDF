@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // Keeps the document scrollbar reactive (thumb sized to the visible proportion) while
     // guaranteeing it never shrinks below a grabbable floor.
