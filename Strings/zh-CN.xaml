@@ -1,9 +1,9 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!-- ================================================================
-         KillerPDF  -  Simplified Chinese (zh-CN) strings
+         StealthPDF  -  Simplified Chinese (zh-CN) strings
          ================================================================ -->
 
     <!-- ── Toolbar tooltips ─────────────────────────────────────────── -->
@@ -44,7 +44,7 @@
     <sys:String x:Key="Str_TT_ExpandSidebar">展开侧边栏</sys:String>
     <sys:String x:Key="Str_TT_KeyboardShortcuts">键盘快速键 (Ctrl+?)</sys:String>
     <sys:String x:Key="Str_TT_Settings">设置</sys:String>
-    <sys:String x:Key="Str_TT_About">关于 KillerPDF</sys:String>
+    <sys:String x:Key="Str_TT_About">关于 StealthPDF</sys:String>
 
     <!-- ── About overlay ─────────────────────────────────────────────── -->
     <sys:String x:Key="Str_About_Version">版本</sys:String>
@@ -107,7 +107,7 @@
     <!-- ── Status bar ────────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ready">就绪</sys:String>
     <sys:String x:Key="Str_Portable">便携版</sys:String>
-    <sys:String x:Key="Str_InstallBtn">安装 KillerPDF...</sys:String>
+    <sys:String x:Key="Str_InstallBtn">安装 StealthPDF...</sys:String>
 
     <!-- ── Status messages (format strings - use string.Format) ─────── -->
     <sys:String x:Key="Str_Opened">已打开 {0} - {1} 页</sys:String>
@@ -136,16 +136,16 @@
     <sys:String x:Key="Str_RotateFailed">旋转失败：{0}</sys:String>
 
     <!-- ── Dialog strings ───────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Dlg_InstallTitle">安装 KillerPDF</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg">要将 KillerPDF 安装到您的用户设置档吗？
+    <sys:String x:Key="Str_Dlg_InstallTitle">安装 StealthPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">要将 StealthPDF 安装到您的用户设置档吗？
 
-这将把应用程序复制到 %LocalAppData%\KillerPDF 并创建开始功能表捷径。
+这将把应用程序复制到 %LocalAppData%\StealthPDF 并创建开始功能表捷径。
 您可以随时通过添加或移除程序来卸载。</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedClose">您有未保存的变更。要在不保存的情况下关闭此文件吗？</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">您有未保存的变更。要在不保存的情况下关闭 KillerPDF 吗？</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">您有未保存的变更。要在不保存的情况下关闭 StealthPDF 吗？</sys:String>
     <sys:String x:Key="Str_Dlg_FailedOpen">无法打开 PDF：
 {0}</sys:String>
-    <sys:String x:Key="Str_Dlg_AppTitle">KillerPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_AppTitle">StealthPDF</sys:String>
 
 
     <!-- ── Theme names ────────────────────────────────────────────────── -->
@@ -256,7 +256,7 @@
     <sys:String x:Key="Str_Pos_TopLeft">左上</sys:String>
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Print_Title">KillerPDF - 打印</sys:String>
+    <sys:String x:Key="Str_Print_Title">StealthPDF - 打印</sys:String>
     <sys:String x:Key="Str_Print_Printer">打印机</sys:String>
     <sys:String x:Key="Str_Print_Orientation">方向</sys:String>
     <sys:String x:Key="Str_Print_Portrait">直向</sys:String>
@@ -307,7 +307,7 @@
     <sys:String x:Key="Str_Drop_Separate">分别打开</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">未找到可打开的 PDF 或图片。</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">这将打开 {0} 个单独的标签页。是否继续？</sys:String>
-    <sys:String x:Key="Str_Drop_TooMany">此文件夹或压缩包包含 {0} 个文件。KillerPDF 只会打开前 {1} 个。是否继续？</sys:String>
+    <sys:String x:Key="Str_Drop_TooMany">此文件夹或压缩包包含 {0} 个文件。StealthPDF 只会打开前 {1} 个。是否继续？</sys:String>
     <sys:String x:Key="Str_Status_Merged">已合并 {0} 个文件 - 尚未保存</sys:String>
     <sys:String x:Key="Str_Drop_Merging">正在合并文件...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCancelled">已取消合并</sys:String>
@@ -440,4 +440,5 @@
     <sys:String x:Key="Str_KS_View">视图</sys:String>
     <sys:String x:Key="Str_KS_FullScreen">全屏</sys:String>
     <sys:String x:Key="Str_FullScreen_Hint">按 F11 或 Esc 退出全屏</sys:String>
+    <sys:String x:Key="Str_Stamp_CertLogoScale">Logo size (%)</sys:String>
 </ResourceDictionary>

@@ -1,4 +1,4 @@
-/* KillerPDF site - shared chrome behavior (theme, accent, language, easter egg).
+﻿/* StealthPDF site - shared chrome behavior (theme, accent, language, easter egg).
    Page-specific behavior (sidebar thumbnails, accordions) stays inline per page. */
 (function () {
   var root = document.documentElement;
@@ -47,7 +47,7 @@
     var theme = root.getAttribute('data-theme');
     var variant = (theme === 'light') ? 'light' : 'dark';
     var color = (NEUTRAL.indexOf(theme) >= 0) ? curAccent : 'green';
-    var src = 'brand/killerpdf-logo-' + variant + '-' + color + '.svg';
+    var src = 'brand/StealthPDF-logo-' + variant + '-' + color + '.svg';
     var imgs = document.querySelectorAll('img.wm-logo');
     for (var i = 0; i < imgs.length; i++) imgs[i].src = src;
   }

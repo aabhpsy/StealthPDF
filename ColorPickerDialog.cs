@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-namespace KillerPDF
+namespace StealthPDF
 {
     /// <summary>
     /// A small, themed RGB color picker: saturation/value square + hue strip, RGB and HTML-hex inputs,
@@ -41,7 +41,7 @@ namespace KillerPDF
         private static SolidColorBrush R(string key) => (SolidColorBrush)Application.Current.Resources[key];
         public ColorPickerDialog(Window? owner, Color initial)
         {
-            Title = "KillerPDF - Color";
+            Title = "StealthPDF - Color";
             Width = 300;
             SizeToContent = SizeToContent.Height;
             DialogChrome.Configure(this, owner);
@@ -296,7 +296,7 @@ namespace KillerPDF
             CaretBrush = R("TextPrimary"), SelectionBrush = R("AccentDim"),
             Padding = new Thickness(4, 0, 4, 0), Template = MakeTextBoxTemplate()
         };
-        // A crosshair/target glyph drawn in vectors, to match the KillerPDF look.
+        // A crosshair/target glyph drawn in vectors, to match the StealthPDF look.
         private UIElement CrosshairIcon()
         {
             var g = new Grid { Width = 14, Height = 14 };

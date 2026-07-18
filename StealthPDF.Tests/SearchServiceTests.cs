@@ -1,7 +1,7 @@
-using KillerPDF.Services;
+﻿using StealthPDF.Services;
 using Xunit;
 
-namespace KillerPDF.Tests
+namespace StealthPDF.Tests
 {
     public class SearchServiceTests
     {

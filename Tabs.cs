@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,9 +8,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using PdfSharpCore.Pdf;
 
-namespace KillerPDF
+namespace StealthPDF
 {
-    // Tabbed document support. KillerPDF keeps one window and one live "working set" of
+    // Tabbed document support. StealthPDF keeps one window and one live "working set" of
     // per-document fields (in MainWindow.xaml.cs). Each open PDF is a DocumentSession that
     // owns its own copy of those fields. Switching tabs captures the live fields into the
     // outgoing session and applies the incoming session's fields, then re-renders.
@@ -55,6 +55,9 @@ namespace KillerPDF
             public Stack<UndoEntry> UndoStack = new();
             public Dictionary<int, List<(double left, double bottom, double right, double top)>> AllSearchRects = [];
             public List<int> SearchResultPages = [];
+            public StampSpec? DocStampSpec;
+            public Dictionary<int, List<StampInstance>> Stamps = [];
+            public Dictionary<int, List<Rect>> StampHitRects = [];
 
             public string Title =>
                 string.IsNullOrEmpty(OriginalFile)
@@ -97,6 +100,9 @@ namespace KillerPDF
             s.UndoStack        = _undoStack;
             s.AllSearchRects   = _allSearchRects;
             s.SearchResultPages = _searchResultPages;
+            s.DocStampSpec     = _docStampSpec;
+            s.Stamps           = _stamps;
+            s.StampHitRects    = _stampHitRects;
             // Persist this document's fit/zoom/view/page so reopening it (even after a restart) restores it.
             SaveDocState(s.OriginalFile, s.Fit, s.ZoomLevel, s.View, s.PageIndex);
         }
@@ -176,6 +182,10 @@ namespace KillerPDF
             _undoStack        = s.UndoStack;
             _allSearchRects   = s.AllSearchRects;
             _searchResultPages = s.SearchResultPages;
+            _docStampSpec      = s.DocStampSpec;
+            _stamps            = s.Stamps;
+            _stampHitRects     = s.StampHitRects;
+            UpdateStampIndicator();
             TouchRenderLru(s);   // this tab is now active: keep its render cache, evict tabs beyond the window
         }
 
@@ -503,7 +513,7 @@ namespace KillerPDF
             {
                 var res = KillerDialog.Show(this,
                     Loc("Str_Dlg_UnsavedClose"),
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (res != MessageBoxResult.Yes) { RebuildTabStrip(); return; }
             }
 
@@ -549,7 +559,7 @@ namespace KillerPDF
             if (docTabs.Any(t => t.IsDirty))
             {
                 var res = KillerDialog.Show(this, Loc("Str_Dlg_UnsavedCloseAll"),
-                    "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (res != MessageBoxResult.Yes) { RebuildTabStrip(); return; }
             }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
@@ -8,7 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     /// <summary>
     /// Combined "Stamp" tool, modeled on the Transform window: a live page preview on the left and an
@@ -66,6 +66,40 @@ namespace KillerPDF
         private TextBlock _wmImageLabel = null!;
         private StackPanel _wmBody = null!, _wmTextPanel = null!, _wmImagePanel = null!;
 
+        // Accordion state: only one section body is expanded at a time so the sidebar never overflows.
+        // Each entry is (body panel, chevron). ExpandSection() collapses all but the requested one.
+        private readonly List<(StackPanel body, TextBlock chevron)> _sections = new();
+        private Dictionary<StackPanel, Button>? _sectionChevronBtns;
+        private TextBlock _certChevron = null!, _wmChevron = null!, _numChevron = null!;
+
+        // Certification controls
+        private CheckBox _certEnable = null!;
+        private CheckBox _certShowLogo = null!, _certShowName = null!, _certShowSig = null!, _certShowDate = null!, _certShowTime = null!;
+        private TextBox _certLabel = null!, _certName = null!, _certDate = null!, _certRange = null!;
+        private ComboBox _certSigPicker = null!, _certPos = null!, _certBorder = null!;
+        private Slider _certScale = null!, _certLogoScale = null!;
+        private Border _certSwatch = null!;
+        private Color _certColor;
+        private string? _certLogoPath, _certSigPath;
+        private TextBlock _certLogoLabel = null!;
+        private StackPanel _certBody = null!;
+        private readonly MainWindow _owner;
+        private readonly Services.SignatureStore _sigStore;
+        // (a) Live cert preview + resize: the rendered block, its logo bitmap, and its corner resize handle.
+        private BitmapSource? _certLogoSrc;
+        private Border? _certPreviewBlock;
+        // (b) Calendar popup for the date field.
+        private System.Windows.Controls.Primitives.Popup _certDatePopup = null!;
+        private System.Windows.Controls.Calendar _certCalendar = null!;
+        // (c) Page-selection combo (All / Current / Custom range).
+        private ComboBox _certPageMode = null!;
+        private const int CertPageAll = 0, CertPageCurrent = 1, CertPageCustom = 2;
+        // (d) Named presets: dropdown + Save/Rename/Delete.
+        private ComboBox _certPresetCombo = null!;
+        private readonly Services.CertStampStore _certStore = new();
+        // Cached current-page-as-range string, recomputed when the page stepper moves.
+        private string _certCurrentPageRange => $"{_pageIndex + 1}";
+
         private readonly Style? _darkSlider, _darkCombo;
 
         private static SolidColorBrush R(string key) => (SolidColorBrush)Application.Current.Resources[key];
@@ -92,9 +126,15 @@ namespace KillerPDF
             _spec = existing?.Clone() ?? new StampSpec { NumbersEnabled = true };
             Result = _spec;
 
-            Title = "KillerPDF - " + S("Str_Stamp_Suffix");
+            _owner = owner as MainWindow ?? throw new InvalidOperationException("StampWindow requires a MainWindow owner");
+            _sigStore = _owner._signatureStore;
+
+            // NOTE: DialogChrome.BuildTitleBar looks for the literal substring "StealthPDF" in the
+            // window title as a sentinel and swaps it for the styled Stealth+PDF wordmark. Do NOT
+            // change/remove "StealthPDF -" here or the title bar will render as plain text.
+            Title = "StealthPDF - " + S("Str_Stamp_Suffix");
             Width = 980;
-            Height = 720;
+            Height = 620;
             MinWidth = 680;
             MinHeight = 480;
             DialogChrome.Configure(this, owner, resizable: true);
@@ -109,13 +149,35 @@ namespace KillerPDF
             _numColor = _spec.NumColor;
             _wmColor  = _spec.WmColor;
             _wmImagePath = _spec.WmImagePath;
-
-            _previewTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(40) };
-            _previewTimer.Tick += (_, _2) => { _previewTimer.Stop(); RenderPreview(); };
-
+            _certColor = _spec.CertColor;
+            _certLogoPath = _spec.CertLogoPath;
+            _certSigPath = _spec.CertSigPath;
             BuildUi(owner);
             LoadWatermarkImage();
+            LoadCertLogoImage();
             UpdateEnabledStates();
+
+            _previewTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(40) };
+            // Guarded: any surprise in the preview (bad drag state, half-loaded image, unexpected
+            // measure/arrange condition) must NOT kill the tool. Fall through to a soft status message
+            // and keep the dialog usable so the user can still commit or reset.
+            _previewTimer.Tick += (_, _2) =>
+            {
+                _previewTimer.Stop();
+                try { RenderPreview(); }
+                catch (Exception ex)
+                {
+                    try { _overlay.Children.Clear(); } catch { }
+                    try { SetStatusMsg("Stamp preview error: " + ex.Message); } catch { }
+                }
+            };
+            // Expand the first enabled section (or the first section if none are enabled yet) so the
+            // sidebar starts compact â€” one body visible â€” instead of all three overflowing the window.
+            var firstOn = _certEnable.IsChecked == true ? _certBody
+                        : _wmEnable.IsChecked   == true ? _wmBody
+                        : _numEnable.IsChecked   == true ? _numBody
+                        : _certBody;
+            ExpandSection(firstOn);
             RenderPreview();
         }
 
@@ -133,6 +195,12 @@ namespace KillerPDF
             var side = new DockPanel();
 
             // Docked footer: Reset all link above a right-aligned Cancel / Apply row. Right inset keeps the
+            var stack = new StackPanel();
+            stack.Children.Add(BuildCertificationSection());
+            stack.Children.Add(Divider());
+            stack.Children.Add(BuildWatermarkSection());
+            stack.Children.Add(Divider());
+            stack.Children.Add(BuildNumbersSection());
             // buttons off the reserved scrollbar gutter.
             var bottom = new StackPanel { Margin = new Thickness(0, 10, 12, 0) };
             var resetLink = UiKit.LinkLabel(S("Str_Tf_ResetAll"), ResetAll);
@@ -150,10 +218,6 @@ namespace KillerPDF
             DockPanel.SetDock(bottom, Dock.Bottom);
             side.Children.Add(bottom);
 
-            var stack = new StackPanel();
-            stack.Children.Add(BuildWatermarkSection());
-            stack.Children.Add(Divider());
-            stack.Children.Add(BuildNumbersSection());
 
             // Scrollbar is ALWAYS reserved (Visible, not Auto) so the content never shifts left when it
             // appears. This is the rule for these sidebar windows.
@@ -207,7 +271,8 @@ namespace KillerPDF
             _previewArea.SizeChanged += (_, _2) => { SizePreviewImage(); Schedule(); };
             root.Children.Add(previewWrap);
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + S("Str_Stamp_Suffix"), () => { Applied = false; Close(); }, root);
+            // "StealthPDF - ..." is the DialogChrome wordmark sentinel (renders as the styled Killer+PDF logo).
+            Content = DialogChrome.Frame(this, Owner, "StealthPDF - " + S("Str_Stamp_Suffix"), () => { Applied = false; Close(); }, root);
 
             // Esc-to-close is wired by DialogChrome.Frame; Enter commits.
             KeyDown += (_, e) => { if (e.Key == Key.Enter) CommitAndClose(); };
@@ -232,8 +297,8 @@ namespace KillerPDF
             _numBody = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
             _numEnable = SectionToggle(S("Str_Stamp_SecNumbers"), _spec.NumbersEnabled);
             _numEnable.Checked   += (_, _2) => { UpdateEnabledStates(); Schedule(); };
+            wrap.Children.Add(SectionHeaderRow(_numEnable, _numBody, out _numChevron));
             _numEnable.Unchecked += (_, _2) => { UpdateEnabledStates(); Schedule(); };
-            wrap.Children.Add(SectionHeaderRow(_numEnable, _numBody));
 
             _numBody.Children.Add(UiKit.GroupLabel(S("Str_Stamp_StartAt")));
             _numStart = UiKit.Field();
@@ -280,15 +345,360 @@ namespace KillerPDF
             return wrap;
         }
 
-        // ---------- Watermark section ----------
+        private FrameworkElement BuildCertificationSection()
+        {
+            var wrap = new StackPanel();
+            _certBody = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
+            _certEnable = SectionToggle(S("Str_Stamp_SecCert"), _spec.CertEnabled);
+            _certEnable.Checked   += (_, _2) => { UpdateEnabledStates(); Schedule(); };
+            wrap.Children.Add(SectionHeaderRow(_certEnable, _certBody, out _certChevron));
+            _certEnable.Unchecked += (_, _2) => { UpdateEnabledStates(); Schedule(); };
+
+            // (d) Preset dropdown + Save / Rename / Delete, at the top of the section so it seeds everything below.
+            _certBody.Children.Add(BuildCertPresetRow());
+
+            // Logo (toggle + Choose button + filename).
+            _certEnable.Unchecked += (_, _2) => { UpdateEnabledStates(); Schedule(); };
+
+            // Logo (toggle + Choose button + filename).
+            _certShowLogo = UiKit.CheckBox(S("Str_Stamp_CertLogo"));
+            _certShowLogo.IsChecked = _spec.CertShowLogo;
+            _certShowLogo.Checked   += (_, _2) => Schedule();
+            _certShowLogo.Unchecked += (_, _2) => Schedule();
+            _certBody.Children.Add(_certShowLogo);
+            var logoRow = new DockPanel { Margin = new Thickness(24, 2, 0, 8) };
+            var logoBtn = UiKit.Make(S("Str_Stamp_ChooseImage"), false);
+            logoBtn.Click += (_, _2) => ChooseCertLogo();
+            DockPanel.SetDock(logoBtn, Dock.Right);
+            logoRow.Children.Add(logoBtn);
+            _certLogoLabel = new TextBlock { Text = System.IO.Path.GetFileName(_certLogoPath ?? ""), Foreground = R("TextSecondary"), FontSize = 11, TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
+            logoRow.Children.Add(_certLogoLabel);
+            _certBody.Children.Add(logoRow);
+
+            // Label + Name.
+            _certBody.Children.Add(UiKit.GroupLabel(S("Str_Stamp_CertLabel")));
+            _certLabel = UiKit.Field();
+            _certLabel.Text = _spec.CertLabel;
+            _certLabel.Margin = new Thickness(0, 0, 0, 8);
+            _certLabel.TextChanged += (_, _2) => Schedule();
+            _certBody.Children.Add(_certLabel);
+            _certShowName = UiKit.CheckBox(S("Str_Stamp_CertName"));
+            _certShowName.IsChecked = _spec.CertShowName;
+            _certShowName.Checked   += (_, _2) => Schedule();
+            _certShowName.Unchecked += (_, _2) => Schedule();
+            _certBody.Children.Add(_certShowName);
+            _certName = UiKit.Field();
+            _certName.Text = _spec.CertName;
+            _certName.Margin = new Thickness(24, 2, 0, 8);
+            _certName.TextChanged += (_, _2) => Schedule();
+            _certBody.Children.Add(_certName);
+            AddCertificationSectionTail();
+
+            wrap.Children.Add(_certBody);
+            return wrap;
+
+        }
+
+        // Second half of the certification section: signature picker, date/time, appearance, placement.
+        private void AddCertificationSectionTail()
+        {
+            _certShowSig = UiKit.CheckBox(S("Str_Stamp_CertSig"));
+            _certShowSig.IsChecked = _spec.CertShowSig;
+            _certShowSig.Checked   += (_, _2) => { PopulateCertSigPicker(); Schedule(); };
+            _certShowSig.Unchecked += (_, _2) => Schedule();
+            _certBody.Children.Add(_certShowSig);
+            var sigRow = new DockPanel { Margin = new Thickness(24, 2, 0, 4) };
+            _certSigPicker = new ComboBox { Height = 26, MaxDropDownHeight = 320, MinWidth = 120 };
+            if (_darkCombo != null) _certSigPicker.Style = _darkCombo; else { _certSigPicker.Background = R("BgCanvas"); _certSigPicker.Foreground = R("TextPrimary"); }
+            PopulateCertSigPicker();
+            _certSigPicker.SelectionChanged += (_, _2) => { OnCertSigPicked(); Schedule(); };
+            DockPanel.SetDock(_certSigPicker, Dock.Left);
+            sigRow.Children.Add(_certSigPicker);
+            var sigImgBtn = UiKit.Make(S("Str_Stamp_CertChooseImg"), false);
+            sigImgBtn.Margin = new Thickness(8, 0, 0, 0);
+            sigImgBtn.Click += (_, _2) => ChooseCertSigImage();
+            DockPanel.SetDock(sigImgBtn, Dock.Right);
+            sigRow.Children.Add(sigImgBtn);
+            _certBody.Children.Add(sigRow);
+
+            _certShowDate = UiKit.CheckBox(S("Str_Stamp_CertDate"));
+            _certShowDate.IsChecked = _spec.CertShowDate;
+            _certShowDate.Checked   += (_, _2) => Schedule();
+            _certShowDate.Unchecked += (_, _2) => Schedule();
+            _certBody.Children.Add(_certShowDate);
+            // (b) Date field + calendar popup. Clicking the field opens the calendar (so a back-dated stamp
+            // can be picked visually); blank means "today", resolved at apply time.
+            var dateRow = new DockPanel { Margin = new Thickness(24, 2, 0, 4) };
+            _certDate = UiKit.Field();
+            _certDate.Text = _spec.CertDate;
+            _certDate.MinWidth = 150;
+            _certDate.TextChanged += (_, _2) => Schedule();
+            var dateBtn = UiKit.Make(S("Str_Stamp_CertPickDate"), false);
+            dateBtn.Margin = new Thickness(6, 0, 0, 0);
+            dateBtn.Click += (_, _2) => OpenCertCalendar();
+            DockPanel.SetDock(dateBtn, Dock.Right);
+            dateRow.Children.Add(dateBtn);
+            dateRow.Children.Add(_certDate);
+            _certBody.Children.Add(dateRow);
+            _certCalendar = new System.Windows.Controls.Calendar { DisplayDate = TryParseCertDate(_certDate.Text, out var picked) ? picked : DateTime.Today };
+            _certCalendar.SelectedDatesChanged += (_, _2) =>
+            {
+                if (_certCalendar.SelectedDate is { } dt)
+                { _certDate.Text = dt.ToString("dd-MMM-yyyy"); _certDatePopup.IsOpen = false; Schedule(); }
+            };
+            var popStack = new StackPanel { Background = R("BgCanvas") };
+            var calHost = new Border { Child = _certCalendar, Background = R("BgCanvas"), BorderBrush = R("BorderDim"), BorderThickness = new Thickness(1), Padding = new Thickness(4) };
+            popStack.Children.Add(calHost);
+            var clearBtn = UiKit.Make(S("Str_Stamp_CertClearDate"), false);
+            clearBtn.Margin = new Thickness(4);
+            clearBtn.Click += (_, _2) => { _certDate.Text = ""; _certDatePopup.IsOpen = false; Schedule(); };
+            popStack.Children.Add(clearBtn);
+            _certDatePopup = new System.Windows.Controls.Primitives.Popup { Child = popStack, PlacementTarget = _certDate, Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom, StaysOpen = false, AllowsTransparency = true };
+            _certShowTime = UiKit.CheckBox(S("Str_Stamp_CertTime"));
+            _certShowTime.IsChecked = _spec.CertShowTime;
+            _certShowTime.Checked   += (_, _2) => Schedule();
+            _certShowTime.Unchecked += (_, _2) => Schedule();
+            _certBody.Children.Add(_certShowTime);
+            AddCertificationSectionTail2();
+        }
+
+        private void AddCertificationSectionTail2()
+        {
+            var scaleRow = SliderBoxRow(S("Str_Stamp_CertScale"), 0.6, 2.5, _spec.CertScale, out var scaleSl, out _);
+            _certScale = scaleSl;
+            _certBody.Children.Add(scaleRow);
+            var logoScaleRow = SliderBoxRow(S("Str_Stamp_CertLogoScale"), 25, 300, _spec.CertLogoScale * 100, out var logoScaleSl, out _);
+            _certLogoScale = logoScaleSl;
+            _certBody.Children.Add(logoScaleRow);
+            _certBody.Children.Add(BorderStyleRow());
+            _certBody.Children.Add(ColorRow(S("Str_Stamp_Color"), _certColor, out _certSwatch, c => { _certColor = c; Schedule(); }));
+            _certBody.Children.Add(UiKit.GroupLabel(S("Str_Stamp_Position")));
+            _certPos = MakePosCombo(_spec.CertPosH, _spec.CertPosV);
+            _certPos.SelectionChanged += (_, _2) => Schedule();
+            _certBody.Children.Add(_certPos);
+            // (c) Page selection: All pages / Current page / Custom range. The custom option reveals the
+            // free-text range box (reusing the existing ParseRange), so a selection can target any subset.
+            _certBody.Children.Add(UiKit.GroupLabel(S("Str_Stamp_Pages")));
+            _certPageMode = new ComboBox { Height = 26, Margin = new Thickness(0, 0, 0, 4) };
+            if (_darkCombo != null) _certPageMode.Style = _darkCombo; else { _certPageMode.Background = R("BgCanvas"); _certPageMode.Foreground = R("TextPrimary"); }
+            _certPageMode.Items.Add(S("Str_Stamp_CertPagesAll"));
+            _certPageMode.Items.Add(S("Str_Stamp_CertPagesCurrent"));
+            _certPageMode.Items.Add(S("Str_Stamp_CertPagesCustom"));
+            _certPageMode.SelectedIndex = ResolveCertPageMode(_spec.CertRange);
+            _certBody.Children.Add(_certPageMode);
+            _certRange = UiKit.Field();
+            _certRange.Text = _spec.CertRange;
+            _certRange.Margin = new Thickness(0, 0, 0, 8);
+            _certRange.TextChanged += (_, _2) => Schedule();
+            _certBody.Children.Add(_certRange);
+            UpdateCertRangeVisibility();
+            _certPageMode.SelectionChanged += (_, _2) => { UpdateCertRangeVisibility(); Schedule(); };
+        }
+
+        // Maps the stored range string to a page-mode index (All=blank, Current=single page, Custom=else).
+        private int ResolveCertPageMode(string range)
+        {
+            if (string.IsNullOrWhiteSpace(range)) return CertPageAll;
+            return range.Trim() == _certCurrentPageRange ? CertPageCurrent : CertPageCustom;
+        }
+
+        // Shows the free-text range box only when "Custom range" is selected; for All/Current the range is
+        // derived from the mode at commit time.
+        private void UpdateCertRangeVisibility()
+        {
+            if (_certRange is null || _certPageMode is null) return;
+            _certRange.Visibility = _certPageMode.SelectedIndex == CertPageCustom ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // (b) Calendar popup: opens under the date field; picking a date writes it back; "Clear" resets to today.
+        private void OpenCertCalendar()
+        {
+            if (_certDatePopup is null) return;
+            _certCalendar.SelectedDate = TryParseCertDate(_certDate.Text, out var d) ? d : (DateTime?)null;
+            _certCalendar.DisplayDate = TryParseCertDate(_certDate.Text, out var d2) ? d2 : DateTime.Today;
+            _certDatePopup.IsOpen = true;
+        }
+
+        private static bool TryParseCertDate(string text, out DateTime result)
+        {
+            result = DateTime.Today;
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            string[] fmts = { "dd-MMM-yyyy", "d-MMM-yyyy", "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy" };
+            foreach (var f in fmts)
+                if (DateTime.TryParseExact(text.Trim(), f, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out result))
+                    return true;
+            if (DateTime.TryParse(text.Trim(), out result)) return true;
+            result = DateTime.Today; return false;
+        }
+        // (d) Preset row: dropdown of saved presets + Save/Rename/Delete. Selecting a preset loads it.
+        private FrameworkElement BuildCertPresetRow()
+        {
+            var row = new StackPanel { Margin = new Thickness(0, 0, 0, 8) };
+            row.Children.Add(UiKit.GroupLabel(S("Str_Stamp_CertPreset")));
+            _certPresetCombo = new ComboBox { Height = 26, Margin = new Thickness(0, 0, 0, 4) };
+            if (_darkCombo != null) _certPresetCombo.Style = _darkCombo; else { _certPresetCombo.Background = R("BgCanvas"); _certPresetCombo.Foreground = R("TextPrimary"); }
+            PopulateCertPresetCombo();
+            _certPresetCombo.SelectionChanged += (_, _2) =>
+            {
+                if (_certPresetCombo.SelectedIndex > 0) LoadCertPresetByName(_certPresetCombo.SelectedItem as string);
+            };
+            row.Children.Add(_certPresetCombo);
+            var btns = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 0) };
+            var save = UiKit.Make(S("Str_Stamp_CertSavePreset"), false); save.Margin = new Thickness(0, 0, 6, 0);
+            save.Click += (_, _2) => SaveCertPreset();
+            var rename = UiKit.Make(S("Str_Stamp_CertRenamePreset"), false); rename.Margin = new Thickness(0, 0, 6, 0);
+            rename.Click += (_, _2) => RenameCertPreset();
+            var del = UiKit.Make(S("Str_Stamp_CertDeletePreset"), false);
+            del.Click += (_, _2) => DeleteCertPreset();
+            btns.Children.Add(save); btns.Children.Add(rename); btns.Children.Add(del);
+            row.Children.Add(btns);
+            return row;
+        }
+
+        private void PopulateCertPresetCombo()
+        {
+            if (_certPresetCombo is null) return;
+            _certPresetCombo.Items.Clear();
+            _certPresetCombo.Items.Add(S("Str_Stamp_CertSigNone"));
+            foreach (var p in _certStore.LoadPresets())
+                _certPresetCombo.Items.Add(p.PresetName ?? "(unnamed)");
+            _certPresetCombo.SelectedIndex = 0;
+        }
+        private void SaveCertPreset()
+        {
+            var dlg = new InputDialog(S("Str_Stamp_CertPresetNameTitle"), S("Str_Stamp_CertPresetNamePrompt"),
+                _certPresetCombo?.SelectedIndex > 0 ? (_certPresetCombo.SelectedItem as string ?? "") : "", this);
+            dlg.ShowDialog();
+            var name = dlg.Answer;
+            if (string.IsNullOrEmpty(name)) { SetStatusMsg(S("Str_Stamp_CertPresetNameRequired")); return; }
+            var d = HarvestCertDefaults(); d.PresetName = name;
+            _certStore.SavePreset(d); PopulateCertPresetCombo(); SelectCertPresetCombo(name!);
+            SetStatusMsg(string.Format(S("Str_Stamp_CertPresetSaved"), name));
+        }
+
+        private void RenameCertPreset()
+        {
+            if (_certPresetCombo is null || _certPresetCombo.SelectedIndex <= 0) return;
+            var old = _certPresetCombo.SelectedItem as string ?? "";
+            var dlg = new InputDialog(S("Str_Stamp_CertPresetRenameTitle"), S("Str_Stamp_CertPresetNamePrompt"), old, this);
+            dlg.ShowDialog();
+            var newName = dlg.Answer;
+            if (string.IsNullOrEmpty(newName)) { SetStatusMsg(S("Str_Stamp_CertPresetNameRequired")); return; }
+            _certStore.RenamePreset(old, newName!); PopulateCertPresetCombo(); SelectCertPresetCombo(newName!);
+        }
+
+        private void DeleteCertPreset()
+        {
+            if (_certPresetCombo is null || _certPresetCombo.SelectedIndex <= 0) return;
+            var name = _certPresetCombo.SelectedItem as string ?? "";
+            if (System.Windows.MessageBox.Show(this, string.Format(S("Str_Stamp_CertPresetConfirmDelete"), name),
+                S("Str_Stamp_CertPresetNameTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+            _certStore.DeletePreset(name); PopulateCertPresetCombo();
+            SetStatusMsg(string.Format(S("Str_Stamp_CertPresetDeleted"), name));
+        }
+
+        private void SelectCertPresetCombo(string name)
+        {
+            if (_certPresetCombo is null) return;
+            for (int i = 1; i < _certPresetCombo.Items.Count; i++)
+                if ((_certPresetCombo.Items[i] as string)?.Equals(name, StringComparison.OrdinalIgnoreCase) == true)
+                { _certPresetCombo.SelectedIndex = i; return; }
+            _certPresetCombo.SelectedIndex = 0;
+        }
+        private Services.CertStampStore.CertDefaults HarvestCertDefaults()
+        {
+            _spec.CertShowLogo = _certShowLogo.IsChecked == true; _spec.CertLogoPath = _certLogoPath;
+            _spec.CertLogoScale = _certLogoScale.Value / 100.0;
+            _spec.CertColor = _certColor; _spec.CertScale = _certScale.Value;
+            _spec.CertBorder = Math.Max(0, Math.Min(2, _certBorder.SelectedIndex));
+            _spec.CertLabel = string.IsNullOrEmpty(_certLabel.Text) ? "Document seen by:" : _certLabel.Text;
+            _spec.CertShowName = _certShowName.IsChecked == true; _spec.CertName = _certName.Text;
+            _spec.CertShowSig = _certShowSig.IsChecked == true; _spec.CertSigPath = _certSigPath;
+            _spec.CertShowDate = _certShowDate.IsChecked == true; _spec.CertShowTime = _certShowTime.IsChecked == true;
+            _spec.CertDate = _certDate.Text?.Trim() ?? ""; _spec.CertRange = ResolveCertRangeFromMode();
+            (_spec.CertPosH, _spec.CertPosV) = (Positions[Math.Max(0, _certPos.SelectedIndex)].h, Positions[Math.Max(0, _certPos.SelectedIndex)].v);
+            return Services.CertStampStore.ToDefaults(_spec);
+        }
+
+        private string ResolveCertRangeFromMode()
+        {
+            if (_certPageMode is null) return _certRange.Text.Trim();
+            return _certPageMode.SelectedIndex switch { CertPageAll => "", CertPageCurrent => _certCurrentPageRange, _ => _certRange.Text.Trim() };
+        }
+
+        private void LoadCertPresetByName(string? name)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            foreach (var p in _certStore.LoadPresets())
+                if ((p.PresetName ?? "").Equals(name, StringComparison.OrdinalIgnoreCase))
+                { ApplyCertDefaultsToControls(Services.CertStampStore.CertDefaultsToSpec(p)); Schedule(); return; }
+        }
+
+        private void SetStatusMsg(string msg) => _owner.SetStatus(msg);
+
+        private FrameworkElement BorderStyleRow()
+        {
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8), VerticalAlignment = VerticalAlignment.Center };
+            row.Children.Add(new TextBlock { Text = S("Str_Stamp_CertBorder"), Foreground = R("TextSecondary"), FontFamily = UiKit.UiFont, FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
+            _certBorder = new ComboBox { Height = 26, Width = 150 };
+            if (_darkCombo != null) _certBorder.Style = _darkCombo; else { _certBorder.Background = R("BgCanvas"); _certBorder.Foreground = R("TextPrimary"); }
+            _certBorder.Items.Add(S("Str_Stamp_CertBorderRect"));
+            _certBorder.Items.Add(S("Str_Stamp_CertBorderRound"));
+            _certBorder.Items.Add(S("Str_Stamp_CertBorderNone"));
+            _certBorder.SelectedIndex = Math.Max(0, Math.Min(2, _spec.CertBorder));
+            _certBorder.SelectionChanged += (_, _2) => Schedule();
+            row.Children.Add(_certBorder);
+            return row;
+        }
+
+
+        private void ChooseCertLogo()
+        {
+            var ofd = new OpenFileDialog { Filter = "Images|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All files|*.*" };
+            if (ofd.ShowDialog() == true) { _certLogoPath = ofd.FileName; _certLogoLabel.Text = System.IO.Path.GetFileName(_certLogoPath); LoadCertLogoImage(); Schedule(); }
+        }
+
+        private void ChooseCertSigImage()
+        {
+            var ofd = new OpenFileDialog { Filter = "Images|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All files|*.*" };
+            if (ofd.ShowDialog() == true)
+            {
+                _certSigPath = ofd.FileName; _spec.CertSignatureId = null;
+                if (_certSigPicker.Items.Count > 0) _certSigPicker.SelectedIndex = 0;
+                Schedule();
+            }
+        }
+
+        private void PopulateCertSigPicker()
+        {
+            if (_certSigPicker is null) return;
+            _certSigPicker.Items.Clear();
+            _certSigPicker.Items.Add(S("Str_Stamp_CertSigNone"));
+            int sel = 0;
+            foreach (var sig in _sigStore.Signatures)
+            {
+                _certSigPicker.Items.Add(string.IsNullOrEmpty(sig.Name) ? $"Signature {_certSigPicker.Items.Count}" : sig.Name);
+                if (sig.Id == _spec.CertSignatureId) sel = _certSigPicker.Items.Count - 1;
+            }
+            _certSigPicker.SelectedIndex = sel;
+        }
+
+        private void OnCertSigPicked()
+        {
+            if (_certSigPicker is null || _certSigPicker.SelectedIndex <= 0) { _spec.CertSignatureId = null; return; }
+            var sigs = _sigStore.Signatures;
+            int idx = _certSigPicker.SelectedIndex - 1;
+            if (idx >= 0 && idx < sigs.Count) { _spec.CertSignatureId = sigs[idx].Id; _certSigPath = null; }
+        }
+
         private FrameworkElement BuildWatermarkSection()
         {
             var wrap = new StackPanel();
             _wmBody = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
             _wmEnable = SectionToggle(S("Str_Stamp_SecWatermark"), _spec.WmEnabled);
             _wmEnable.Checked   += (_, _2) => { UpdateEnabledStates(); Schedule(); };
+            wrap.Children.Add(SectionHeaderRow(_wmEnable, _wmBody, out _wmChevron));
             _wmEnable.Unchecked += (_, _2) => { UpdateEnabledStates(); Schedule(); };
-            wrap.Children.Add(SectionHeaderRow(_wmEnable, _wmBody));
 
             // Type: text vs image (clean UiKit radios line up with the section content directly).
             var typeRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 6) };
@@ -367,30 +777,94 @@ namespace KillerPDF
             return cb;
         }
 
-        // Collapsible section header. The enable checkbox itself expands (checked) or collapses (unchecked)
-        // the body; the chevron is just a non-clickable indicator of that state.
-        private FrameworkElement SectionHeaderRow(CheckBox enable, StackPanel body)
+        // Collapsible section header with accordion behaviour. The whole header row (chevron + enable
+        // checkbox) is clickable to expand this section and collapse the others. The enable checkbox only
+        // controls whether the stamp is applied/previewed â€” NOT the section's expansion â€” so you can
+        // configure any tool before turning it on, and all three never overflow the sidebar at once.
+        private FrameworkElement SectionHeaderRow(CheckBox enable, StackPanel body, out TextBlock chevron)
         {
-            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
-            var chevron = new TextBlock
+            // A full-width bar: chevron button on the left, section title checkbox on the right.
+            // The chevron is a real Button so it's guaranteed clickable in all WPF event-routing scenarios.
+            var bar = new Border
             {
-                FontSize = 12, Foreground = R("TextSecondary"),
-                Width = 14, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 6, 0)
+                CornerRadius = new CornerRadius(4),
+                Margin = new Thickness(0, 8, 0, 0),
+                Padding = new Thickness(8, 6, 8, 6),
+                Background = Brushes.Transparent,
+                Cursor = Cursors.Hand
             };
-            void Sync()
+
+            var row = new StackPanel { Orientation = Orientation.Horizontal };
+
+            // The chevron is a chrome-free Button: no border, no background, just the arrow glyph.
+            // Clicking it expands this section and collapses the others.
+            var chevronBtn = new Button
             {
-                bool on = enable.IsChecked == true;
-                body.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
-                chevron.Text = on ? "▾" : "▸";   // down when expanded, right when collapsed
-            }
-            enable.Checked   += (_, _2) => Sync();
-            enable.Unchecked += (_, _2) => Sync();
-            Sync();
-            row.Children.Add(chevron);
+                Content = "â–¸",
+                FontSize = 15,
+                FontWeight = FontWeights.Bold,
+                Foreground = Brushes.White,
+                Width = 22,
+                Height = 22,
+                Padding = new Thickness(0),
+                Margin = new Thickness(0, 0, 8, 0),
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                Cursor = Cursors.Hand,
+                VerticalAlignment = VerticalAlignment.Center,
+                Focusable = false
+            };
+            chevronBtn.Click += (_, _2) => ExpandSection(body);
+
+            // The chevron text is tracked for expand/collapse state (â–¾ vs â–¸).
+            // Since the Button's Content is a string, we update it via the ExpandSection loop.
+            chevron = new TextBlock(); // placeholder; ExpandSection writes â–¾/â–¸ to chevron.Text â€” but since
+            // the real chevron is a Button, store a reference so ExpandSection can update the Button's Content.
+            // We'll use a closure: ExpandSection will update chevronBtn.Content instead.
+            // But ExpandSection writes to chevron.Text. So instead, we keep the TextBlock as a hidden ref and
+            // sync it in ExpandSection. Better: just make ExpandSection work with the Button directly.
+
+            // Clicking the checkbox itself also expands the section.
+            enable.Click += (_, _2) => ExpandSection(body);
+
+            _sections.Add((body, chevron));
+            body.Visibility = Visibility.Collapsed;
+
+            // Hover: subtle accent-tinted background so the row reads as an interactive header.
+            bar.MouseEnter += (_, _2) =>
+            {
+                bar.Background = new SolidColorBrush(Color.FromArgb(40, 100, 160, 255));
+            };
+            bar.MouseLeave += (_, _2) =>
+            {
+                bar.Background = Brushes.Transparent;
+            };
+
+            row.Children.Add(chevronBtn);
             row.Children.Add(enable);
-            return row;
+            bar.Child = row;
+
+            // Override ExpandSection chevron update for this section: we update the Button's Content,
+            // not a TextBlock. Store the button reference keyed by body.
+            _sectionChevronBtns ??= new Dictionary<StackPanel, Button>();
+            _sectionChevronBtns[body] = chevronBtn;
+
+            return bar;
         }
 
+        // Accordion: expand exactly one section, collapsing the rest. Called on header click.
+        private void ExpandSection(StackPanel target)
+        {
+            foreach (var (body, chev) in _sections)
+            {
+                bool isTarget = ReferenceEquals(body, target);
+                body.Visibility = isTarget ? Visibility.Visible : Visibility.Collapsed;
+                chev.Text = isTarget ? "â–¾" : "â–¸";
+                // Also update the Button chevron if one exists for this section.
+                if (_sectionChevronBtns != null && _sectionChevronBtns.TryGetValue(body, out var btn))
+                    btn.Content = isTarget ? "â–¾" : "â–¸";
+            }
+        }
         // A slider paired with a small numeric input box (two-way synced), e.g. font size.
         private FrameworkElement SliderBoxRow(string label, double min, double max, double value, out Slider slider, out TextBox box)
         {
@@ -468,9 +942,11 @@ namespace KillerPDF
                 onPick(dlg.SelectedColor);
             };
 
-            swatch = sw;
             row.Children.Add(btn);
+            swatch = sw;
             return row;
+
+
         }
 
         private FrameworkElement Divider() => new Border { Height = 1, Background = R("BorderDim"), Opacity = 0.6, Margin = new Thickness(0, 12, 0, 12) };
@@ -480,7 +956,9 @@ namespace KillerPDF
             if (_wmTextPanel != null) _wmTextPanel.Visibility = _wmImageRadio.IsChecked == true ? Visibility.Collapsed : Visibility.Visible;
             if (_wmImagePanel != null) _wmImagePanel.Visibility = _wmImageRadio.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             // Nothing to apply unless at least one section is enabled.
-            if (_applyBtn != null) _applyBtn.IsEnabled = _numEnable.IsChecked == true || _wmEnable.IsChecked == true;
+            if (_applyBtn != null) _applyBtn.IsEnabled = _numEnable.IsChecked == true || _wmEnable.IsChecked == true || _certEnable.IsChecked == true;
+            // NOTE: section bodies are left editable regardless of their enable checkbox â€” you can configure
+            // a stamp before turning it on. Visibility is governed by the accordion (ExpandSection), not here.
         }
 
         // Mirroring only makes sense for a left/right position, so grey it out on a centered one.
@@ -518,13 +996,30 @@ namespace KillerPDF
             }
             catch { _wmImageSrc = null; }
         }
+        private void LoadCertLogoImage()
+        {
+            _certLogoSrc = null;
+            if (string.IsNullOrEmpty(_certLogoPath) || !System.IO.File.Exists(_certLogoPath)) return;
+            try
+            {
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.UriSource = new Uri(_certLogoPath!);
+                bmp.EndInit();
+                bmp.Freeze();
+                _certLogoSrc = bmp;
+            }
+            catch { _certLogoSrc = null; }
+        }
+
 
         // ---------- preview ----------
         // ---------- Preview page stepper ----------
         private FrameworkElement BuildPageNav()
         {
-            _prevArrow = MakeNavArrow("", () => GoToPage(_pageIndex - 1));   // ChevronLeft
-            _nextArrow = MakeNavArrow("", () => GoToPage(_pageIndex + 1));   // ChevronRight
+            _prevArrow = MakeNavArrow("î«", () => GoToPage(_pageIndex - 1));   // ChevronLeft
+            _nextArrow = MakeNavArrow("î¬", () => GoToPage(_pageIndex + 1));   // ChevronRight
             _pageNavLabel = new TextBlock
             {
                 FontFamily = UiKit.UiFont, FontSize = 12,
@@ -542,6 +1037,11 @@ namespace KillerPDF
             row.Children.Add(_nextArrow);
             UpdatePageNav();
             return row;
+
+
+
+
+
         }
 
         // Same chrome as the print preview stepper (UiKit.Make), so the two windows share one button style.
@@ -708,6 +1208,125 @@ namespace KillerPDF
                     _overlay.Children.Add(tb);
                 }
             }
+            // (a/e) Certification block: live preview with drag-to-move (custom position) + corner resize handle.
+            if (_certEnable.IsChecked == true)
+                RenderCertPreview(pxPerPt, pw, ph, mx, my);
+        }
+
+        // (a) Renders the certification block onto the preview overlay. When the position is "custom" the block
+        // is draggable anywhere on the page (e); a bottom-right thumb resizes the whole block live (a).
+        private void RenderCertPreview(double pxPerPt, double pw, double ph, double mx, double my)
+        {
+            SyncCertControlsToSpec();
+            bool anyText = _spec.CertShowName || _spec.CertShowDate || _spec.CertShowSig || !string.IsNullOrWhiteSpace(_spec.CertLabel);
+            if (!anyText && !_spec.CertShowLogo) return;
+            if (!ParseRange(ResolveCertRangeFromMode(), _pageCount).Contains(_pageIndex)) return;
+
+            double fontPx = Math.Max(5, 10 * _spec.CertScale * pxPerPt);
+            var brush = new SolidColorBrush(_spec.CertColor);
+            var fill = _spec.CertWhiteFill ? new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)) : null;
+            double pad = 7 * _spec.CertScale * pxPerPt;
+            var inner = new StackPanel { Margin = new Thickness(pad) };
+            if (_spec.CertShowLogo && _certLogoSrc != null)
+            {
+                double logoPx = 26 * _spec.CertScale * _spec.CertLogoScale * pxPerPt;
+                double logoW = _certLogoSrc.PixelWidth > 0 && _certLogoSrc.PixelHeight > 0 ? logoPx * _certLogoSrc.PixelWidth / _certLogoSrc.PixelHeight : logoPx;
+                inner.Children.Add(new Image { Source = _certLogoSrc, Width = logoW, Height = logoPx, Stretch = Stretch.Fill, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 0, 0, 4) });
+            }
+            if (!string.IsNullOrWhiteSpace(_spec.CertLabel))
+                inner.Children.Add(new TextBlock { Text = _spec.CertLabel, FontFamily = UiKit.UiFont, FontSize = fontPx, FontWeight = FontWeights.SemiBold, Foreground = brush, Margin = new Thickness(0, 0, 0, 2) });
+            if (_spec.CertShowName && !string.IsNullOrWhiteSpace(_spec.CertName))
+                inner.Children.Add(new TextBlock { Text = _spec.CertName, FontFamily = UiKit.UiFont, FontSize = fontPx, Foreground = brush });
+            if (_spec.CertShowDate && !string.IsNullOrWhiteSpace(_spec.CertDate))
+                inner.Children.Add(new TextBlock { Text = _spec.CertDate, FontFamily = UiKit.UiFont, FontSize = fontPx * 0.9, Foreground = brush });
+            if (_spec.CertShowSig)
+            {
+                var sigSrc = ResolveCertSigBitmap();
+                if (sigSrc != null)
+                {
+                    double sigH = 34 * _spec.CertScale * pxPerPt;
+                    double sigW = sigH * sigSrc.PixelWidth / Math.Max(1, sigSrc.PixelHeight);
+                    inner.Children.Add(new Image { Source = sigSrc, Width = sigW, Height = sigH, Stretch = Stretch.Fill, Margin = new Thickness(0, 4, 0, 0), HorizontalAlignment = HorizontalAlignment.Left });
+                }
+            }
+            var border = _certPreviewBlock = new Border
+            {
+                Background = fill,
+                BorderBrush = _spec.CertBorder == 2 ? null : brush,
+                BorderThickness = _spec.CertBorder == 2 ? new Thickness(0) : new Thickness(1.2),
+                CornerRadius = _spec.CertBorder == 1 ? new CornerRadius(6) : new CornerRadius(0),
+                Child = inner,
+            };
+            border.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            double w = border.DesiredSize.Width, h = border.DesiredSize.Height;
+            if (w <= 0 || h <= 0) return;
+            int hpos = _spec.CertPosH, vpos = _spec.CertPosV;
+            double x, y;
+            if (hpos < 0)
+            {
+                x = _spec.CertCustomX * pw - w / 2; y = _spec.CertCustomY * ph - h / 2;
+                MakeDraggable(border, w, h, pw, ph, (fx, fy) => { _spec.CertCustomX = fx; _spec.CertCustomY = fy; });
+            }
+            else
+            {
+                x = hpos == 0 ? mx : hpos == 2 ? pw - w - mx : (pw - w) / 2;
+                y = vpos == 0 ? my : vpos == 1 ? (ph - h) / 2 : ph - h - my;
+            }
+            Canvas.SetLeft(border, x); Canvas.SetTop(border, y);
+            _overlay.Children.Add(border);
+            if (hpos < 0) AddCertResizeThumb(brush, x, y, w, h, ph);
+        }
+
+        private void AddCertResizeThumb(SolidColorBrush brush, double x, double y, double w, double h, double ph)
+        {
+            const double thumb = 10;
+            var thumbEl = new Border { Width = thumb, Height = thumb, Background = brush, Opacity = 0.7, Cursor = Cursors.SizeNWSE, BorderBrush = new SolidColorBrush(Colors.White), BorderThickness = new Thickness(1) };
+            _overlay.IsHitTestVisible = true; thumbEl.IsHitTestVisible = true;
+            Canvas.SetLeft(thumbEl, x + w - thumb / 2); Canvas.SetTop(thumbEl, y + h - thumb / 2);
+            bool resizing = false; Point? startP = null; double startScale = 1;
+            thumbEl.MouseLeftButtonDown += (_, e) => { resizing = true; startP = e.GetPosition(_overlay); startScale = _certScale.Value; thumbEl.CaptureMouse(); e.Handled = true; };
+            thumbEl.MouseLeftButtonUp += (_, _2) => { resizing = false; thumbEl.ReleaseMouseCapture(); };
+            thumbEl.MouseMove += (_, e) =>
+            {
+                if (!resizing || startP is null) return;
+                var p = e.GetPosition(_overlay);
+                double drag = ((p.X - startP.Value.X) + (p.Y - startP.Value.Y)) / 2;
+                double ns = Math.Max(0.6, Math.Min(2.5, startScale + drag / Math.Max(1, ph) * 1.5));
+                _certScale.Value = ns; _spec.CertScale = ns; Schedule();
+            };
+            _overlay.Children.Add(thumbEl);
+        }
+
+        // Syncs the cert section's live control values into _spec (the preview reads from _spec).
+        private void SyncCertControlsToSpec()
+        {
+            _spec.CertShowLogo = _certShowLogo.IsChecked == true; _spec.CertLogoPath = _certLogoPath;
+            _spec.CertLogoScale = _certLogoScale.Value / 100.0;
+            _spec.CertLabel = _certLabel.Text; _spec.CertShowName = _certShowName.IsChecked == true; _spec.CertName = _certName.Text;
+            _spec.CertShowSig = _certShowSig.IsChecked == true; _spec.CertSigPath = _certSigPath;
+            _spec.CertShowDate = _certShowDate.IsChecked == true; _spec.CertShowTime = _certShowTime.IsChecked == true;
+            _spec.CertDate = _certDate.Text?.Trim() ?? ""; _spec.CertScale = _certScale.Value;
+            _spec.CertBorder = Math.Max(0, Math.Min(2, _certBorder.SelectedIndex));
+            _spec.CertColor = _certColor;
+            (_spec.CertPosH, _spec.CertPosV) = (Positions[Math.Max(0, _certPos.SelectedIndex)].h, Positions[Math.Max(0, _certPos.SelectedIndex)].v);
+        }
+
+        // Resolves the signature bitmap for the cert preview: a picked image file, or a saved signature's PNG.
+        private BitmapSource? ResolveCertSigBitmap()
+        {
+            if (!string.IsNullOrEmpty(_certSigPath) && System.IO.File.Exists(_certSigPath))
+            {
+                try { var b = new BitmapImage(); b.BeginInit(); b.CacheOption = BitmapCacheOption.OnLoad; b.UriSource = new Uri(_certSigPath); b.EndInit(); b.Freeze(); return b; } catch { }
+            }
+            if (!string.IsNullOrEmpty(_spec.CertSignatureId))
+            {
+                foreach (var sig in _sigStore.Signatures)
+                    if (sig.Id == _spec.CertSignatureId && !string.IsNullOrEmpty(sig.ImageData))
+                    {
+                        try { var b = new BitmapImage(); b.BeginInit(); b.CacheOption = BitmapCacheOption.OnLoad; b.StreamSource = new System.IO.MemoryStream(Convert.FromBase64String(sig.ImageData!)); b.EndInit(); b.Freeze(); return b; } catch { }
+                    }
+            }
+            return null;
         }
 
         private void PlaceRotated(FrameworkElement el, double w, double h, int posIndex, double pw, double ph, double mx, double my, double angle)
@@ -782,7 +1401,50 @@ namespace KillerPDF
             _wmAngle.Value = d.WmAngle;
             _wmOpacity.Value = d.WmOpacity * 100;
             _wmScale.Value = d.WmScale * 100;
+            // Certification: reset to defaults but keep the section's enabled state the user left it in.
+            _certEnable.IsChecked = d.CertEnabled;
+            _certShowLogo.IsChecked = d.CertShowLogo;
+            _certLogoLabel.Text = ""; _certLogoPath = null;
+            _certLabel.Text = d.CertLabel;
+            _certShowName.IsChecked = d.CertShowName;
+            _certName.Text = d.CertName;
+            _certShowSig.IsChecked = d.CertShowSig;
+            _certSigPath = null; _spec.CertSignatureId = null; PopulateCertSigPicker();
+            _certShowDate.IsChecked = d.CertShowDate;
+            _certDate.Text = d.CertDate;
+            _certShowTime.IsChecked = d.CertShowTime;
+            _certScale.Value = d.CertScale;
+            _certLogoScale.Value = d.CertLogoScale * 100.0;
+            _certBorder.SelectedIndex = d.CertBorder;
+            _certColor = d.CertColor; _certSwatch.Background = new SolidColorBrush(d.CertColor);
+            _certRange.Text = d.CertRange;
+            if (_certPageMode != null) _certPageMode.SelectedIndex = ResolveCertPageMode(d.CertRange);
+            UpdateCertRangeVisibility();
             Schedule();
+        }
+
+        // Loads a cert preset (as a StampSpec) into the certification controls only, leaving other sections intact.
+        private void ApplyCertDefaultsToControls(StampSpec d)
+        {
+            _certShowLogo.IsChecked = d.CertShowLogo;
+            _certLogoPath = d.CertLogoPath; _certLogoLabel.Text = System.IO.Path.GetFileName(d.CertLogoPath ?? "");
+            LoadCertLogoImage();
+            _certLabel.Text = d.CertLabel;
+            _certShowName.IsChecked = d.CertShowName; _certName.Text = d.CertName;
+            _certShowSig.IsChecked = d.CertShowSig;
+            _certSigPath = d.CertSigPath; _spec.CertSignatureId = d.CertSignatureId; PopulateCertSigPicker();
+            _certShowDate.IsChecked = d.CertShowDate; _certDate.Text = d.CertDate;
+            _certShowTime.IsChecked = d.CertShowTime;
+            _certScale.Value = d.CertScale;
+            _certLogoScale.Value = d.CertLogoScale * 100.0;
+            _certBorder.SelectedIndex = Math.Max(0, Math.Min(2, d.CertBorder));
+            _certColor = d.CertColor; _certSwatch.Background = new SolidColorBrush(d.CertColor);
+            _certRange.Text = d.CertRange;
+            if (_certPageMode != null) _certPageMode.SelectedIndex = ResolveCertPageMode(d.CertRange);
+            UpdateCertRangeVisibility();
+            // Position: find the combo entry matching the spec's h/v.
+            for (int i = 0; i < Positions.Length; i++)
+                if (Positions[i].h == d.CertPosH && Positions[i].v == d.CertPosV) { _certPos.SelectedIndex = i; break; }
         }
 
         private void CommitAndClose()
@@ -808,6 +1470,25 @@ namespace KillerPDF
             _spec.WmImagePath = _wmImagePath;
             _spec.WmRange = _wmRange.Text.Trim();
             (_spec.WmPosH, _spec.WmPosV) = (Positions[Math.Max(0, _wmPos.SelectedIndex)].h, Positions[Math.Max(0, _wmPos.SelectedIndex)].v);
+
+            // Certification
+            _spec.CertEnabled = _certEnable.IsChecked == true;
+            _spec.CertShowLogo = _certShowLogo.IsChecked == true;
+            _spec.CertLogoPath = _certLogoPath;
+            _spec.CertLogoScale = _certLogoScale.Value / 100.0;
+            _spec.CertColor = _certColor;
+            _spec.CertScale = _certScale.Value;
+            _spec.CertBorder = Math.Max(0, Math.Min(2, _certBorder.SelectedIndex));
+            _spec.CertLabel = string.IsNullOrEmpty(_certLabel.Text) ? "Document seen by:" : _certLabel.Text;
+            _spec.CertShowName = _certShowName.IsChecked == true;
+            _spec.CertName = _certName.Text;
+            _spec.CertShowSig = _certShowSig.IsChecked == true;
+            _spec.CertSigPath = _certSigPath;   // CertSignatureId already set live by OnCertSigPicked
+            _spec.CertShowDate = _certShowDate.IsChecked == true;
+            _spec.CertShowTime = _certShowTime.IsChecked == true;
+            _spec.CertDate = _certDate.Text?.Trim() ?? "";
+            _spec.CertRange = ResolveCertRangeFromMode();
+            (_spec.CertPosH, _spec.CertPosV) = (Positions[Math.Max(0, _certPos.SelectedIndex)].h, Positions[Math.Max(0, _certPos.SelectedIndex)].v);
 
             Result = _spec;
             Applied = true;

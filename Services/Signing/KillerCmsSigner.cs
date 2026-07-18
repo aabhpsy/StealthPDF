@@ -1,11 +1,11 @@
-using System.IO;
+﻿using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using PdfSharp.Pdf.Signatures;
 
-namespace KillerPDF.Services.Signing
+namespace StealthPDF.Services.Signing
 {
     /// <summary>
     /// A PDF signer that assembles the PKCS#7 / CMS itself with .NET's <see cref="SignedCms"/> rather

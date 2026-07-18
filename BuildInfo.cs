@@ -1,4 +1,4 @@
-namespace KillerPDF
+﻿namespace StealthPDF
 {
     /// <summary>
     /// Build-time constants written or verified by release.ps1.

@@ -1,0 +1,28 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- ================================================================
+         StealthPDF  —  English (en-UK) strings
+         A thin British-English override on top of the en-US base.
+         Only keys that differ in spelling are listed here; everything
+         else falls back to en-US, so this stays small and maintainable.
+         ================================================================ -->
+
+    <!-- Tools menu: recognise (British) vs recognize (US) -->
+    <sys:String x:Key="Str_Menu_Tools_Ocr">OCR (recognise text)</sys:String>
+
+    <!-- Colour (British) vs Color (US) -->
+    <sys:String x:Key="Str_Stamp_Color">Colour</sys:String>
+    <sys:String x:Key="Str_Print_Color">Colour</sys:String>
+    <sys:String x:Key="Str_Pos_Center">Centre</sys:String>
+    <sys:String x:Key="Str_Pos_BottomCenter">Bottom Centre</sys:String>
+    <sys:String x:Key="Str_Pos_TopCenter">Top Centre</sys:String>
+    <sys:String x:Key="Str_Bar_Color">Colour:</sys:String>
+    <sys:String x:Key="Str_Bar_MoreColors">More colours...</sys:String>
+    <sys:String x:Key="Str_Scan_Color">Colour</sys:String>
+
+    <!-- "Grayscale" stays as-is (UK printing/publishing uses both); no override needed -->
+
+    <sys:String x:Key="Str_Stamp_CertLogoScale">Logo size (%)</sys:String>
+</ResourceDictionary>

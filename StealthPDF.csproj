@@ -1,0 +1,183 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <!-- Output assembly is StealthPDF.exe (the .csproj keeps its original filename for git
+         history, but the produced binary, install paths, and shortcuts all use StealthPDF). -->
+    <AssemblyName>StealthPDF</AssemblyName>
+    <RootNamespace>StealthPDF</RootNamespace>
+    <ApplicationIcon>Resources\kp-icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>2.0.0</Version>
+    <Product>StealthPDF</Product>
+    <Description>StealthPDF - a clean, professional PDF editor for Windows. View, annotate, edit, OCR, scan, merge, compress, fill, sign, and print PDFs locally. https://stealthpdf.com</Description>
+    <Company>StealthPDF (https://stealthpdf.com)</Company>
+    <Copyright>Copyright (c) StealthPDF contributors; fork of KillerPDF by Steve the Killer (GPL-3.0)</Copyright>
+    <PackageProjectUrl>https://stealthpdf.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/aabhpsy/StealthPDF</RepositoryUrl>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="5.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Fody" Version="6.8.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="PdfSharpCore" Version="1.3.67" />
+    <!-- Digital signatures only (Services/Signing). Separate namespace (PdfSharp.*) so it does not
+         clash with PdfSharpCore, which still drives the rest of the app. -->
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
+    <PackageReference Include="PdfPig" Version="0.1.14" />
+    <PackageReference Include="Docnet.Core" Version="2.6.0" />
+    <!-- We embed the x64 natives as resources and self-extract them at runtime (OcrNativeBootstrap), so the
+         package's loose x86/x64 native copies in the output are dead weight. ExcludeAssets stops that copy
+         while keeping the managed assembly (compile/runtime) and the GeneratePathProperty path for the embed. -->
+    <PackageReference Include="Tesseract" Version="5.2.0" GeneratePathProperty="true" ExcludeAssets="build;buildTransitive;native;contentFiles" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="PolySharp" Version="1.15.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- The x86 TWAIN helper is a SEPARATE project (different PlatformTarget) built alongside this
+       x64 app. We don't reference its assembly; instead we copy its built EXE + NTwain.dll next to
+       StealthPDF.exe so ScannerService can launch it out-of-process to see 32-bit TWAIN scanners. -->
+  <ItemGroup>
+    <ProjectReference Include="TwainHelper\StealthPDF.TwainHelper.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+      <UndefineProperties>PlatformTarget</UndefineProperties>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- After the helper builds, drop its x86 output (EXE + NTwain.dll) into this project's output
+       folder under a TwainHelper\ subfolder. At runtime ScannerService extracts/launches from there. -->
+  <!-- After the helper builds, drop its x86 output (EXE + NTwain.dll) into this project's output
+       folder under a TwainHelper\ subfolder. At runtime ScannerService launches it from there.
+       We explicitly MSBuild the helper first (a ProjectReference with ReferenceOutputAssembly=false
+       does not reliably produce a build dependency, so we guarantee order ourselves). -->
+  <Target Name="CopyTwainHelperOutput" AfterTargets="Build">
+    <PropertyGroup>
+      <_HelperProj>$(MSBuildThisFileDirectory)TwainHelper\StealthPDF.TwainHelper.csproj</_HelperProj>
+      <_HelperOut>$(MSBuildThisFileDirectory)TwainHelper\bin\$(Configuration)\net48</_HelperOut>
+      <_Dest>$(TargetDir)TwainHelper</_Dest>
+    </PropertyGroup>
+    <MSBuild Projects="$(_HelperProj)" Targets="Build" Properties="Configuration=$(Configuration)" />
+    <ItemGroup>
+      <_HelperFiles Include="$(_HelperOut)\StealthPDF.TwainHelper.exe" />
+      <_HelperFiles Include="$(_HelperOut)\StealthPDF.TwainHelper.pdb" Condition="Exists('$(_HelperOut)\StealthPDF.TwainHelper.pdb')" />
+      <_HelperFiles Include="$(_HelperOut)\NTwain.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_HelperFiles)" DestinationFolder="$(_Dest)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Deploy the bundled PyMuPDF compression helper (portable Python + PyMuPDF + script) into the
+       app output under PdfHelper\. The bundle lives in the repo under PdfHelper\bundle\ and is NOT
+       in source control (it's ~55 MB of binaries) — see PdfHelper\fetch-pdfhelper.ps1 to acquire it.
+       At runtime PdfCompressHelper launches PdfHelper\python\python.exe compress_pdf.py from here. -->
+  <Target Name="CopyPdfHelperOutput" AfterTargets="Build"
+          Condition="Exists('$(MSBuildThisFileDirectory)PdfHelper\bundle')">
+    <ItemGroup>
+      <_PdfHelperFiles Include="$(MSBuildThisFileDirectory)PdfHelper\bundle\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PdfHelperFiles)"
+          DestinationFolder="$(TargetDir)PdfHelper\%(RecursiveDir)"
+          SkipUnchangedFiles="true" />
+    <!-- The compress script lives one level up from the bundle (it's small source, tracked in git). -->
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)PdfHelper\compress_pdf.py"
+          DestinationFolder="$(TargetDir)PdfHelper" SkipUnchangedFiles="true" />
+  </Target>
+
+
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Printing" />
+    <Reference Include="ReachFramework" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="StealthPDF.Tests\**" />
+    <!-- The x86 TWAIN helper is a separate project (different PlatformTarget). Don't let this
+         project's SDK compile glob pull its sources in (it would fail on NTwain refs + dup attrs). -->
+    <Compile Remove="TwainHelper\**" />
+    <None Remove="TwainHelper\**" />
+    <EmbeddedResource Remove="TwainHelper\**" />
+    <Page Remove="TwainHelper\**" />
+    <!-- The PyMuPDF compression helper is a bundled portable Python runtime, not C# source.
+         Keep the SDK globs away from its .py / test files. -->
+    <Compile Remove="PdfHelper\**" />
+    <None Remove="PdfHelper\**" />
+    <EmbeddedResource Remove="PdfHelper\**" />
+    <Page Remove="PdfHelper\**" />
+  </ItemGroup>
+
+  <!-- /brand holds heavy source art only (stored locally, see .gitignore). Keep it out of the SDK default
+       globs so it is not part of the project. This targets StealthPDF\brand only, not pdf-landing\brand. -->
+  <ItemGroup>
+    <None Remove="brand\**" />
+    <Content Remove="brand\**" />
+    <Resource Remove="brand\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\kp-icon.ico" />
+    <Resource Include="Resources\kp-icon.png" />
+    <Resource Include="Fonts\Typewriter-wm.ttf" />
+    <EmbeddedResource Include="Resources\pdf-file.ico" />
+  </ItemGroup>
+
+  <!-- OCR: embed only the native Tesseract libs (x64) so the app still ships as a single exe. Language data
+       is NOT bundled - it is downloaded on demand on first OCR (see EnsureOcrModelsReadyAsync), which keeps
+       the exe small. OcrNativeBootstrap extracts the natives to a per-version cache under %LOCALAPPDATA% on
+       first use, the same self-extract pattern Costura uses for the managed assemblies. PkgTesseract comes
+       from GeneratePathProperty. -->
+  <ItemGroup>
+    <EmbeddedResource Include="$(PkgTesseract)\x64\tesseract50.dll" Condition="'$(PkgTesseract)' != ''">
+      <LogicalName>StealthPDF.OcrNative.tesseract50.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(PkgTesseract)\x64\leptonica-1.82.0.dll" Condition="'$(PkgTesseract)' != ''">
+      <LogicalName>StealthPDF.OcrNative.leptonica-1.82.0.dll</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- OCR bundled language data: English (eng) and Nepali (nep), both High Quality (tessdata_best).
+       These self-extract to the tessdata folder on first OCR (OcrNativeBootstrap.EnsureLanguageData),
+       so OCR works fully offline for English + Nepali with no download. Other languages still
+       download on demand. The LogicalName prefix MUST match TessDataPrefix in OcrNativeBootstrap.cs. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\eng.traineddata">
+      <LogicalName>StealthPDF.OcrTessData.eng.traineddata</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\nep.traineddata">
+      <LogicalName>StealthPDF.OcrTessData.nep.traineddata</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- GPL3 source bundle: produces <AppName>-<Version>-src.zip in the publish folder every time you Publish. -->
+  <Target Name="BundleSource" AfterTargets="Publish">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)build\bundle-source.ps1&quot; -ProjectDir &quot;$(ProjectDir.TrimEnd('\'))&quot; -Version &quot;$(Version)&quot; -AppName &quot;$(AssemblyName)&quot; -PublishDir &quot;$(PublishDir.TrimEnd('\'))&quot;" IgnoreExitCode="true" />
+  </Target>
+
+</Project>

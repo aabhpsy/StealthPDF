@@ -1,117 +1,121 @@
-# KillerPDF
+# StealthPDF
 
-Free and open-source PDF editor for Windows. View, annotate, OCR, merge, split, edit text, draw, sign, fill forms, print, flatten, and open password-protected PDFs without an Adobe subscription or a phone-home. Install or run portable. Single Windows EXE, ~14.6 MB (ZIPs to 10.2MB), no runtime install required.
+StealthPDF is a free and open-source PDF editor for Windows. It can view, annotate, edit, OCR, merge, split, compress, stamp, fill, sign, unlock, print, and flatten PDFs locally - no account, no telemetry, and no cloud upload.
 
-Landing page is hosted at [KillerPDF.net](https://killerpdf.net)
+**Website & downloads: [stealthpdf.com](https://stealthpdf.com)** · Source code: [github.com/aabhpsy/StealthPDF](https://github.com/aabhpsy/StealthPDF)
 
-## Why this exists
-
-I hate Adobe. Acrobat is bloated, wants a subscription to do basic things, and phones home constantly. Most of the "free" alternatives are either ad-riddled, cloud-based, or rebrands of the same PDF engine sold under three different names.
-
-KillerPDF is what I wanted: local-only, portable, no account, no telemetry. The PDF equivalent of Notepad.
+> **StealthPDF** is a community fork and rebrand of the original **KillerPDF** project by **Steve the Killer**, released under GPLv3. This fork is maintained by **[@aabhpsy](https://github.com/aabhpsy)**.
 
 ## Features
 
 ### Viewing & navigation
+- High-quality PDF rendering via PDFium.
+- Single Page, Continuous, Two-Page, and Grid view modes.
+- Tabbed documents with per-tab page, zoom, view, search, annotation, form, and stamp state.
+- Full-text search with highlighted results and drag-select text copy.
+- Outline/bookmark navigation and clickable links.
+- Fit to Width, Fit Page, zoom presets, mouse-wheel zoom, and full-screen mode.
+- Recent files on the start screen and Open menu.
 
-- High-quality rendering via PDFium
-- Four view modes - Single Page, Continuous scroll, Two-Page, and Grid - that persist across sessions
-- Tabbed documents: open several PDFs at once, each restoring its page, zoom, and view mode
-- Full-text search across the whole document with highlighting; drag-select to copy text
-- Outline/bookmark navigation and clickable links, including internal cross-references and TOC back-links
-- Zoom presets with scroll-wheel sync; Fit to Width and Fit Page re-apply on resize
-- Full-screen mode (F11) hides all chrome so only the document fills the screen
-- Recent files on the start screen and Open menu, each with its real Windows file-type icon
+### Menus, toolbar, and shortcuts
+- Traditional **File / Edit / View / Tools / Help** menu bar plus an icon toolbar.
+- Tooltips on toolbar buttons and a keyboard shortcut overlay.
+- Localized UI in multiple languages, including English, English (UK), Nepali, Spanish, Chinese, German, French, Turkish, and Bengali.
 
-### Annotate & edit
+### Annotate, edit, and mark up
+- Add text/typewriter annotations with font, size, color, bold/italic/underline/strike, and optional background fill.
+- Edit existing text-based PDF content with a cover-and-text replacement workflow that matches the detected text color and size where possible.
+- Draw freehand ink, straight lines, and highlights with configurable color, width, and opacity.
+- Insert images as resizable annotations and burn them into the saved PDF.
+- Move, resize, multi-select, restyle, and delete annotations in place.
 
-- Inline text editing with font matching against the original document
-- Resizable, word-wrapping text boxes with an optional whiteout background fill
-- Freehand draw, a straight-line tool, and highlight - each with its own color, opacity, and width
-- Full RGB color picker: saturation/value square, hue strip, hex input, screen eyedropper, and editable palette
-- Select tool to move, resize, multi-select, and restyle any annotation in place
-- Insert images as resizable annotations, burned into the PDF on save
-- Page-number and watermark stamping across a page range, applied as one undo
+### Stamping
+- Add page numbers and watermarks across a page range.
+- Add certification stamps with configurable label, name, date/time, signature image, logo, border style, placement, and scale.
+- Certification stamp fill is transparent by default; enable the fill box when a document needs a distinct backing panel.
+- Stamp state is per document tab so applying a stamp to one PDF does not auto-apply it to another.
+
+### Fill, sign, and forms
+- Fill PDF form text fields, checkboxes, and radio buttons.
+- Use Fill & Sign tools for free-placement text, checkmarks, and signatures.
+- Store reusable signatures or import a one-off signature image.
+- Save or flatten filled/signed PDFs.
 
 ### OCR (built in, no cloud)
+- OCR a whole page or a dragged region straight to the clipboard.
+- Make Searchable PDF by adding an invisible text layer over scanned pages.
+- Extract all recognized text to `.txt` or `.md`.
+- English and Nepali OCR models are bundled for fully offline use; other supported languages can be downloaded on demand and cached.
 
-- OCR a whole page or a dragged region straight to the clipboard
-- Make Searchable PDF: lay an invisible text layer over a scan
-- Extract All Text to a `.txt` or `.md` file
-- Tesseract bundled in the single EXE; extra languages download on demand
+### Scan and import
+- Scan pages from WIA or TWAIN scanners into a new PDF.
+- Choose DPI, color mode, flatbed/feeder options, and duplex where supported.
+- Import images or combine selected files into a PDF.
 
-### Organize pages
+### Organize and convert
+- Merge PDFs, split/extract pages, rotate pages, crop pages, and reorder pages.
+- Compress PDFs using the bundled compression helper.
+- Repair damaged PDFs where possible.
+- Open password-protected PDFs and save an unlocked/unencrypted copy when permitted.
+- Print with preview and save flattened output.
 
-- Merge multiple PDFs and split out selected pages, with drag-and-drop reordering
-- Right-click sidebar: insert blank page, rotate, move, extract, or delete - on multi-page selections
-- Crop with corner handles; remove crop from one page or all
-- Transform: rotate by 90 degrees or a fine angle, scale, flip, and straighten a crooked scan by drawing a level line - live preview, with annotations following the transform
-- Drop a folder or `.zip` onto the window to merge the PDFs and images inside into one, or open each separately
+### App and privacy
+- Single portable Windows EXE, or self-install per user to `%LOCALAPPDATA%\Programs\StealthPDF\`.
+- No administrator rights required for normal use or per-user install.
+- Registers as a PDF handler with branded icons when installed.
+- Local-only processing: no account, no telemetry, no phone-home.
 
-### Forms & signing
+## Portable or installed?
 
-- Fill PDF forms (text, checkbox, radio) as live controls and save back to the PDF
-- Digital signatures with a cloud certificate (Certum SimplySign), including click-to-sign form fields
-- Draw and reuse signatures and initials, or import a PNG/JPG/BMP to place anywhere
+You can use the same EXE either way:
 
-### Output
+| | Portable | Installed |
+|---|---|---|
+| Admin rights | None | None |
+| Location | Wherever you place it | `%LOCALAPPDATA%\Programs\StealthPDF\` |
+| Start Menu shortcut | No | Yes |
+| Desktop shortcut | No | Optional |
+| Open PDFs by default | No | Yes, if selected |
+| Add/Remove Programs entry | No | Yes |
 
-- Print with annotations flattened, a real in-app preview, and scale / position / margins / pages-per-sheet / color / two-sided options, rendered at 300 DPI
-- Save Flattened PDF: rasterize every page into a fully uneditable document
-- Document Info: view and edit title, author, subject, keywords, and creator metadata
-
-### Customize
-
-- Six themes - Dark, Light, Black, Blood, Greed, Cyanotic - with per-theme accent colors, switchable live
-- Toolbar style (icon size, text placement) and a resizable sidebar that docks left or right
-- Localized UI in 8 languages (English, Spanish, Traditional and Simplified Chinese, German, French, Turkish, Bengali); contribute via `Strings/TRANSLATING.md`
-- Full keyboard shortcut overlay (Ctrl+?) with a link to the online guide
-
-### App & files
-
-- Single portable Windows EXE, ~6 MB zipped, no runtime install
-- Self-installs per-user to %LOCALAPPDATA% (no UAC), registers as a PDF handler with a branded file icon, and uninstalls cleanly via Add/Remove Programs
-- Opens password-protected PDFs (prompts instead of erroring) and repairs damaged ones
-- Local-only: no account, no telemetry, no phone-home
-
-## Screenshots
-
-<p align="center">
-  <img src="pdf-landing/screenshots/02.png" width="32%" alt="KillerPDF" />
-  <img src="pdf-landing/screenshots/04.png" width="32%" alt="KillerPDF" />
-  <img src="pdf-landing/screenshots/06.png" width="32%" alt="KillerPDF" />
-  <img src="pdf-landing/screenshots/07.png" width="32%" alt="KillerPDF" />
-  <img src="pdf-landing/screenshots/12.png" width="32%" alt="KillerPDF" />
-  <img src="pdf-landing/screenshots/13.png" width="32%" alt="KillerPDF" />
-</p>
+If you are just trying StealthPDF, run the portable EXE. If you use it regularly, click **Install** for shortcuts, file association, and clean uninstall support.
 
 ## Requirements
 
-- Windows 10 or 11 (x64)
-- No runtime install. Everything needed is inside the EXE (targets .NET Framework 4.8, which ships with every supported Windows release).
+- Windows 10 or Windows 11, x64.
+- No separate runtime install for normal use. The app targets .NET Framework 4.8, which is present on supported Windows releases.
 
 ## Download
 
-WinGet:
-
-```powershell
-winget install killerpdf
-```
-
-- Prebuilt binary: <https://github.com/SteveTheKiller/KillerPDF/releases/latest/download/KillerPDF.exe>
-- Source (GPL3 corresponding source for this release): <https://github.com/SteveTheKiller/KillerPDF/releases/download/v1.6.0/KillerPDF-1.6.0-src.zip>
+- **Get the app from the website: [stealthpdf.com](https://stealthpdf.com)** — the downloadable build (portable EXE / per-user installer) is hosted there.
+- GitHub hosts the **source code** (and release archives for packagers): <https://github.com/aabhpsy/StealthPDF>
+- Also on package managers: `choco install stealthpdf` · `winget install aabhpsy.StealthPDF`
 
 ## Build from source
 
 ```powershell
-git clone https://github.com/SteveTheKiller/KillerPDF.git
-cd KillerPDF
-dotnet publish -c Release
+git clone https://github.com/aabhpsy/StealthPDF.git
+cd StealthPDF
+dotnet build KillerPDF/StealthPDF.csproj -c Release
 ```
 
-Output lands in `bin/Release/net48/publish/`. The publish step produces a single Costura-bundled `KillerPDF.exe` plus a versioned `KillerPDF-<version>-src.zip` for GPL3 source distribution.
+For a publish bundle with the single bundled EXE and GPL source zip:
 
-Requires the .NET 8 SDK or later to build (even though the output targets .NET Framework 4.8).
+```powershell
+dotnet publish KillerPDF/StealthPDF.csproj -c Release
+```
+
+Output lands in `KillerPDF/bin/Release/net48/publish/`. Building requires the .NET SDK even though the app output targets .NET Framework 4.8.
+
+## Project naming note
+
+Some internal folders still use the historical `KillerPDF` path for git-history continuity. The shipped application, executable, registry entries, file associations, and user-facing branding are **StealthPDF**.
+
+## Credits
+
+- Original project: **KillerPDF** by [Steve the Killer](https://thekiller.net).
+- Fork/rebrand maintainer: [@aabhpsy](https://github.com/aabhpsy).
+- Engines and libraries include PDFium, Tesseract OCR, PdfSharpCore, PdfPig, Docnet.Core, NTwain, and PyMuPDF.
 
 ## Changelog
 
@@ -119,4 +123,4 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-GPLv3. See [LICENSE](LICENSE). If you fork, modify, or redistribute KillerPDF, your version must also be released under GPLv3 with source available. No exceptions for commercial rebrands.
+GPLv3. See [LICENSE](LICENSE). StealthPDF is a GPLv3 fork/rebrand; forks, modifications, and redistributions must also provide GPLv3 source.

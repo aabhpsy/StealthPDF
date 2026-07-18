@@ -1,4 +1,4 @@
-name: WinGet Release
+﻿name: WinGet Release
 
 on:
   release:
@@ -26,8 +26,8 @@ jobs:
         run: |
           $releaseTag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.event.inputs.tag }}" } else { "${{ github.event.release.tag_name }}" }
           $version = $releaseTag.TrimStart('v')
-          $url = "https://github.com/SteveTheKiller/KillerPDF/releases/download/$releaseTag/KillerPDF.exe"
-          komac update SteveTheKiller.KillerPDF --version $version --urls $url --submit
+          $url = "https://github.com/aabhpsy/StealthPDF/releases/download/$releaseTag/StealthPDF.exe"
+          komac update aabhpsy.StealthPDF --version $version --urls $url --submit
         env:
           GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}
         shell: pwsh

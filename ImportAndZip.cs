@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -11,7 +11,7 @@ using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // Import images as a PDF, and compress the current PDF to a .zip. Kept in its own partial-class
     // file rather than the MainWindow monolith. User-facing strings go through Loc() (keys live in
@@ -49,7 +49,7 @@ namespace KillerPDF
             {
                 AbortTabLoad(target, prev, createdNew);
                 KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -147,7 +147,7 @@ namespace KillerPDF
             {
                 CleanupDirs(tempDirs);
                 KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -165,7 +165,7 @@ namespace KillerPDF
             {
                 var proceed = KillerDialog.Show(this,
                     string.Format(Loc("Str_Drop_TooMany"), found.Count, MaxDropFiles),
-                    "KillerPDF", MessageBoxButton.OKCancel);
+                    "StealthPDF", MessageBoxButton.OKCancel);
                 if (proceed != MessageBoxResult.OK) { CleanupDirs(tempDirs); return; }
                 found = found.GetRange(0, MaxDropFiles);
             }
@@ -204,7 +204,7 @@ namespace KillerPDF
             if (found.Count > 30)
             {
                 var ok = KillerDialog.Show(this, string.Format(Loc("Str_Drop_ManyTabs"), found.Count),
-                    "KillerPDF", MessageBoxButton.OKCancel);
+                    "StealthPDF", MessageBoxButton.OKCancel);
                 if (ok != MessageBoxResult.OK) return;
             }
             foreach (var f in found)
@@ -247,7 +247,7 @@ namespace KillerPDF
                 HideBusyOverlay(busy);
                 AbortTabLoad(target, prev, createdNew);
                 KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -275,7 +275,7 @@ namespace KillerPDF
             {
                 AbortTabLoad(target, prev, createdNew);
                 KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -325,7 +325,7 @@ namespace KillerPDF
 
         private static string? ExtractZipToTemp(string zipPath)
         {
-            string dir = Path.Combine(Path.GetTempPath(), "KillerPDF-zip-" + Guid.NewGuid().ToString("N")[..8]);
+            string dir = Path.Combine(Path.GetTempPath(), "StealthPDF-zip-" + Guid.NewGuid().ToString("N")[..8]);
             try { Directory.CreateDirectory(dir); ZipFile.ExtractToDirectory(zipPath, dir); return dir; }
             catch { try { Directory.Delete(dir, true); } catch { } return null; }
         }
@@ -345,7 +345,7 @@ namespace KillerPDF
             if (_isDirty || string.IsNullOrEmpty(_originalFile) || !File.Exists(_originalFile))
             {
                 var ask = KillerDialog.Show(this, Loc("Str_Dlg_SaveBeforeZip"),
-                    "KillerPDF", MessageBoxButton.OKCancel);
+                    "StealthPDF", MessageBoxButton.OKCancel);
                 if (ask != MessageBoxResult.OK) return;
                 SaveInPlace();
                 if (_isDirty || string.IsNullOrEmpty(_originalFile) || !File.Exists(_originalFile))
@@ -377,7 +377,7 @@ namespace KillerPDF
             catch (Exception ex)
             {
                 KillerDialog.Show(this, Loc("Str_Err_ZipFailed") + "\n" + ex.Message,
-                    "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

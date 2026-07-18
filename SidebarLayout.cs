@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // Configurable sidebar placement (left or right). The layout uses three columns in
     // MainContentGrid: one sized sidebar column, a 6px splitter, and a star document column.

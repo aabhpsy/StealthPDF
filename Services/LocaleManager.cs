@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Windows;
 
-namespace KillerPDF.Services
+namespace StealthPDF.Services
 {
-    internal enum Locale { EnUS, Es, ZhTW, ZhCN, Bn, TrTR, De, Fr }
+    internal enum Locale { EnUS, EnUK, NpNP, Es, ZhTW, ZhCN, Bn, TrTR, De, Fr }
 
     internal static class LocaleManager
     {
@@ -44,6 +44,8 @@ namespace KillerPDF.Services
 
             Uri? overrideUri = locale switch
             {
+                Locale.EnUK => new Uri("pack://application:,,,/Strings/en-UK.xaml"),
+                Locale.NpNP => new Uri("pack://application:,,,/Strings/np-NP.xaml"),
                 Locale.Es   => new Uri("pack://application:,,,/Strings/es.xaml"),
                 Locale.Fr   => new Uri("pack://application:,,,/Strings/fr-FR.xaml"),
                 Locale.ZhTW => new Uri("pack://application:,,,/Strings/zh-TW.xaml"),
@@ -51,7 +53,7 @@ namespace KillerPDF.Services
                 Locale.Bn   => new Uri("pack://application:,,,/Strings/bn.xaml"),
                 Locale.TrTR => new Uri("pack://application:,,,/Strings/tr-TR.xaml"),
                 Locale.De   => new Uri("pack://application:,,,/Strings/de-DE.xaml"),
-                _           => null,   // English: base only
+                _           => null,   // English (en-US): base only
             };
 
             if (overrideUri is not null)

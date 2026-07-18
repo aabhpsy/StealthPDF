@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -197,6 +197,7 @@ namespace KillerPDF
 
         private void ToolSelect_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Select);
         private void ToolText_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Text);
+        private void ToolEdit_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Edit);
         private void ToolHighlight_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Highlight);
         private void ToolLine_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Line);
         private void ToolDraw_Click(object sender, RoutedEventArgs e) => SetTool(EditTool.Draw);

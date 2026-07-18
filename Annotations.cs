@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // Annotation rendering - draws the per-page annotation overlays (text, cover, highlight, ink,
     // signature, image). First slice of the annotations extraction out of MainWindow.xaml.cs. Pure
@@ -1064,6 +1064,12 @@ namespace KillerPDF
                             e.Handled = true;
                         }
                     }
+                    break;
+
+                case EditTool.Edit:
+                    ClearSelection();
+                    EditTextAtPosition(pos, pageIdx);
+                    e.Handled = true;
                     break;
 
                 case EditTool.Text:

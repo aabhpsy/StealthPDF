@@ -1,0 +1,22 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- ================================================================
+         StealthPDF  —  Nepali (np-NP) strings
+         This is a SCAFFOLD locale: it ships empty so the language shows
+         up in the Settings picker (selected by Nepali users), while every
+         untranslated key transparently falls back to the en-US base.
+         Translate the keys below into Nepali (नेपाली) and add more over time
+         — a partial translation is fully supported and improves with each PR.
+         See Strings/TRANSLATING.md for the contribution guide.
+         ================================================================ -->
+
+    <!-- Example: once translated, uncomment and fill in the Nepali text.
+    <sys:String x:Key="Str_Drop_Title">PDF यहाँ छोड्नुहोस्</sys:String>
+    <sys:String x:Key="Str_Drop_Sub">वा ब्राउज गर्न क्लिक गर्नुहोस्</sys:String>
+    <sys:String x:Key="Str_Menu_File">_फाइल</sys:String>
+    -->
+
+    <sys:String x:Key="Str_Stamp_CertLogoScale">Logo size (%)</sys:String>
+</ResourceDictionary>

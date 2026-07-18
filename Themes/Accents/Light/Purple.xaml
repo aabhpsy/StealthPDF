@@ -13,6 +13,8 @@
     <SolidColorBrush x:Key="BgScrollThumb"   Color="#886A1DA5" po:Freeze="True"/>
     <SolidColorBrush x:Key="ScrollThumbHover" Color="#5A1690" po:Freeze="True"/>
     <SolidColorBrush x:Key="RadioAccent"     Color="#5A1690" po:Freeze="True"/>
+    <SolidColorBrush x:Key="AccentLogo"     Color="#5A1690" po:Freeze="True"/>
+    <SolidColorBrush x:Key="InstallBtnBg"   Color="#5A1690" po:Freeze="True"/>
 
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"                      Color="#EADBF5" po:Freeze="True"/>
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"                  Color="#5A1690" po:Freeze="True"/>

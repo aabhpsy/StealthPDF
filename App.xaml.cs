@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -15,10 +15,10 @@ using System.Windows.Input;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using Microsoft.Win32;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class App : Application
     {
@@ -26,8 +26,8 @@ namespace KillerPDF
         // Paths
         // ============================================================
 
-        private static readonly string AppName   = "KillerPDF";
-        private static readonly string ExeName   = "KillerPDF.exe";
+        private static readonly string AppName   = "StealthPDF";
+        private static readonly string ExeName   = "StealthPDF.exe";
         private static readonly string InstallDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Programs", AppName);
@@ -98,8 +98,8 @@ namespace KillerPDF
         // Single-instance IPC (mutex + named pipe)
         // ============================================================
 
-        private const string MutexName = @"Local\KillerPDF.SingleInstance";
-        private const string PipeName  = "KillerPDF.OpenPipe";
+        private const string MutexName = @"Local\StealthPDF.SingleInstance";
+        private const string PipeName  = "StealthPDF.OpenPipe";
         private Mutex? _instanceMutex;
 
         private void StartPipeServer()
@@ -107,7 +107,7 @@ namespace KillerPDF
             var t = new System.Threading.Thread(RunPipeServer)
             {
                 IsBackground = true,
-                Name = "KillerPDF-IPC",
+                Name = "StealthPDF-IPC",
             };
             t.Start();
         }
@@ -244,7 +244,7 @@ namespace KillerPDF
 
             var win = new Window
             {
-                Title                 = "KillerPDF - Unexpected Error",
+                Title                 = "StealthPDF - Unexpected Error",
                 Width                 = 680,
                 Height                = 520,
                 MinWidth              = 480,
@@ -277,7 +277,7 @@ namespace KillerPDF
             titleBar.Children.Add(xBtn);
             titleBar.Children.Add(new TextBlock
             {
-                Text              = "KillerPDF - Unexpected Error",
+                Text              = "StealthPDF - Unexpected Error",
                 Foreground        = dimText,
                 FontSize          = 12,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -406,7 +406,7 @@ namespace KillerPDF
                         $"```\n{stack}\n```\n\n" +
                         $"_Log folder: `{CrashReporter.LogDir}`_");
                     Process.Start(new ProcessStartInfo(
-                        $"https://github.com/SteveTheKiller/KillerPDF/issues/new?title={title}&body={body}")
+                        $"https://github.com/aabhpsy/StealthPDF/issues/new?title={title}&body={body}")
                         { UseShellExecute = true });
                 }
                 catch { }
@@ -517,7 +517,7 @@ namespace KillerPDF
         {
             var sb  = new StringBuilder();
             var ver = Assembly.GetExecutingAssembly().GetName().Version;
-            sb.AppendLine($"KillerPDF v{ver?.ToString(3)}");
+            sb.AppendLine($"StealthPDF v{ver?.ToString(3)}");
             sb.AppendLine($"Time : {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             sb.AppendLine($"OS   : {Environment.OSVersion}");
             sb.AppendLine();
@@ -539,7 +539,7 @@ namespace KillerPDF
         }
 
         /// <summary>
-        /// Installs KillerPDF, offers to set as default PDF handler, then relaunches
+        /// Installs StealthPDF, offers to set as default PDF handler, then relaunches
         /// from the installed location. Returns false if installation failed or was
         /// already installed from this path.
         /// </summary>
@@ -550,9 +550,9 @@ namespace KillerPDF
             if (!IsDefaultPdfHandler())
             {
                 var res = KillerDialog.Show(null,
-                    "Would you like to set KillerPDF as your default PDF viewer?\n\n" +
+                    "Would you like to set StealthPDF as your default PDF viewer?\n\n" +
                     "Opens Windows Settings → Default Apps.",
-                    "KillerPDF", MessageBoxButton.YesNo);
+                    "StealthPDF", MessageBoxButton.YesNo);
                 if (res == MessageBoxResult.Yes)
                     Process.Start(new ProcessStartInfo("ms-settings:defaultapps")
                         { UseShellExecute = true });
@@ -582,19 +582,19 @@ namespace KillerPDF
         /// </summary>
         internal static readonly string TempDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "KillerPDF", "Temp");
+            "StealthPDF", "Temp");
 
         private static readonly List<string> _sessionTemps = [];
 
         /// <summary>
-        /// Creates a tracked temp path of the form killerpdf_&lt;tag&gt;_&lt;guid&gt;.pdf
-        /// under %LOCALAPPDATA%\KillerPDF\Temp\.
+        /// Creates a tracked temp path of the form StealthPDF_&lt;tag&gt;_&lt;guid&gt;.pdf
+        /// under %LOCALAPPDATA%\StealthPDF\Temp\.
         /// All registered paths are deleted when CleanupSessionTemps() is called.
         /// </summary>
         internal static string MakeTempFile(string tag)
         {
             try { Directory.CreateDirectory(TempDir); } catch { }
-            var path = Path.Combine(TempDir, $"killerpdf_{tag}_{Guid.NewGuid():N}.pdf");
+            var path = Path.Combine(TempDir, $"StealthPDF_{tag}_{Guid.NewGuid():N}.pdf");
             lock (_sessionTemps) _sessionTemps.Add(path);
             return path;
         }
@@ -611,7 +611,7 @@ namespace KillerPDF
         }
 
         /// <summary>
-        /// Deletes killerpdf_*.pdf files left over from previous crashed sessions.
+        /// Deletes StealthPDF_*.pdf files left over from previous crashed sessions.
         /// Sweeps both the current TempDir and the legacy %TEMP% location.
         /// Locked files (still open by another instance) are silently skipped.
         /// </summary>
@@ -621,7 +621,7 @@ namespace KillerPDF
             try
             {
                 if (Directory.Exists(TempDir))
-                    foreach (var f in Directory.GetFiles(TempDir, "killerpdf_*.pdf"))
+                    foreach (var f in Directory.GetFiles(TempDir, "StealthPDF_*.pdf"))
                         try { File.Delete(f); } catch { }
             }
             catch { }
@@ -629,7 +629,7 @@ namespace KillerPDF
             // Legacy %TEMP% location - sweep once for users upgrading from older builds
             try
             {
-                foreach (var f in Directory.GetFiles(Path.GetTempPath(), "killerpdf_*.pdf"))
+                foreach (var f in Directory.GetFiles(Path.GetTempPath(), "StealthPDF_*.pdf"))
                     try { File.Delete(f); } catch { }
             }
             catch { }
@@ -639,7 +639,7 @@ namespace KillerPDF
         {
             try
             {
-                using var key = Registry.CurrentUser.OpenSubKey(@"Software\KillerPDF\Settings");
+                using var key = Registry.CurrentUser.OpenSubKey(@"Software\StealthPDF\Settings");
                 return key?.GetValue(name) as string;
             }
             catch { return null; }
@@ -649,7 +649,7 @@ namespace KillerPDF
         {
             try
             {
-                using var key = Registry.CurrentUser.CreateSubKey(@"Software\KillerPDF\Settings");
+                using var key = Registry.CurrentUser.CreateSubKey(@"Software\StealthPDF\Settings");
                 key.SetValue(name, value);
             }
             catch { /* best-effort */ }
@@ -659,23 +659,23 @@ namespace KillerPDF
         {
             try
             {
-                using var key = Registry.CurrentUser.OpenSubKey(@"Software\KillerPDF\Settings", writable: true);
+                using var key = Registry.CurrentUser.OpenSubKey(@"Software\StealthPDF\Settings", writable: true);
                 key?.DeleteValue(name, throwOnMissingValue: false);
             }
             catch { /* best-effort */ }
         }
 
         /// <summary>
-        /// Wipes all persisted KillerPDF state: settings (registry), downloaded OCR language packs, the
+        /// Wipes all persisted StealthPDF state: settings (registry), downloaded OCR language packs, the
         /// native OCR cache, and temp files. Best-effort - files locked this session (e.g. loaded native
         /// DLLs) are skipped and clear on the next restart. The user's actual PDFs are never touched.
         /// </summary>
         internal static void ClearAllData()
         {
-            try { Registry.CurrentUser.DeleteSubKeyTree(@"Software\KillerPDF\Settings", throwOnMissingSubKey: false); } catch { }
+            try { Registry.CurrentUser.DeleteSubKeyTree(@"Software\StealthPDF\Settings", throwOnMissingSubKey: false); } catch { }
 
             string localKp = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "KillerPDF");
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "StealthPDF");
             TryDeleteDir(Path.Combine(localKp, "tessdata"));   // downloaded language packs + bundled English
             TryDeleteDir(Path.Combine(localKp, "ocr"));        // native Tesseract cache
             TryDeleteDir(TempDir);                              // temp working files
@@ -683,7 +683,7 @@ namespace KillerPDF
             // Legacy temp PDFs that may linger in %TEMP%.
             try
             {
-                foreach (var f in Directory.GetFiles(Path.GetTempPath(), "killerpdf_*.pdf"))
+                foreach (var f in Directory.GetFiles(Path.GetTempPath(), "StealthPDF_*.pdf"))
                     try { File.Delete(f); } catch { }
             }
             catch { }
@@ -744,7 +744,7 @@ namespace KillerPDF
 
         private static bool IsInstalled()
         {
-            using var key = Registry.CurrentUser.OpenSubKey(@"Software\KillerPDF");
+            using var key = Registry.CurrentUser.OpenSubKey(@"Software\StealthPDF");
             if (key is null) return false;
             return key.GetValue("Installed") is int i && i == 1;
         }
@@ -754,7 +754,7 @@ namespace KillerPDF
             using var key = Registry.CurrentUser.OpenSubKey(
                 @"Software\Microsoft\Windows\Shell\Associations\FileAssociations\.pdf\UserChoice");
             return key?.GetValue("ProgId") is string progId &&
-                   progId.Equals("KillerPDF.pdf", StringComparison.OrdinalIgnoreCase);
+                   progId.Equals("StealthPDF.pdf", StringComparison.OrdinalIgnoreCase);
         }
 
         // ============================================================
@@ -880,7 +880,7 @@ namespace KillerPDF
             {
                 Text         = alreadyInstalled
                     ? "A newer version is available. Install it or run without updating."
-                    : "Install KillerPDF on this computer, or run it without installing.",
+                    : "Install StealthPDF on this computer, or run it without installing.",
                 Foreground   = Brushes.White,
                 TextWrapping = TextWrapping.Wrap,
                 Margin       = new Thickness(0, 0, 0, 16)
@@ -1078,7 +1078,7 @@ namespace KillerPDF
             var bgCard = new SolidColorBrush(Color.FromRgb(0x2a, 0x2a, 0x2a));
             var fg     = new SolidColorBrush(Color.FromRgb(0xe0, 0xe0, 0xe0));
             var fgDim  = new SolidColorBrush(Color.FromRgb(0x77, 0x77, 0x77));
-            var accent = new SolidColorBrush(Color.FromRgb(0x1e, 0xa5, 0x4c));
+            var accent = new SolidColorBrush(Color.FromRgb(0x4c, 0x9a, 0xff));   // brand blue
             var mono   = new FontFamily("Consolas");
 
             // Title bar
@@ -1092,7 +1092,7 @@ namespace KillerPDF
 
             var titleText = new TextBlock
             {
-                Text = $"About KillerPDF",
+                Text = $"About StealthPDF",
                 Foreground = fg, VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(12, 0, 0, 0), FontSize = 13, FontWeight = FontWeights.SemiBold
             };
@@ -1168,7 +1168,7 @@ namespace KillerPDF
             };
             var cardContent = new StackPanel();
             cardContent.Children.Add(MakeRow("VERSION", $"v{version}", fgDim, accent,
-                onClick: () => OpenUrl($"https://github.com/SteveTheKiller/KillerPDF/releases/tag/v{version}")));
+                onClick: () => OpenUrl($"https://github.com/aabhpsy/StealthPDF/releases/tag/v{version}")));
             cardContent.Children.Add(MakeRow("PUBLISHER", sigInfo,         fgDim, fg));
             cardContent.Children.Add(MakeRow("THUMBPRINT", thumbInfo,      fgDim, fg, mono, wrap: true));
             cardContent.Children.Add(MakeRow("EXE SHA256", sha256,         fgDim, fg, mono, wrap: true));
@@ -1186,9 +1186,9 @@ namespace KillerPDF
             okBtn.Margin = new Thickness(0, 12, 0, 0);
             okBtn.Click += (_, __) => dlg!.Close();
 
-            // KillerPDF logo - clickable link to product site
+            // StealthPDF logo - clickable link to product site
             var logo = new TextBlock { FontSize = 22, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 0, 0, 4) };
-            var logoHl = new Hyperlink(new Run("KillerPDF"))
+            var logoHl = new Hyperlink(new Run("StealthPDF"))
             {
                 Foreground = accent,
                 TextDecorations = null
@@ -1277,7 +1277,7 @@ namespace KillerPDF
                         "Security check failed: pdfium.dll integrity verification failed.\n\n" +
                         $"Expected: {BuildInfo.PdfiumSha256}\n" +
                         $"Actual  : {actual}\n\n" +
-                        "The bundled PDF engine may have been tampered with. KillerPDF will exit.",
+                        "The bundled PDF engine may have been tampered with. StealthPDF will exit.",
                         $"{AppName} - Security", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
@@ -1303,7 +1303,7 @@ namespace KillerPDF
             {
                 MessageBox.Show(
                     "Installation refused: the running EXE does not carry a valid Authenticode " +
-                    "signature.\n\nOnly signed builds of KillerPDF can be installed.",
+                    "signature.\n\nOnly signed builds of StealthPDF can be installed.",
                     AppName, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -1344,7 +1344,7 @@ namespace KillerPDF
                 {
                     MessageBox.Show(
                         "Couldn't write the installed copy at:\n" + InstallExe +
-                        "\n\nClose any open KillerPDF window (and check Task Manager for KillerPDF.exe), " +
+                        "\n\nClose any open StealthPDF window (and check Task Manager for StealthPDF.exe), " +
                         "then run the installer again.",
                         AppName, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -1358,7 +1358,7 @@ namespace KillerPDF
                     CreateShortcut(DesktopLnk, InstallExe);
 
                 // Installed marker
-                using (var key = Registry.CurrentUser.CreateSubKey(@"Software\KillerPDF"))
+                using (var key = Registry.CurrentUser.CreateSubKey(@"Software\StealthPDF"))
                 {
                     key.SetValue("Installed",    1);
                     key.SetValue("InstallPath",  InstallExe);
@@ -1368,7 +1368,7 @@ namespace KillerPDF
 
                 // Add/Remove Programs entry
                 using (var key = Registry.CurrentUser.CreateSubKey(
-                    @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"))
+                    @"Software\Microsoft\Windows\CurrentVersion\Uninstall\StealthPDF"))
                 {
                     key.SetValue("DisplayName",          AppName);
                     key.SetValue("DisplayVersion",
@@ -1420,35 +1420,35 @@ namespace KillerPDF
                 : $"{InstallExe},0";
 
             // ProgID definition
-            using (var k = Registry.CurrentUser.CreateSubKey(@"Software\Classes\KillerPDF.pdf"))
+            using (var k = Registry.CurrentUser.CreateSubKey(@"Software\Classes\StealthPDF.pdf"))
                 k.SetValue("", "PDF Document");
 
             using (var k = Registry.CurrentUser.CreateSubKey(
-                @"Software\Classes\KillerPDF.pdf\DefaultIcon"))
+                @"Software\Classes\StealthPDF.pdf\DefaultIcon"))
                 k.SetValue("", iconRef);
 
             using (var k = Registry.CurrentUser.CreateSubKey(
-                @"Software\Classes\KillerPDF.pdf\shell\open\command"))
+                @"Software\Classes\StealthPDF.pdf\shell\open\command"))
                 k.SetValue("", $"\"{InstallExe}\" \"%1\"");
 
-            // Associate .pdf extension - adds KillerPDF to the "Open with" list
+            // Associate .pdf extension - adds StealthPDF to the "Open with" list
             using (var k = Registry.CurrentUser.CreateSubKey(
                 @"Software\Classes\.pdf\OpenWithProgids"))
-                k.SetValue("KillerPDF.pdf", new byte[0], RegistryValueKind.None);
+                k.SetValue("StealthPDF.pdf", new byte[0], RegistryValueKind.None);
 
             // RegisteredApplications capability (used by Default Programs UI)
             using (var k = Registry.CurrentUser.CreateSubKey(
-                @"Software\KillerPDF\Capabilities"))
+                @"Software\StealthPDF\Capabilities"))
             {
                 k.SetValue("ApplicationName",        AppName);
                 k.SetValue("ApplicationDescription", "Lightweight PDF viewer and editor");
             }
             using (var k = Registry.CurrentUser.CreateSubKey(
-                @"Software\KillerPDF\Capabilities\FileAssociations"))
-                k.SetValue(".pdf", "KillerPDF.pdf");
+                @"Software\StealthPDF\Capabilities\FileAssociations"))
+                k.SetValue(".pdf", "StealthPDF.pdf");
 
             using (var k = Registry.CurrentUser.CreateSubKey(@"Software\RegisteredApplications"))
-                k.SetValue(AppName, @"Software\KillerPDF\Capabilities");
+                k.SetValue(AppName, @"Software\StealthPDF\Capabilities");
 
             // Tell the shell file associations have changed
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
@@ -1476,7 +1476,7 @@ namespace KillerPDF
         private static void Uninstall()
         {
             var res = MessageBox.Show(
-                "Uninstall KillerPDF from this computer?",
+                "Uninstall StealthPDF from this computer?",
                 $"{AppName} Uninstall",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -1488,16 +1488,16 @@ namespace KillerPDF
             try { File.Delete(DesktopLnk); } catch { }
 
             // Registry cleanup
-            try { Registry.CurrentUser.DeleteSubKeyTree(@"Software\KillerPDF"); } catch { }
+            try { Registry.CurrentUser.DeleteSubKeyTree(@"Software\StealthPDF"); } catch { }
             try { Registry.CurrentUser.DeleteSubKeyTree(
-                @"Software\Microsoft\Windows\CurrentVersion\Uninstall\KillerPDF"); } catch { }
-            try { Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\KillerPDF.pdf"); } catch { }
+                @"Software\Microsoft\Windows\CurrentVersion\Uninstall\StealthPDF"); } catch { }
+            try { Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\StealthPDF.pdf"); } catch { }
 
             try
             {
                 using var k = Registry.CurrentUser.OpenSubKey(
                     @"Software\Classes\.pdf\OpenWithProgids", writable: true);
-                k?.DeleteValue("KillerPDF.pdf", throwOnMissingValue: false);
+                k?.DeleteValue("StealthPDF.pdf", throwOnMissingValue: false);
             }
             catch { }
 
@@ -1512,7 +1512,7 @@ namespace KillerPDF
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
 
             // Self-delete: deferred via cmd batch so the EXE can exit first
-            string bat = Path.Combine(Path.GetTempPath(), "killerpdf_uninstall.bat");
+            string bat = Path.Combine(Path.GetTempPath(), "StealthPDF_uninstall.bat");
             File.WriteAllText(bat,
                 "@echo off\r\n" +
                 "ping -n 3 127.0.0.1 >nul\r\n" +
@@ -1524,7 +1524,7 @@ namespace KillerPDF
                 UseShellExecute = true
             });
 
-            MessageBox.Show("KillerPDF has been uninstalled.", AppName,
+            MessageBox.Show("StealthPDF has been uninstalled.", AppName,
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }

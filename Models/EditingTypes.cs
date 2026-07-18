@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
 
-namespace KillerPDF
+namespace StealthPDF
 {
-    public enum EditTool { Select, Text, Highlight, Strikethrough, Underline, Draw, Signature, Image, Crop, Line, Rotate }
+    public enum EditTool { Select, Text, Edit, Highlight, Strikethrough, Underline, Draw, Signature, Image, Crop, Line, Rotate }
 
     /// <summary>How a HighlightAnnotation paints over its bounds.</summary>
     public enum HighlightStyle { Fill, Strikethrough, Underline }

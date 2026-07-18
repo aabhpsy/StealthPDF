@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 
-namespace KillerPDF.Services.Signing
+namespace StealthPDF.Services.Signing
 {
     /// <summary>
     /// Windows-only helper that lists signing-capable certificates from the current user's personal

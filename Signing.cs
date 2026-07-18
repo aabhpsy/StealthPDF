@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -16,10 +16,10 @@ using Microsoft.Win32;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
-using KillerPDF.Services;
+using StealthPDF.Services;
 using PdfPigDoc = UglyToad.PdfPig.PdfDocument;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     public partial class MainWindow
     {
@@ -719,7 +719,7 @@ namespace KillerPDF
             {
                 if (strokes.Count == 0)
                 {
-                    KillerDialog.Show(this, "Draw a signature first.", "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    KillerDialog.Show(this, "Draw a signature first.", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -759,7 +759,7 @@ namespace KillerPDF
             btnPanel.Margin = new Thickness(12, 4, 12, 12);
             contentArea.Children.Add(btnPanel);
 
-            win.Content = DialogChrome.Frame(win, this, "KillerPDF - " + Loc("Str_Sig_Create"), () => win.Close(), contentArea);
+            win.Content = DialogChrome.Frame(win, this, "StealthPDF - " + Loc("Str_Sig_Create"), () => win.Close(), contentArea);
             win.ShowDialog();
         }
 
@@ -801,7 +801,7 @@ namespace KillerPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Failed to import image:\n{ex.Message}", "KillerPDF",
+                KillerDialog.Show(this, $"Failed to import image:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

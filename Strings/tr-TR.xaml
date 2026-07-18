@@ -1,9 +1,9 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!-- ================================================================
-         KillerPDF  —  Türkçe (tr-TR) metinleri
+         StealthPDF  —  Türkçe (tr-TR) metinleri
          ================================================================ -->
 
     <!-- ── Araç çubuğu ipuçları ─────────────────────────────────────── -->
@@ -44,7 +44,7 @@
     <sys:String x:Key="Str_TT_ExpandSidebar">Kenar çubuğunu genişlet</sys:String>
     <sys:String x:Key="Str_TT_KeyboardShortcuts">Klavye kısayolları (Ctrl+?)</sys:String>
     <sys:String x:Key="Str_TT_Settings">Ayarlar</sys:String>
-    <sys:String x:Key="Str_TT_About">KillerPDF Hakkında</sys:String>
+    <sys:String x:Key="Str_TT_About">StealthPDF Hakkında</sys:String>
 
     <!-- ── Hakkında katmanı ──────────────────────────────────────────── -->
     <sys:String x:Key="Str_About_Version">SÜRÜM</sys:String>
@@ -107,7 +107,7 @@
     <!-- ── Durum çubuğu ──────────────────────────────────────────────── -->
     <sys:String x:Key="Str_Ready">Hazır</sys:String>
     <sys:String x:Key="Str_Portable">KURULUMSUZ</sys:String>
-    <sys:String x:Key="Str_InstallBtn">KillerPDF'i yükle...</sys:String>
+    <sys:String x:Key="Str_InstallBtn">StealthPDF'i yükle...</sys:String>
 
     <!-- ── Durum mesajları (biçim dizeleri — string.Format kullanır) ── -->
     <sys:String x:Key="Str_Opened">Açıldı {0} - {1} sayfa</sys:String>
@@ -136,16 +136,16 @@
     <sys:String x:Key="Str_RotateFailed">Döndürme başarısız: {0}</sys:String>
 
     <!-- ── İletişim kutusu metinleri ────────────────────────────────── -->
-    <sys:String x:Key="Str_Dlg_InstallTitle">KillerPDF'i Yükle</sys:String>
-    <sys:String x:Key="Str_Dlg_InstallMsg">KillerPDF kullanıcı profilinize yüklensin mi?
+    <sys:String x:Key="Str_Dlg_InstallTitle">StealthPDF'i Yükle</sys:String>
+    <sys:String x:Key="Str_Dlg_InstallMsg">StealthPDF kullanıcı profilinize yüklensin mi?
 
-Bu işlem uygulamayı %LocalAppData%\KillerPDF konumuna kopyalar ve bir Başlat Menüsü kısayolu oluşturur.
+Bu işlem uygulamayı %LocalAppData%\StealthPDF konumuna kopyalar ve bir Başlat Menüsü kısayolu oluşturur.
 İstediğiniz zaman Program Ekle/Kaldır üzerinden kaldırabilirsiniz.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedClose">Kaydedilmemiş değişiklikleriniz var. Bu dosya kaydedilmeden kapatılsın mı?</sys:String>
-    <sys:String x:Key="Str_Dlg_UnsavedExit">Kaydedilmemiş değişiklikleriniz var. KillerPDF kaydedilmeden kapatılsın mı?</sys:String>
+    <sys:String x:Key="Str_Dlg_UnsavedExit">Kaydedilmemiş değişiklikleriniz var. StealthPDF kaydedilmeden kapatılsın mı?</sys:String>
     <sys:String x:Key="Str_Dlg_FailedOpen">PDF açılamadı:
 {0}</sys:String>
-    <sys:String x:Key="Str_Dlg_AppTitle">KillerPDF</sys:String>
+    <sys:String x:Key="Str_Dlg_AppTitle">StealthPDF</sys:String>
 
 
     <!-- ── Tema adları ───────────────────────────────────────────────── -->
@@ -256,7 +256,7 @@ Bu işlem uygulamayı %LocalAppData%\KillerPDF konumuna kopyalar ve bir Başlat 
     <sys:String x:Key="Str_Pos_TopLeft">Üst Sol</sys:String>
 
     <!-- ── Print dialog ───────────────────────────────────────────────── -->
-    <sys:String x:Key="Str_Print_Title">KillerPDF - Yazdır</sys:String>
+    <sys:String x:Key="Str_Print_Title">StealthPDF - Yazdır</sys:String>
     <sys:String x:Key="Str_Print_Printer">Yazıcı</sys:String>
     <sys:String x:Key="Str_Print_Orientation">Yönlendirme</sys:String>
     <sys:String x:Key="Str_Print_Portrait">Dikey</sys:String>
@@ -307,7 +307,7 @@ Bu işlem uygulamayı %LocalAppData%\KillerPDF konumuna kopyalar ve bir Başlat 
     <sys:String x:Key="Str_Drop_Separate">Ayrı ayrı aç</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Açılacak PDF veya görüntü bulunamadı.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Bu, {0} ayrı sekme açacak. Devam edilsin mi?</sys:String>
-    <sys:String x:Key="Str_Drop_TooMany">Bu klasör veya arşiv {0} dosya içeriyor. KillerPDF yalnızca ilk {1} tanesini açacak. Devam edilsin mi?</sys:String>
+    <sys:String x:Key="Str_Drop_TooMany">Bu klasör veya arşiv {0} dosya içeriyor. StealthPDF yalnızca ilk {1} tanesini açacak. Devam edilsin mi?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} dosya birleştirildi - henüz kaydedilmedi</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Dosyalar birleştiriliyor...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCancelled">Birleştirme iptal edildi</sys:String>
@@ -436,4 +436,5 @@ Bu işlem uygulamayı %LocalAppData%\KillerPDF konumuna kopyalar ve bir Başlat 
     <sys:String x:Key="Str_KS_View">Görünüm</sys:String>
     <sys:String x:Key="Str_KS_FullScreen">Tam ekran</sys:String>
     <sys:String x:Key="Str_FullScreen_Hint">Tam ekrandan çıkmak için F11 veya Esc'e basın</sys:String>
+    <sys:String x:Key="Str_Stamp_CertLogoScale">Logo size (%)</sys:String>
 </ResourceDictionary>

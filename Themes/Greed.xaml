@@ -31,10 +31,10 @@
     <!-- Open settings row uses the translucent-white SelectionBg (matches selected page/tool). -->
     <SolidColorBrush x:Key="SettingsOpenRowBg" Color="#44ffffff" po:Freeze="True"/>
     <SolidColorBrush x:Key="TextPrimary"    Color="#fffde8" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextSecondary"  Color="#e0d49a" po:Freeze="True"/>
-    <SolidColorBrush x:Key="FilenameBrush"  Color="#a6a99a" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextDim"        Color="#c0aa68" po:Freeze="True"/>
-    <SolidColorBrush x:Key="TextFooter"     Color="#3a8a5a" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TextSecondary"  Color="#eae0b0" po:Freeze="True"/>
+    <SolidColorBrush x:Key="FilenameBrush"  Color="#b8bcb0" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TextDim"        Color="#cbb878" po:Freeze="True"/>
+    <SolidColorBrush x:Key="TextFooter"     Color="#5aa67a" po:Freeze="True"/>
     <SolidColorBrush x:Key="DangerRed"      Color="#ff6666" po:Freeze="True"/>
     <SolidColorBrush x:Key="BgDragHandle"   Color="#4a8a64" po:Freeze="True"/>
     <SolidColorBrush x:Key="DragLine"       Color="#0b3b23" po:Freeze="True"/>
@@ -43,7 +43,7 @@
     <SolidColorBrush x:Key="SliderTrack"    Color="#00120b" po:Freeze="True"/>
     <SolidColorBrush x:Key="RadioAccent"    Color="#e0d49a" po:Freeze="True"/>
     <SolidColorBrush x:Key="BgOverlay"      Color="#CC003322" po:Freeze="True"/>
-    <sys:Double x:Key="GrainOpacity">0.26</sys:Double>
+    <sys:Double x:Key="GrainOpacity">0</sys:Double>
     <sys:Double x:Key="IconShadowOpacity">1.0</sys:Double>
     <sys:Double x:Key="HeaderShadowOpacity">0.95</sys:Double>
 

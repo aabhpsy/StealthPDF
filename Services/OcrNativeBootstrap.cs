@@ -1,8 +1,8 @@
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace KillerPDF.Services
+namespace StealthPDF.Services
 {
     /// <summary>
     /// Keeps the single-exe build self-sufficient for OCR. The native Tesseract DLLs (x64) and the bundled
@@ -12,8 +12,8 @@ namespace KillerPDF.Services
     /// </summary>
     internal static class OcrNativeBootstrap
     {
-        private const string NativePrefix = "KillerPDF.OcrNative.";
-        private const string TessDataPrefix = "KillerPDF.OcrTessData.";
+        private const string NativePrefix = "StealthPDF.OcrNative.";
+        private const string TessDataPrefix = "StealthPDF.OcrTessData.";
 
         private static readonly object _gate = new();
         private static bool _langReady;
@@ -31,7 +31,7 @@ namespace KillerPDF.Services
         /// </summary>
         public static string TessDataDir { get; } = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "KillerPDF", "tessdata");
+            "StealthPDF", "tessdata");
 
         /// <summary>
         /// Ensures the bundled language data (English) is present in <see cref="TessDataDir"/> and returns
@@ -77,7 +77,7 @@ namespace KillerPDF.Services
                 string version = asm.GetName().Version?.ToString() ?? "0";
                 string baseDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "KillerPDF", "ocr", version);
+                    "StealthPDF", "ocr", version);
                 string nativeDir = Path.Combine(baseDir, "x64");
                 Directory.CreateDirectory(nativeDir);
 

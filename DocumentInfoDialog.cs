@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using PdfSharpCore.Pdf;
 
-namespace KillerPDF
+namespace StealthPDF
 {
     // Read/edit the PDF Document Info dictionary (Title, Author, Subject, Keywords, Creator). Themed via
     // DialogChrome, no preview pane. Producer/dates/structure are shown read-only.
@@ -19,7 +19,7 @@ namespace KillerPDF
         public DocumentInfoDialog(Window owner, PdfDocument doc, string? filePath)
         {
             _doc = doc;
-            Title = "KillerPDF - " + L("Str_DocInfo_Suffix");
+            Title = "StealthPDF - " + L("Str_DocInfo_Suffix");
             Width = 460;
             SizeToContent = SizeToContent.Height;
             UseLayoutRounding = true;
@@ -54,7 +54,7 @@ namespace KillerPDF
             row.Margin = new Thickness(0, 16, 0, 0);
             body.Children.Add(row);
 
-            Content = DialogChrome.Frame(this, Owner, "KillerPDF - " + L("Str_DocInfo_Suffix"),
+            Content = DialogChrome.Frame(this, Owner, "StealthPDF - " + L("Str_DocInfo_Suffix"),
                 () => { DialogResult = false; Close(); }, body);
 
             Loaded += (_, _2) => _title.Focus();
