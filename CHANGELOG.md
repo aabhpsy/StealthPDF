@@ -2,7 +2,7 @@
 
 All notable changes to StealthPDF are documented here.
 
-StealthPDF is a fork of [StealthPDF](https://github.com/SteveTheKiller/StealthPDF) by Steve the Killer, maintained by [@aabhpsy](https://github.com/aabhpsy).
+StealthPDF is a fork of [KillerPDF](https://github.com/SteveTheKiller/KillerPDF) by Steve the Killer, maintained by [@aabhpsy](https://github.com/aabhpsy).
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -27,8 +27,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Changed
 - **Professional UI refresh**: the default Dark and Light themes are now neutral graphite/paper palettes with a single restrained **blue accent** and a flat, clean finish - the film grain, icon glow, and header drop shadows are gone, and the Consolas "terminal" chrome is replaced by the app UI font (Segoe UI) throughout. The look borrows the restraint of professional PDF tools without losing the StealthPDF identity. The legacy KillerTools green survives as an accent choice (Dark/Light), and every accent hue now also drives the wordmark and install-button colour. Black stays the high-contrast theme; Blood/Greed/Cyanotic keep their personalities but lose the grain.
 - **stealthpdf.com is the download home**: the downloadable build now lives on the website; GitHub hosts the source. Landing site, README, Chocolatey package (`stealthpdf`) and WinGet id (`aabhpsy.StealthPDF`) updated to match; release workflows point at the fork.
-- **Rebrand StealthPDF → StealthPDF** (user-visible only): app title, window title, wordmark, About box, tagline, install/uninstall dialogs, install path (`%LOCALAPPDATA%\Programs\StealthPDF\`), Start Menu / Desktop shortcuts, PDF file-handler ProgID (`StealthPDF.pdf`), registry keys, update-check URLs, and the launcher dialog. The internal C# namespace `StealthPDF` is intentionally kept to avoid a risky deep rename.
-- Footer credit now shows: "StealthPDF · fork of StealthPDF by Steve the Killer · maintainer @aabhpsy".
+- **Rebrand KillerPDF → StealthPDF** (user-visible only): app title, window title, wordmark, About box, tagline, install/uninstall dialogs, install path (`%LOCALAPPDATA%\Programs\StealthPDF\`), Start Menu / Desktop shortcuts, PDF file-handler ProgID (`StealthPDF.pdf`), registry keys, update-check URLs, and the launcher dialog. The internal C# namespace `StealthPDF` is intentionally kept to avoid a risky deep rename.
+- Footer credit now shows: "StealthPDF · fork of KillerPDF by Steve the Killer · maintainer @aabhpsy".
 - About box tagline link points to the StealthPDF GitHub repo.
 - Output binary is now `StealthPDF.exe` (via `<AssemblyName>StealthPDF</AssemblyName>`).
 - README rewritten for StealthPDF with an install-vs-portable comparison table and credits.

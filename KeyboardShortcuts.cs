@@ -319,7 +319,7 @@ namespace StealthPDF
         // Opens the online help / how-to page in the user's default browser.
         private void OnlineHelp_Click(object sender, RoutedEventArgs e)
         {
-            try { Process.Start(new ProcessStartInfo("https://StealthPDF.net/help.html") { UseShellExecute = true }); }
+            try { Process.Start(new ProcessStartInfo("https://stealthpdf.com/help.html") { UseShellExecute = true }); }
             catch { }
         }
     }

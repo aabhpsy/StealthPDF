@@ -1,12 +1,12 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
-    KillerPDF release script: build → sign → verify → hash → update BuildInfo → publish summary.
+    StealthPDF release script: build → sign → verify → hash → update BuildInfo → publish summary.
 .DESCRIPTION
     1. Locates pdfium.dll in the NuGet cache, hashes it, and writes BuildInfo.cs so the
        embedded integrity check at startup knows the expected value.
     2. Publishes using FolderProfile1 (net48, win-x64); bundle-source.ps1 also runs.
-    3. Signs KillerPDF.exe. Prefers CertThumbprint (exact match) over CertName (CN match).
+    3. Signs StealthPDF.exe. Prefers CertThumbprint (exact match) over CertName (CN match).
        Retries the timestamp across three TSA endpoints if the first attempt fails.
     4. Runs "signtool verify /pa /v" as a post-sign gate — aborts if the cert chain
        is not trusted to an accepted root.
@@ -28,23 +28,23 @@
 .EXAMPLE
     .\release.ps1 -CertThumbprint "AABBCC..."
 .EXAMPLE
-    .\release.ps1 -CertName "Open Source Developer, Stephen Riley"
+    .\release.ps1 -CertName "Open Source Developer, Your Name"
 .EXAMPLE
     .\release.ps1 -SkipSign
 #>
 param(
     [string]$CertThumbprint = "",
-    [string]$CertName       = "Open Source Developer Stephen Riley",
+    [string]$CertName       = "",
     [switch]$SkipSign
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$proj         = Join-Path $PSScriptRoot "KillerPDF.csproj"
+$proj         = Join-Path $PSScriptRoot "StealthPDF.csproj"
 $buildInfoPath = Join-Path $PSScriptRoot "BuildInfo.cs"
 $publishDir   = Join-Path $PSScriptRoot "bin\Release\net48\publish"
-$exe          = Join-Path $publishDir "KillerPDF.exe"
+$exe          = Join-Path $publishDir "StealthPDF.exe"
 
 # TSA endpoints — tried in order; first success wins.
 $tsaList = @(
@@ -104,7 +104,7 @@ if ($SkipSign) {
 
 Write-Host "`n==> Writing BuildInfo.cs..." -ForegroundColor Cyan
 $buildInfoContent = @"
-namespace KillerPDF
+namespace StealthPDF
 {
     /// <summary>
     /// Build-time constants written or verified by release.ps1.
@@ -179,8 +179,8 @@ if (-not $SkipSign) {
             /tr  $tsa `
             /td  sha256 `
             @certArgs `
-            /d   "KillerPDF" `
-            /du  "https://killerpdf.net" `
+            /d   "StealthPDF" `
+            /du  "https://stealthpdf.com" `
             /v   $exe
 
         if ($LASTEXITCODE -eq 0) {
@@ -228,7 +228,7 @@ if (-not $SkipSign) {
 # ── 4. SHA256 (final EXE) ─────────────────────────────────────────────────
 Write-Host "`n==> Computing final EXE SHA256..." -ForegroundColor Cyan
 $exeHash = (Get-FileHash $exe -Algorithm SHA256).Hash
-Write-Host "    KillerPDF.exe : $exeHash" -ForegroundColor Green
+Write-Host "    StealthPDF.exe : $exeHash" -ForegroundColor Green
 if ($pdfiumPath) {
     Write-Host "    pdfium.dll    : $pdfiumHash" -ForegroundColor Green
 }
@@ -246,7 +246,7 @@ if ($srcZip) {
 # ── 6. Write SHA256SUMS.txt ──────────────────────────────────────────────────
 $sumsPath = Join-Path $PSScriptRoot "SHA256SUMS.txt"
 $lines    = [System.Collections.Generic.List[string]]::new()
-$lines.Add("KillerPDF.exe           $exeHash")
+$lines.Add("StealthPDF.exe          $exeHash")
 if ($pdfiumPath) { $lines.Add("pdfium.dll              $pdfiumHash") }
 if ($srcZip) {
     $srcHash = (Get-FileHash $srcZip.FullName -Algorithm SHA256).Hash
@@ -257,7 +257,7 @@ Write-Host "`n==> SHA256SUMS.txt written to: $sumsPath" -ForegroundColor Green
 
 # ── 7. Summary ───────────────────────────────────────────────────────────────
 Write-Host "`n╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host   "  KillerPDF release artifacts" -ForegroundColor White
+Write-Host   "  StealthPDF release artifacts" -ForegroundColor White
 Write-Host   "  EXE  : $exe"
 if ($srcZip) { Write-Host "  SRC  : $($srcZip.FullName)" }
 Write-Host   ""
@@ -269,5 +269,5 @@ Write-Host   "  Signer : $actualCN"
 Write-Host   "  Thumbprint: $actualThumb"
 Write-Host   ""
 Write-Host   "  Paste EXE SHA256 into:"
-Write-Host   "    KillerPDF\pdf-landing\index.html (line ~183)"
+Write-Host   "    stealthPDF.com download page (verify the integrity hash)"
 Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
