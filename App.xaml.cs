@@ -1373,7 +1373,7 @@ namespace StealthPDF
                     key.SetValue("DisplayName",          AppName);
                     key.SetValue("DisplayVersion",
                         Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "");
-                    key.SetValue("Publisher",            "Steve / thekiller.net");
+                    key.SetValue("Publisher",            "StealthPDF (stealthpdf.com)");
                     key.SetValue("InstallLocation",      InstallDir);
                     key.SetValue("DisplayIcon",          $"{InstallExe},0");
                     key.SetValue("UninstallString",      $"\"{InstallExe}\" /uninstall");

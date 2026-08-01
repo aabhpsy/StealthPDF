@@ -1,4 +1,4 @@
 ﻿User-agent: *
 Allow: /
 
-Sitemap: https://StealthPDF.net/sitemap.xml
+Sitemap: https://stealthpdf.com/sitemap.xml
