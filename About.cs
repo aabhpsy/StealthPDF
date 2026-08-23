@@ -137,7 +137,7 @@ namespace StealthPDF
         // an explicit confirmation. Destructive, so it always warns first; the user's PDFs are untouched.
         private void AboutClearData_Click(object sender, RoutedEventArgs e)
         {
-            var res = KillerDialog.Show(this,
+            var res = StealthDialog.Show(this,
                 "This will delete all saved settings, downloaded OCR language packs, and temporary files.\n\n" +
                 "Your PDF files are not affected. Continue?",
                 "Clear all Data", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -145,7 +145,7 @@ namespace StealthPDF
 
             App.ClearAllData();
             SetStatus("All StealthPDF data cleared");
-            KillerDialog.Show(this,
+            StealthDialog.Show(this,
                 "Settings, language packs, and temp files were cleared.\n\n" +
                 "Restart StealthPDF to finish clearing any files still in use this session.",
                 "Clear all Data", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -201,12 +201,12 @@ namespace StealthPDF
 
             if (_isDirty)
             {
-                KillerDialog.Show(this, "Please save your changes before updating.",
+                StealthDialog.Show(this, "Please save your changes before updating.",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var confirm = KillerDialog.Show(this,
+            var confirm = StealthDialog.Show(this,
                 $"Download and install StealthPDF {tag}?\n\nThe app will close and reopen automatically.",
                 "StealthPDF", MessageBoxButton.OKCancel, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.OK) return;

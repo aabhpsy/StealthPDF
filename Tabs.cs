@@ -511,7 +511,7 @@ namespace StealthPDF
 
             if (_isDirty)
             {
-                var res = KillerDialog.Show(this,
+                var res = StealthDialog.Show(this,
                     Loc("Str_Dlg_UnsavedClose"),
                     "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (res != MessageBoxResult.Yes) { RebuildTabStrip(); return; }
@@ -558,7 +558,7 @@ namespace StealthPDF
 
             if (docTabs.Any(t => t.IsDirty))
             {
-                var res = KillerDialog.Show(this, Loc("Str_Dlg_UnsavedCloseAll"),
+                var res = StealthDialog.Show(this, Loc("Str_Dlg_UnsavedCloseAll"),
                     "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (res != MessageBoxResult.Yes) { RebuildTabStrip(); return; }
             }

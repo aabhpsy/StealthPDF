@@ -61,7 +61,7 @@ namespace StealthPDF
         {
             if (_doc is null || string.IsNullOrEmpty(_currentFile))
             {
-                KillerDialog.Show(this, "Open a PDF first.");
+                StealthDialog.Show(this, "Open a PDF first.");
                 return;
             }
             // Sign the user's real document, not the temp working copy. Operations like print/crop/repair
@@ -155,6 +155,54 @@ namespace StealthPDF
                     pin.AddrOfPinnedObject());
                 using var ms = new MemoryStream();
                 bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                return ms.ToArray();
+            }
+            finally { pin.Free(); }
+        }
+
+        /// <summary>
+        /// Encodes raw BGRA pixel data from pdfium to JPEG at the given quality (1-100).
+        /// Used for full-page rasters in Flatten and Make-Searchable-PDF, where a lossless
+        /// PNG of every page accumulates hundreds of MB on long documents and exhausts memory
+        /// before the job finishes. A rendered page as JPEG is ~5-10x smaller, so long files
+        /// complete. The source is composited onto a solid white background into a 24bpp (no
+        /// alpha) bitmap first, so a transparent pdfium render can never produce a black JPEG
+        /// background.
+        /// </summary>
+        private static byte[] RenderToJpeg(byte[] bgra, int width, int height, long quality = 82)
+        {
+            var pin = GCHandle.Alloc(bgra, GCHandleType.Pinned);
+            try
+            {
+                using var src = new System.Drawing.Bitmap(
+                    width, height, width * 4,
+                    System.Drawing.Imaging.PixelFormat.Format32bppArgb,
+                    pin.AddrOfPinnedObject());
+                // Flatten onto white, dropping the alpha channel (JPEG has none).
+                using var flat = new System.Drawing.Bitmap(
+                    width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                using (var g = System.Drawing.Graphics.FromImage(flat))
+                {
+                    g.Clear(System.Drawing.Color.White);
+                    g.DrawImageUnscaled(src, 0, 0);
+                }
+
+                var codec = Array.Find(
+                    System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders(),
+                    c => c.FormatID == System.Drawing.Imaging.ImageFormat.Jpeg.Guid);
+                using var ms = new MemoryStream();
+                if (codec != null)
+                {
+                    using var eps = new System.Drawing.Imaging.EncoderParameters(1);
+                    eps.Param[0] = new System.Drawing.Imaging.EncoderParameter(
+                        System.Drawing.Imaging.Encoder.Quality,
+                        Math.Max(1, Math.Min(100, quality)));
+                    flat.Save(ms, codec, eps);
+                }
+                else
+                {
+                    flat.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
                 return ms.ToArray();
             }
             finally { pin.Free(); }

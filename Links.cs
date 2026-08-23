@@ -195,7 +195,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Remove link failed:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Remove link failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

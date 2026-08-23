@@ -84,7 +84,7 @@ namespace StealthPDF
                 }
                 catch (Exception ex2)
                 {
-                    KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex2.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                    StealthDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex2.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex) when (IsPasswordException(ex))
@@ -105,7 +105,7 @@ namespace StealthPDF
                 }
                 catch (Exception ex2)
                 {
-                    KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex2.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                    StealthDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex2.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex) when (IsXRefException(ex))
@@ -119,14 +119,14 @@ namespace StealthPDF
                     _currentFile = srcPath;
                     FinishOpenFile(path, srcPath);
                     SetStatus(string.Format(Loc("Str_OpenedReadOnlyXRef"), System.IO.Path.GetFileName(path), _doc.PageCount));
-                    KillerDialog.Show(this,
+                    StealthDialog.Show(this,
                         $"\"{System.IO.Path.GetFileName(path)}\" has a non-standard structure and was opened read-only.\n\nEditing, saving, and some other features may not work correctly.",
                         "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 catch
                 {
                     // ReadOnly also failed - offer to repair.
-                    var result = KillerDialog.Show(this,
+                    var result = StealthDialog.Show(this,
                         $"This PDF has a damaged structure and couldn't be opened.\n\nWould you like StealthPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
                         "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                     if (result == MessageBoxResult.Yes)
@@ -147,7 +147,7 @@ namespace StealthPDF
                 // Any other open failure (truncated file, malformed objects, an out-of-range parse, etc.):
                 // we can't classify the damage, but the PDFium-based repair often recovers it anyway, so
                 // offer the repair rather than just failing outright.
-                var result = KillerDialog.Show(this,
+                var result = StealthDialog.Show(this,
                     "This PDF couldn't be opened - its structure may be damaged.\n\nWould you like StealthPDF to attempt a repair? A repaired copy will be created - the original file will not be changed.\n\nNote: repaired files may be missing bookmarks, forms, and other interactive features.",
                     "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
@@ -520,7 +520,7 @@ namespace StealthPDF
                 {
                     HideBusyOverlay(busy);
                     _asyncOpenPending = false;
-                    KillerDialog.Show(this,
+                    StealthDialog.Show(this,
                         "Repair failed - the file is too severely damaged to recover.\n\nTry opening the original in a different application (Adobe Acrobat, browsers) which may have additional recovery options.",
                         "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -535,7 +535,7 @@ namespace StealthPDF
                                         System.IO.Path.GetFileName(path), _doc.PageCount));
                 HideBusyOverlay(busy);
                 FinalizeAsyncOpen();
-                KillerDialog.Show(this,
+                StealthDialog.Show(this,
                     raster
                         ? $"\"{System.IO.Path.GetFileName(path)}\" was repaired by rasterizing through PDFium.\n\nText is not selectable in the repaired copy. Use Save As to write it to a new location."
                         : $"\"{System.IO.Path.GetFileName(path)}\" was repaired successfully.\n\nBookmarks, forms, and other interactive features may have been lost. Use Save As to write the repaired file to a new location.",
@@ -545,7 +545,7 @@ namespace StealthPDF
             {
                 HideBusyOverlay(busy);
                 _asyncOpenPending = false;
-                KillerDialog.Show(this, $"Repair failed:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Repair failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -586,7 +586,7 @@ namespace StealthPDF
             {
                 HideBusyOverlay(busy);
                 _asyncOpenPending = false;
-                KillerDialog.Show(this, $"Could not open the protected PDF:\n{ex.Message}",
+                StealthDialog.Show(this, $"Could not open the protected PDF:\n{ex.Message}",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 EndCancellableOp();
             }
@@ -702,7 +702,7 @@ namespace StealthPDF
             if (_doc is null) return;
             if (_isDirty)
             {
-                var res = KillerDialog.Show(this,
+                var res = StealthDialog.Show(this,
                     Loc("Str_Dlg_UnsavedClose"),
                     "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (res != MessageBoxResult.Yes) return;
@@ -782,7 +782,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 AbortTabLoad(target, prev, createdNew);
-                KillerDialog.Show(this, $"Could not create new document:\n{ex.Message}",
+                StealthDialog.Show(this, $"Could not create new document:\n{ex.Message}",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -816,7 +816,7 @@ namespace StealthPDF
                     var item = MakeMenuItem(System.IO.Path.GetFileName(path), (_, _) =>
                     {
                         if (System.IO.File.Exists(path)) OpenInNewTab(path);
-                        else KillerDialog.Show(this, $"File not found:\n{path}", "StealthPDF",
+                        else StealthDialog.Show(this, $"File not found:\n{path}", "StealthPDF",
                             MessageBoxButton.OK, MessageBoxImage.Warning);
                     });
                     item.ToolTip = path;
@@ -1066,7 +1066,7 @@ namespace StealthPDF
                 {
                     ev.Handled = true;   // don't bubble to the DropZone "click to browse" handler
                     if (System.IO.File.Exists(path)) OpenInNewTab(path);
-                    else KillerDialog.Show(this, $"File not found:\n{path}", "StealthPDF",
+                    else StealthDialog.Show(this, $"File not found:\n{path}", "StealthPDF",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
                 };
                 RecentFilesList.Items.Add(row);
@@ -1103,7 +1103,7 @@ namespace StealthPDF
         // Opens the Document Info dialog; edits are applied to the live doc and persist on the next save.
         private void OpenDocumentInfo()
         {
-            if (_doc is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             CommitActiveTextBox();
             var dlg = new DocumentInfoDialog(this, _doc, _originalFile ?? _currentFile);
             dlg.ShowDialog();   // fade-close dialogs don't reliably return true; rely on the Saved flag
@@ -1116,7 +1116,7 @@ namespace StealthPDF
 
         private void Merge_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             var doc = _doc;
             var dlg = new OpenFileDialog { Filter = "PDF files|*.pdf", Title = "Select PDF to merge", Multiselect = true };
             if (dlg.ShowDialog(this) != true) return;
@@ -1144,7 +1144,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Merge failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Merge failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1325,7 +1325,7 @@ namespace StealthPDF
 
         private void SaveInPlace()
         {
-            if (_doc is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             // Save back to the user's real file. After a page edit (crop/rotate) _currentFile is a
             // temp working copy, so the real path is kept in _originalFile. If there is no real path
             // (e.g. a repaired temp-backed open), fall back to Save As.
@@ -1376,17 +1376,17 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Save failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Save failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             // No real path yet (repaired temp-backed open) -> go straight to Save As.
             if (string.IsNullOrEmpty(_originalFile)) { SaveAs_Click(sender, e); return; }
             var name = System.IO.Path.GetFileName(_originalFile);
-            var choice = KillerDialog.Show(this, $"Overwrite {name}?", "Save",
+            var choice = StealthDialog.Show(this, $"Overwrite {name}?", "Save",
                                            MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
             if (choice == MessageBoxResult.Yes)      SaveInPlace();
             else if (choice == MessageBoxResult.No)  SaveAs_Click(sender, e);
@@ -1395,7 +1395,7 @@ namespace StealthPDF
 
         private void SaveAs_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             CommitActiveTextBox();
             var dlg = new SaveFileDialog { Filter = "PDF files|*.pdf", Title = "Save PDF as",
                                            CheckFileExists = false, CheckPathExists = true };
@@ -1453,13 +1453,13 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Save failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Save failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private async void SaveFlattened_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             CommitActiveTextBox();
             var dlg = new SaveFileDialog { Filter = "PDF files|*.pdf", Title = "Save Flattened PDF",
                                            CheckFileExists = false, CheckPathExists = true };
@@ -1522,15 +1522,21 @@ namespace StealthPDF
                 await Task.Run(() =>
                 {
                     // Rasterize pages across CPU cores. Docnet/PDFium is not thread-safe, so the
-                    // pdfium render is serialized behind a lock; the PNG encode (GDI+) runs in
+                    // pdfium render is serialized behind a lock; the JPEG encode (GDI+) runs in
                     // parallel. Pages are assembled into the PDF afterwards, in order.
+                    //
+                    // Pages are encoded as JPEG, not PNG: a lossless PNG of every rendered page
+                    // accumulates hundreds of MB across a long document (the whole-document set is
+                    // held until outDoc.Save() writes them), which exhausted memory and made long
+                    // files fail before finishing. JPEG at q82 is ~5-10x smaller with no visible
+                    // loss for a 150-DPI flattened page, so long documents now complete.
                     //
                     // The source document is opened ONCE here. The old code re-opened it inside
                     // the per-page loop, re-parsing the whole file on every page (O(pages) full
                     // document parses) - the dominant cost on large files. A single scaling
                     // factor renders each page at its own size at 150 DPI (150/72), so the doc
                     // no longer needs reopening to apply per-page pixel dimensions.
-                    var pngPages = new byte[pageCount][];
+                    var pageImages = new byte[pageCount][];
                     var docGate  = new object();
                     int done     = 0;
                     var po = new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount) };
@@ -1546,8 +1552,8 @@ namespace StealthPDF
                             rw   = pr.GetPageWidth();
                             rh   = pr.GetPageHeight();
                         }
-                        // Encode BGRA to PNG (GDI+) outside the lock so it parallelizes.
-                        pngPages[i] = RenderToPng(bgra, rw, rh);
+                        // Encode BGRA to JPEG (GDI+) outside the lock so it parallelizes.
+                        pageImages[i] = RenderToJpeg(bgra, rw, rh);
 
                         int n = System.Threading.Interlocked.Increment(ref done);
                         Dispatcher.BeginInvoke(new Action(() => UpdateFlattenProgress(overlay, n, pageCount)));
@@ -1564,7 +1570,7 @@ namespace StealthPDF
                             var newPage = outDoc.AddPage();
                             newPage.Width  = XUnit.FromPoint(pageDims[i].widthPt);
                             newPage.Height = XUnit.FromPoint(pageDims[i].heightPt);
-                            using var xi  = XImage.FromStream(() => new MemoryStream(pngPages[i]));
+                            using var xi  = XImage.FromStream(() => new MemoryStream(pageImages[i]));
                             using var gfx = XGraphics.FromPdfPage(newPage);
                             gfx.DrawImage(xi, 0, 0, newPage.Width.Point, newPage.Height.Point);
                         }
@@ -1582,7 +1588,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                try { KillerDialog.Show(this, $"Flatten failed:\n{ex.GetType().Name}: {ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
+                try { StealthDialog.Show(this, $"Flatten failed:\n{ex.GetType().Name}: {ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
                 catch { /* dialog failed; overlay still removed in finally */ }
             }
             finally
@@ -1644,7 +1650,7 @@ namespace StealthPDF
 
         private void Print_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             CommitActiveTextBox();
 
             // The print prep (annotation burn + doc reopen) runs synchronously on the UI thread and freezes
@@ -1788,7 +1794,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                try { KillerDialog.Show(this, $"Print failed:\n{ex.GetType().Name}: {ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
+                try { StealthDialog.Show(this, $"Print failed:\n{ex.GetType().Name}: {ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
                 catch { }
             }
         }

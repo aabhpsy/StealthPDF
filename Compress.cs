@@ -28,7 +28,7 @@ namespace StealthPDF
         {
             if (_doc is null || _currentFile is null)
             {
-                KillerDialog.Show(this, Loc("Str_Msg_OpenFirst"), "StealthPDF",
+                StealthDialog.Show(this, Loc("Str_Msg_OpenFirst"), "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -123,7 +123,7 @@ namespace StealthPDF
                 string.Equals(Path.GetFullPath(outputPath), Path.GetFullPath(_currentFile),
                               StringComparison.OrdinalIgnoreCase))
             {
-                KillerDialog.Show(this,
+                StealthDialog.Show(this,
                     "Pick a different file name - the compressed copy can't replace the document that is currently open.",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -177,7 +177,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                try { KillerDialog.Show(this, Loc("Str_Compress_Failed") + "\n" + ex.Message, "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
+                try { StealthDialog.Show(this, Loc("Str_Compress_Failed") + "\n" + ex.Message, "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error); }
                 catch { }
             }
             finally

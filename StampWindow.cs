@@ -271,7 +271,7 @@ namespace StealthPDF
             _previewArea.SizeChanged += (_, _2) => { SizePreviewImage(); Schedule(); };
             root.Children.Add(previewWrap);
 
-            // "StealthPDF - ..." is the DialogChrome wordmark sentinel (renders as the styled Killer+PDF logo).
+            // "StealthPDF - ..." is the DialogChrome wordmark sentinel (renders as the styled Stealth+PDF logo).
             Content = DialogChrome.Frame(this, Owner, "StealthPDF - " + S("Str_Stamp_Suffix"), () => { Applied = false; Close(); }, root);
 
             // Esc-to-close is wired by DialogChrome.Frame; Enter commits.

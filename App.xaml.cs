@@ -549,7 +549,7 @@ namespace StealthPDF
 
             if (!IsDefaultPdfHandler())
             {
-                var res = KillerDialog.Show(null,
+                var res = StealthDialog.Show(null,
                     "Would you like to set StealthPDF as your default PDF viewer?\n\n" +
                     "Opens Windows Settings → Default Apps.",
                     "StealthPDF", MessageBoxButton.YesNo);
@@ -1193,18 +1193,18 @@ namespace StealthPDF
                 Foreground = accent,
                 TextDecorations = null
             };
-            logoHl.Click += (_, _) => OpenUrl("https://pdf.killertools.com");
+            logoHl.Click += (_, _) => OpenUrl("https://stealthpdf.com");
             logo.Inlines.Add(logoHl);
 
-            // Tagline with Killer Tools link
+            // Tagline linking to the open-source project on GitHub.
             var tagline = new TextBlock { FontSize = 11, Margin = new Thickness(0, 0, 0, 16) };
-            tagline.Inlines.Add(new Run("A fast, free PDF toolkit for Windows. Part of ") { Foreground = fgDim });
-            var ktHl = new Hyperlink(new Run("Killer Tools"))
+            tagline.Inlines.Add(new Run("A private, offline PDF editor for Windows. Open source on ") { Foreground = fgDim });
+            var ktHl = new Hyperlink(new Run("GitHub"))
             {
                 Foreground = accent,
                 TextDecorations = null
             };
-            ktHl.Click += (_, _) => OpenUrl("https://killertools.net");
+            ktHl.Click += (_, _) => OpenUrl("https://github.com/aabhpsy/StealthPDF");
             tagline.Inlines.Add(ktHl);
             tagline.Inlines.Add(new Run(".") { Foreground = fgDim });
 

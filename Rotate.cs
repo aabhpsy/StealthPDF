@@ -41,7 +41,7 @@ namespace StealthPDF
             // First-use warning that a transform rasterizes the page; persists the opt-out.
             if (App.GetSetting("RotateWarnAck") != "1")
             {
-                var (res, dontWarn) = KillerDialog.ShowWithCheckbox(this,
+                var (res, dontWarn) = StealthDialog.ShowWithCheckbox(this,
                     Loc("Str_Tf_Warn"),
                     Loc("Str_Tf_DontWarn"), Loc("Str_Tf_Suffix"), MessageBoxButton.OKCancel);
                 if (res != MessageBoxResult.OK) return;
@@ -129,7 +129,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, string.Format(Loc("Str_Tf_Failed"), ex.Message), "StealthPDF",
+                StealthDialog.Show(this, string.Format(Loc("Str_Tf_Failed"), ex.Message), "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

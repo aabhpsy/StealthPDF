@@ -35,7 +35,7 @@ namespace StealthPDF
         {
             if (_doc is null || _currentFile is null)
             {
-                KillerDialog.Show(this, Loc("Str_Unlock_NoDoc"), "StealthPDF",
+                StealthDialog.Show(this, Loc("Str_Unlock_NoDoc"), "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -44,12 +44,12 @@ namespace StealthPDF
             string sourceForCheck = _currentFile;
             if (!PdfFileHasEncryption(sourceForCheck))
             {
-                KillerDialog.Show(this, Loc("Str_Unlock_None"), "StealthPDF",
+                StealthDialog.Show(this, Loc("Str_Unlock_None"), "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var confirm = KillerDialog.Show(this, Loc("Str_Unlock_Confirm").Replace("\\n", "\n"),
+            var confirm = StealthDialog.Show(this, Loc("Str_Unlock_Confirm").Replace("\\n", "\n"),
                 Loc("Str_Unlock_Title"), MessageBoxButton.OKCancel, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.OK) return;
 
@@ -82,7 +82,7 @@ namespace StealthPDF
 
                 if (!ok)
                 {
-                    KillerDialog.Show(this, Loc("Str_Unlock_Failed"), "StealthPDF",
+                    StealthDialog.Show(this, Loc("Str_Unlock_Failed"), "StealthPDF",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
@@ -90,14 +90,14 @@ namespace StealthPDF
                 SetStatus(string.Format(Loc("Str_Unlock_Done"), System.IO.Path.GetFileName(destPath)));
                 // Offer to open the unlocked copy in a new tab so the user can immediately keep working
                 // with a version that actually allows printing / editing.
-                var openIt = KillerDialog.Show(this,
+                var openIt = StealthDialog.Show(this,
                     $"Unlocked copy saved:\n{destPath}\n\nOpen the unlocked copy now?",
                     "StealthPDF", MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (openIt == MessageBoxResult.Yes) OpenInNewTab(destPath);
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, Loc("Str_Unlock_Failed") + "\n\n" + ex.Message,
+                StealthDialog.Show(this, Loc("Str_Unlock_Failed") + "\n\n" + ex.Message,
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally

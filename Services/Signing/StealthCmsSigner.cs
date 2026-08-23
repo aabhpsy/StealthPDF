@@ -19,7 +19,7 @@ namespace StealthPDF.Services.Signing
     /// sign and drops the returned DER bytes into the /Contents placeholder. A detached CMS over that
     /// content is exactly an adbe.pkcs7.detached PDF signature.
     /// </summary>
-    internal sealed class KillerCmsSigner(X509Certificate2 cert) : IDigitalSigner
+    internal sealed class StealthCmsSigner(X509Certificate2 cert) : IDigitalSigner
     {
         private static readonly Oid Sha256 = new("2.16.840.1.101.3.4.2.1");   // id-sha256
 

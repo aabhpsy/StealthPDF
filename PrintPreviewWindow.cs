@@ -866,7 +866,7 @@ namespace StealthPDF
         {
             if (_queue == null)
             {
-                KillerDialog.Show(this, "No printer is available.", "StealthPDF",
+                StealthDialog.Show(this, "No printer is available.", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -874,7 +874,7 @@ namespace StealthPDF
             var indices = ParseRange(_pagesBox.Text, _pages.Length);
             if (indices.Count == 0)
             {
-                KillerDialog.Show(this, "No valid pages in that range.", "StealthPDF",
+                StealthDialog.Show(this, "No valid pages in that range.", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -942,7 +942,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Print failed:\n{ex.GetType().Name}: {ex.Message}",
+                StealthDialog.Show(this, $"Print failed:\n{ex.GetType().Name}: {ex.Message}",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

@@ -219,12 +219,12 @@ namespace StealthPDF
                 return;
             }
 
-            KillerDialog.Show(this, "Signed copy saved to:\n" + output, "Digital Signature", MessageBoxButton.OK, MessageBoxImage.Information);
+            StealthDialog.Show(this, "Signed copy saved to:\n" + output, "Digital Signature", MessageBoxButton.OK, MessageBoxImage.Information);
             DialogResult = true;
             Close();
         }
 
-        private void Warn(string msg) => KillerDialog.Show(this, msg, "Digital Signature", MessageBoxButton.OK, MessageBoxImage.Warning);
+        private void Warn(string msg) => StealthDialog.Show(this, msg, "Digital Signature", MessageBoxButton.OK, MessageBoxImage.Warning);
 
         // ---- themed control helpers (mirroring PrintPreviewWindow) -------------------------------
         private Style? FindOwnerStyle(string key) => Owner?.TryFindResource(key) as Style;
