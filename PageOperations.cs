@@ -45,16 +45,16 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, string.Format(Loc("Str_RotateFailed"), ex.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, string.Format(Loc("Str_RotateFailed"), ex.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void Split_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             var currentFile = _currentFile;
             var selected = PageList.SelectedItems;
-            if (selected.Count == 0) { KillerDialog.Show(this, "Select pages to extract."); return; }
+            if (selected.Count == 0) { StealthDialog.Show(this, "Select pages to extract."); return; }
             var dlg = new SaveFileDialog { Filter = "PDF files|*.pdf", Title = "Save extracted pages as",
                                            CheckFileExists = false, CheckPathExists = true };
             if (dlg.ShowDialog(this) != true) return;
@@ -71,17 +71,17 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Split failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Split failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             var doc = _doc;
             var selected = PageList.SelectedItems;
-            if (selected.Count == 0) { KillerDialog.Show(this, "Select pages to delete."); return; }
-            var result = KillerDialog.Show(this, $"Delete {selected.Count} {(selected.Count == 1 ? "page" : "pages")}?", "StealthPDF",
+            if (selected.Count == 0) { StealthDialog.Show(this, "Select pages to delete."); return; }
+            var result = StealthDialog.Show(this, $"Delete {selected.Count} {(selected.Count == 1 ? "page" : "pages")}?", "StealthPDF",
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
             try
@@ -95,13 +95,13 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Delete failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Delete failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void InsertBlankPage_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             var doc = _doc;
             int insertAfter = PageList.SelectedIndex >= 0 ? PageList.SelectedIndex : doc.PageCount - 1;
             try
@@ -114,7 +114,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Insert failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Insert failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -122,7 +122,7 @@ namespace StealthPDF
         // (sidebar empty area / outside the page), where there's no specific page to insert relative to.
         private void AddBlankPageAtEnd()
         {
-            if (_doc is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             var doc = _doc;
             try
             {
@@ -133,7 +133,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Add page failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Add page failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

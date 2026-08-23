@@ -267,7 +267,7 @@ namespace StealthPDF
 
         private void Install_Click(object sender, RoutedEventArgs e)
         {
-            var res = KillerDialog.Show(this,
+            var res = StealthDialog.Show(this,
                 Loc("Str_Dlg_InstallMsg"),
                 Loc("Str_Dlg_InstallTitle"), MessageBoxButton.OKCancel);
             if (res != MessageBoxResult.OK) return;
@@ -523,7 +523,7 @@ namespace StealthPDF
             {
                 // fadeClose:false so the prompt closes instantly instead of adding its own 150ms fade
                 // before the app's fade-out starts - otherwise the two run back-to-back (300ms of waiting).
-                var res = KillerDialog.Show(this,
+                var res = StealthDialog.Show(this,
                     Loc("Str_Dlg_UnsavedExit"),
                     Loc("Str_Dlg_AppTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning, fadeClose: false);
                 if (res != MessageBoxResult.Yes)

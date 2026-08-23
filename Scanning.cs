@@ -23,7 +23,7 @@ namespace StealthPDF
         {
             if (!ScannerService.HasScanner())
             {
-                KillerDialog.Show(this, Loc("Str_Scan_NoneFound"), "StealthPDF",
+                StealthDialog.Show(this, Loc("Str_Scan_NoneFound"), "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -125,7 +125,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 AbortTabLoad(target, prev, createdNew);
-                KillerDialog.Show(this, Loc("Str_Scan_Failed") + "\n" + ex.Message,
+                StealthDialog.Show(this, Loc("Str_Scan_Failed") + "\n" + ex.Message,
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally

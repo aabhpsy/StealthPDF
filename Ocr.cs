@@ -243,14 +243,14 @@ namespace StealthPDF
                 HideBusyOverlay(busy);
                 TryDeleteFile(dest + ".part");
                 if (ct.IsCancellationRequested) SetStatus($"{name} download cancelled");
-                else KillerDialog.Show(this, $"Downloading {name} timed out. Check your connection and try again.",
+                else StealthDialog.Show(this, $"Downloading {name} timed out. Check your connection and try again.",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
                 TryDeleteFile(dest + ".part");
-                KillerDialog.Show(this, $"Could not download {name} language data:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Could not download {name} language data:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -315,7 +315,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"High quality download failed:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"High quality download failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -384,7 +384,7 @@ namespace StealthPDF
             if (missing.Count == 0) return true;
 
             string names = string.Join(", ", missing.ConvertAll(NameForCode));
-            var choice = KillerDialog.Show(this,
+            var choice = StealthDialog.Show(this,
                 $"A language model ({names}) will be downloaded now so OCR can run.\n\n" +
                 "You can add more languages or switch to higher quality models any time from the OCR menu.",
                 "StealthPDF", MessageBoxButton.OKCancel, MessageBoxImage.Information);
@@ -417,7 +417,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Could not download the language model:\n{ex.Message}",
+                StealthDialog.Show(this, $"Could not download the language model:\n{ex.Message}",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -433,7 +433,7 @@ namespace StealthPDF
         // busy overlay; everything touching the clipboard/UI happens back on the UI thread.
         private async void OcrPageToClipboard(int pageIdx)
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             if (pageIdx < 0 || pageIdx >= _doc.PageCount) return;
             if (!await EnsureOcrModelsReadyAsync()) return;
 
@@ -480,7 +480,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"OCR failed:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"OCR failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -495,7 +495,7 @@ namespace StealthPDF
 
         private void BeginOcrRegion()
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, "Open a PDF first."); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, "Open a PDF first."); return; }
             SetTool(EditTool.Select);
             _ocrRegionMode = true;
             SetStatus("Drag a box over the area to recognize");
@@ -549,7 +549,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"OCR failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"OCR failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -608,7 +608,7 @@ namespace StealthPDF
 
         private async void MakeSearchablePdf()
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Ocr_NoDoc")); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, Loc("Str_Ocr_NoDoc")); return; }
             if (!await EnsureOcrModelsReadyAsync()) return;
             CommitActiveTextBox();
 
@@ -629,7 +629,7 @@ namespace StealthPDF
             try { _doc.Save(src); }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -646,14 +646,14 @@ namespace StealthPDF
                 HideBusyOverlay(busy);
                 if (ct.IsCancellationRequested) { SetStatus("Searchable PDF cancelled (no file written)"); return; }
                 SetStatus($"Searchable PDF saved: {pages} pages, {words} words recognized");
-                KillerDialog.Show(this,
+                StealthDialog.Show(this,
                     $"Saved searchable PDF:\n{outPath}\n\n{pages} pages processed, {words} words recognized.",
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"Searchable PDF failed:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Searchable PDF failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -721,17 +721,25 @@ namespace StealthPDF
                 byte[] bgra = pr.GetImage();
                 if (bgra is null || bgra.Length == 0 || w <= 0 || h <= 0) continue;
 
-                // Encode the rendered page as PNG for PdfSharpCore's XImage.
+                // Encode the rendered page as JPEG for PdfSharpCore's XImage. JPEG (not PNG)
+                // because every page image is held in the in-memory outDoc until the final
+                // Save(); a lossless PNG per page piles up hundreds of MB on a long document and
+                // OCR of long files ran out of memory before finishing. q82 at OCR render
+                // resolution is the standard quality for a searchable-PDF background layer.
+                // Bgra32 -> Bgr24 first: pdfium renders opaque pages, and JpegBitmapEncoder has
+                // no alpha channel, so dropping the (opaque) alpha avoids any encoder ambiguity.
                 var wb = new WriteableBitmap(w, h, 96, 96, PixelFormats.Bgra32, null);
                 wb.WritePixels(new Int32Rect(0, 0, w, h), bgra, w * 4, 0);
                 wb.Freeze();
-                byte[] pngBytes;
+                var bgr24 = new FormatConvertedBitmap(wb, PixelFormats.Bgr24, null, 0);
+                bgr24.Freeze();
+                byte[] jpegBytes;
                 using (var ms = new MemoryStream())
                 {
-                    var enc = new PngBitmapEncoder();
-                    enc.Frames.Add(BitmapFrame.Create(wb));
+                    var enc = new JpegBitmapEncoder { QualityLevel = 82 };
+                    enc.Frames.Add(BitmapFrame.Create(bgr24));
                     enc.Save(ms);
-                    pngBytes = ms.ToArray();
+                    jpegBytes = ms.ToArray();
                 }
 
                 // Output page point dimensions: prefer PdfPig's true page size; otherwise cap at Letter width.
@@ -746,7 +754,7 @@ namespace StealthPDF
                 page.Height = XUnit.FromPoint(pageHpt);
 
                 using var gfx = XGraphics.FromPdfPage(page);
-                using (var xImg = XImage.FromStream(() => new MemoryStream(pngBytes)))
+                using (var xImg = XImage.FromStream(() => new MemoryStream(jpegBytes)))
                     gfx.DrawImage(xImg, 0, 0, pageWpt, pageHpt);
 
                 OcrResult result = ocr.RecognizeBgra(bgra, w, h);
@@ -781,7 +789,7 @@ namespace StealthPDF
 
         private async void ExtractAllText()
         {
-            if (_doc is null || _currentFile is null) { KillerDialog.Show(this, Loc("Str_Ocr_NoDoc")); return; }
+            if (_doc is null || _currentFile is null) { StealthDialog.Show(this, Loc("Str_Ocr_NoDoc")); return; }
             if (!await EnsureOcrModelsReadyAsync()) return;
             CommitActiveTextBox();
 
@@ -802,7 +810,7 @@ namespace StealthPDF
             try { _doc.Save(src); pageCount = _doc.PageCount; }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Could not prepare the document:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -823,7 +831,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 HideBusyOverlay(busy);
-                KillerDialog.Show(this, $"Text extraction failed:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Text extraction failed:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally

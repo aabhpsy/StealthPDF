@@ -71,7 +71,7 @@ namespace StealthPDF
             _srcH = src.PixelHeight;
             _pageWpt = pageWpt;
             _pageHpt = pageHpt;
-            // "StealthPDF - ..." is the DialogChrome wordmark sentinel (renders as styled Killer+PDF).
+            // "StealthPDF - ..." is the DialogChrome wordmark sentinel (renders as styled Stealth+PDF).
             Title = "StealthPDF - " + S("Str_Tf_Suffix");
             Width = 980;
             Height = 720;
@@ -249,7 +249,7 @@ namespace StealthPDF
             previewWrap.SizeChanged += (_, _2) => SizePreviewImage();
             root.Children.Add(previewWrap);
 
-            // Sentinel: DialogChrome swaps the "StealthPDF" substring for the styled Killer+PDF wordmark.
+            // Sentinel: DialogChrome swaps the "StealthPDF" substring for the styled Stealth+PDF wordmark.
             Content = DialogChrome.Frame(this, Owner, "StealthPDF - " + S("Str_Tf_Suffix"), () => { Applied = false; Close(); }, root);
             UpdatePreview();   // populate the output-size readout at the original dimensions
 

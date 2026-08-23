@@ -48,7 +48,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 AbortTabLoad(target, prev, createdNew);
-                KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
+                StealthDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -146,7 +146,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 CleanupDirs(tempDirs);
-                KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
+                StealthDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -163,7 +163,7 @@ namespace StealthPDF
             const int MaxDropFiles = 50;
             if (found.Count > MaxDropFiles)
             {
-                var proceed = KillerDialog.Show(this,
+                var proceed = StealthDialog.Show(this,
                     string.Format(Loc("Str_Drop_TooMany"), found.Count, MaxDropFiles),
                     "StealthPDF", MessageBoxButton.OKCancel);
                 if (proceed != MessageBoxResult.OK) { CleanupDirs(tempDirs); return; }
@@ -174,7 +174,7 @@ namespace StealthPDF
             // zip is kept for the session since the opened doc references it.
             if (!expanded && found.Count == 1) { OpenDropped(found[0]); return; }
 
-            int choice = KillerDialog.ShowChoices(this,
+            int choice = StealthDialog.ShowChoices(this,
                 string.Format(Loc("Str_Drop_Prompt"), found.Count),
                 [Loc("Str_Drop_Merge"), Loc("Str_Drop_Separate"), Loc("Str_Stamp_Cancel")],
                 accentIndex: 0);
@@ -203,7 +203,7 @@ namespace StealthPDF
         {
             if (found.Count > 30)
             {
-                var ok = KillerDialog.Show(this, string.Format(Loc("Str_Drop_ManyTabs"), found.Count),
+                var ok = StealthDialog.Show(this, string.Format(Loc("Str_Drop_ManyTabs"), found.Count),
                     "StealthPDF", MessageBoxButton.OKCancel);
                 if (ok != MessageBoxResult.OK) return;
             }
@@ -246,7 +246,7 @@ namespace StealthPDF
             {
                 HideBusyOverlay(busy);
                 AbortTabLoad(target, prev, createdNew);
-                KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
+                StealthDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -274,7 +274,7 @@ namespace StealthPDF
             catch (Exception ex)
             {
                 AbortTabLoad(target, prev, createdNew);
-                KillerDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
+                StealthDialog.Show(this, Loc("Str_Err_ImportFailed") + "\n" + ex.Message,
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -339,12 +339,12 @@ namespace StealthPDF
 
         private void CompressToZip_Click(object sender, RoutedEventArgs e)
         {
-            if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
+            if (_doc is null) { StealthDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
 
             // The zip wraps the PDF on disk, so make sure what's on screen is saved first.
             if (_isDirty || string.IsNullOrEmpty(_originalFile) || !File.Exists(_originalFile))
             {
-                var ask = KillerDialog.Show(this, Loc("Str_Dlg_SaveBeforeZip"),
+                var ask = StealthDialog.Show(this, Loc("Str_Dlg_SaveBeforeZip"),
                     "StealthPDF", MessageBoxButton.OKCancel);
                 if (ask != MessageBoxResult.OK) return;
                 SaveInPlace();
@@ -376,7 +376,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, Loc("Str_Err_ZipFailed") + "\n" + ex.Message,
+                StealthDialog.Show(this, Loc("Str_Err_ZipFailed") + "\n" + ex.Message,
                     "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

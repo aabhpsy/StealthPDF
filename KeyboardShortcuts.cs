@@ -97,7 +97,7 @@ namespace StealthPDF
             {
                 // A cancellable long operation (OCR, repair) is running behind the busy overlay - offer to
                 // cancel it instead of letting Escape fall through to the app-exit handler below.
-                if (KillerDialog.Show(this, $"Cancel the current {_busyOpLabel}?", "StealthPDF",
+                if (StealthDialog.Show(this, $"Cancel the current {_busyOpLabel}?", "StealthPDF",
                         MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     _busyCts?.Cancel();
                 e.Handled = true;
@@ -319,7 +319,7 @@ namespace StealthPDF
         // Opens the online help / how-to page in the user's default browser.
         private void OnlineHelp_Click(object sender, RoutedEventArgs e)
         {
-            try { Process.Start(new ProcessStartInfo("https://StealthPDF.net/help.html") { UseShellExecute = true }); }
+            try { Process.Start(new ProcessStartInfo("https://stealthpdf.com/") { UseShellExecute = true }); }
             catch { }
         }
     }

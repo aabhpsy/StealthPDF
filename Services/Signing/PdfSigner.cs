@@ -51,7 +51,7 @@ namespace StealthPDF.Services.Signing
             // works with cloud / token keys (Certum SimplySign) as well as software .pfx keys, where
             // PdfSharpDefaultSigner throws "An internal error occurred". Same IDigitalSigner slot, so a
             // Bouncy Castle variant can later swap in here for portability + timestamps.
-            var signer = new KillerCmsSigner(cert);
+            var signer = new StealthCmsSigner(cert);
 
             // Associates the signer + options with the document; the signature is produced on Save.
             _ = DigitalSignatureHandler.ForDocument(document, signer, options);

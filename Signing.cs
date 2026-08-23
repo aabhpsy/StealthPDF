@@ -719,7 +719,7 @@ namespace StealthPDF
             {
                 if (strokes.Count == 0)
                 {
-                    KillerDialog.Show(this, "Draw a signature first.", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    StealthDialog.Show(this, "Draw a signature first.", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -801,7 +801,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Failed to import image:\n{ex.Message}", "StealthPDF",
+                StealthDialog.Show(this, $"Failed to import image:\n{ex.Message}", "StealthPDF",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

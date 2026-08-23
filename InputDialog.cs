@@ -16,7 +16,7 @@ namespace StealthPDF
         internal InputDialog(string title, string prompt, string initial, Window owner)
         {
             // The DialogChrome title bar looks for the literal "StealthPDF" substring in the window
-            // title and swaps it for the styled Killer+PDF wordmark. Prefix here so this small
+            // title and swaps it for the styled Stealth+PDF wordmark. Prefix here so this small
             // input dialog gets the same branded header as Stamp / Transform.
             Title = "StealthPDF - " + title;
             Width = 380;

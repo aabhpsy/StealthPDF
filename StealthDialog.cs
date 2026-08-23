@@ -17,7 +17,7 @@ namespace StealthPDF
     // ============================================================
     // Themed dialog - replaces MessageBox for dark-UI consistency
     // ============================================================
-    internal static class KillerDialog
+    internal static class StealthDialog
     {
         // Pulls the current theme brush at call time so dialogs respect light/dark/HC themes.
         private static SolidColorBrush R(string key)

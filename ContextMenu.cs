@@ -263,7 +263,7 @@ namespace StealthPDF
             }
             catch (Exception ex)
             {
-                KillerDialog.Show(this, $"Duplicate failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
+                StealthDialog.Show(this, $"Duplicate failed:\n{ex.Message}", "StealthPDF", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
