@@ -17,11 +17,13 @@ body > * { position: relative; z-index: 1; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { filter: brightness(1.15); }
 
-/* ---- Wordmark (rendered from the app font as SVG) ---- */
-.wm-logo { display: block; width: auto; }
+/* ---- Wordmark: text, mirroring the in-app wordmark (DialogChrome.cs) ----
+   "Stealth" in the UI font at semibold, "PDF" heavier, larger and accent-coloured.
+   Rendering it as text (rather than one SVG per theme x accent) means it follows
+   --logo-pdf for free, so every theme and accent stays in sync automatically. */
+.wm-logo { display: block; width: auto; font-family: 'Segoe UI Variable Display', 'Segoe UI Semibold', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; font-weight: 600; color: var(--text); letter-spacing: -0.01em; line-height: 1; white-space: nowrap; }
 html[data-theme="light"] .wm-logo { filter: none; }
-.wm-killer { fill: currentColor; }
-.wm-pdf { fill: var(--logo-pdf); stroke: var(--logo-pdf); stroke-width: 14; stroke-linejoin: round; }
+.wm-pdf { font-weight: 700; font-size: 1.18em; color: var(--logo-pdf); }
 
 /* ---- Page title kicker (sits above the wordmark on sub-pages), in the wordmark typewriter font ---- */
 @font-face {
@@ -43,7 +45,7 @@ html[data-theme="light"] .page-title { text-shadow: none; }
 .tb-home { display: inline-flex; align-items: center; gap: 9px; color: var(--text); }
 .tb-home:hover { filter: none; }
 .tb-icon { width: 36px; height: 36px; border-radius: 9px; display: block; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.55)); }
-.tb-wm { height: 22px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+.tb-wm { font-size: 17px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 .tb-sub { font-size: 12px; color: var(--muted); font-family: Consolas, monospace; }
 .tb-spacer { flex: 1; }
 .help-link { color: var(--accent); font-size: 13px; font-weight: 600; border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 6px; padding: 4px 12px; }
@@ -140,7 +142,7 @@ html[data-theme="light"] .page-title { text-shadow: none; }
 @media (max-width: 560px) {
   .topbar { min-height: 0; padding: 8px 12px; gap: 8px 9px; justify-content: center; }
   .tb-icon { width: 30px; height: 30px; }
-  .tb-wm { height: 18px; }
+  .tb-wm { font-size: 14px; }
   .tb-spacer { display: none; }
   /* Row 1: home logo on the left, download button pushed to the right */
   .tb-dl { margin-left: auto; padding: 7px 13px; font-size: 12px; }

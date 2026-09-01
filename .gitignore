@@ -28,11 +28,7 @@ obj/
 *.tmp
 
 # Heavy source art - stored locally only, not shipped and not part of the project.
-# Anchored with a leading slash so it only ignores KillerPDF/brand, NOT pdf-landing/brand
-# (the small web logos the landing site links to).
-# Heavy source art - stored locally only, not shipped and not part of the project.
-# Anchored with a leading slash so it only ignores KillerPDF/brand, NOT pdf-landing/brand
-# (the small web logos the landing site links to).
+# Anchored with a leading slash so it only ignores a /brand folder at the repo root.
 /brand/
 
 # PyMuPDF compression helper bundle (~55 MB of binaries: portable Python + PyMuPDF).

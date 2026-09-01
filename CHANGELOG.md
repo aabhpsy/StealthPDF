@@ -2,9 +2,33 @@
 
 All notable changes to StealthPDF are documented here.
 
-StealthPDF is a fork of [StealthPDF](https://github.com/SteveTheKiller/StealthPDF) by Steve the Killer, maintained by [@aabhpsy](https://github.com/aabhpsy).
+StealthPDF is a fork of **KillerPDF** by [Steve the Killer](https://thekiller.net), maintained by [@aabhpsy](https://github.com/aabhpsy).
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Fixed
+- **`release.ps1` could not run at all**: it still pointed at `KillerPDF.csproj` and `KillerPDF.exe`, neither of which exists after the rename, and it rewrote `BuildInfo.cs` with `namespace KillerPDF` — which would have broken the build it had just started. It also signed with `/d "KillerPDF"` and the retired `killerpdf.net` URL, and wrote `KillerPDF.exe` into `SHA256SUMS.txt`.
+- **`SHA256SUMS.txt` had no separator before the source-zip hash**: the name column was padded to 24 characters and `StealthPDF-2.0.0-src.zip` is itself exactly 24, so the hash ran straight into the filename. All three rows now pad to a fixed column and always emit a space.
+- **`SHA256SUMS.txt` began with a UTF-8 BOM**, which sits in front of `StealthPDF.exe` on the first line. `About.cs` matches that line with `TrimStart().StartsWith("StealthPDF.exe")`, and U+FEFF is not whitespace in .NET Framework, so the in-app update check could not find the expected hash and fell back to opening the releases page. The file is now written without a BOM, matching what `release.ps1` emits.
+- **Every logo on stealthpdf.com was a broken image**: the pages requested `brand/StealthPDF-logo-<theme>-<accent>.svg` while the files on disk were all named `killerpdf-logo-*.svg`, so all twelve theme/accent combinations 404'd.
+- **The download panel advertised the wrong release**: it still showed v1.6.0, its release date and its SHA256, while the footer on the same page said v2.0.0.
+- **Chocolatey package icon 404'd**: `iconUrl` pointed at `main/KillerPDF/Resources/kp-icon.ico`, a directory that does not exist.
+- **README build instructions did not work**: they said `dotnet build KillerPDF/StealthPDF.csproj`; the project is at the repository root.
+- **CHANGELOG had been mangled by the rebrand replace**: it described the project as "a fork of StealthPDF", rendered the rebrand as "StealthPDF → StealthPDF", claimed the C# namespace was deliberately left as KillerPDF (2.0.0 did rename it), and carried a duplicated `### Added` block and a repeated bullet.
+- **`StealthPDF.Tests` was missing from `StealthPDF.sln`**, so opening the solution showed no tests. CI had been working around this with an explicit restore.
+
+### Changed
+- **The site wordmark is now text rather than an image**, styled in `kp.css` to mirror the in-app wordmark (`DialogChrome.cs`): "Stealth" in the UI font, "PDF" heavier and coloured by `--logo-pdf`. It follows the theme and accent on its own, so the twelve per-variant SVGs and the JavaScript that swapped between them are gone.
+- **`release.ps1` now stamps the landing site** with the version, release date, EXE size and SHA256, driven by `data-stamp` attributes rather than the line numbers it used to print for manual pasting.
+- **Tightened the site CSP** — the `static.cloudflareinsights.com` and `cloudflareinsights.com` allowances outlived the analytics removal — and added `object-src 'none'`, HSTS, and per-asset cache headers.
+- Removed ~92 KB of dead KillerPDF wordmark artwork that every page carried in a hidden `<defs>` block that nothing referenced.
+
+### Added
+- `pdf-landing/deploy-check.ps1`: a pre-deploy gate that fails on unstamped `REPLACE_*` sentinels, missing local assets, a footer version badge that disagrees with the csproj, unresolvable `sitemap.xml` entries, or reintroduced KillerPDF asset paths.
+- `pdf-landing/DEPLOY.md`: the release-to-deploy runbook.
+- `pdf-landing/404.html`: a not-found page using the shared site chrome (`noindex`, deliberately absent from the sitemap).
 
 ## [2.0.0] - 2026-07-18
 
@@ -12,23 +36,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - **Bundled OCR models**: English (`eng`) and Nepali (`nep`) Tesseract traineddata now ship embedded inside the EXE (High Quality, tessdata_best), so OCR works fully offline for both — no download required, ever. Other languages still download on demand and are cached. Adds ~27 MB to the EXE.
 - **Nepali (np-NP) UI locale** added to the Settings language picker (scaffold — falls back to English until translated; contributes via `Strings/TRANSLATING.md`).
 - **English (UK) UI locale** added — British-spelling override (colour, centre, recognise) on top of the en-US base.
-### Added
 - **TWAIN scanner support**: a bundled x86 helper (`StealthPDF.TwainHelper.exe`, built from the new `TwainHelper` project) bridges to the 32-bit TWAIN Data Source Manager. The main 64-bit app launches it out-of-process to enumerate and acquire from every installed TWAIN scanner — including TWAIN-only drivers that WIA (and therefore the previous WIA-only build) could not see at all. The scanner dropdown now lists **`[TWAIN] <name>`** and **`[WIA] <name>`** entries; TWAIN acquisition shows the scanner's own native UI (same dialog Adobe/Fax & Scan present). Uses the MIT-licensed [NTwain](https://github.com/soukoku/ntwain) library.
 - **Traditional menu bar** (File / Edit / View / Tools / Help) at the top of the window, Adobe-style, in addition to the icon toolbar. Every action is reachable from the keyboard via Alt + underlined letter.
+- Menu strings for all five menus in en-US (English). Other locales fall back to English until translated.
+
 ### Fixed
-- **Scanner selection (WIA)**: the scanner dropdown now also accepts WIA devices that report `Type 0` (some stacks enumerate image devices as untyped). Added a **"Choose at scan time…"** fallback entry in the scan dialog that defers the pick to Windows' native Select-Device dialog, which can surface scanners that WIA enumeration missed. If a previously chosen scanner is unplugged, acquisition now falls back to the native picker instead of failing silently. Rebranded the scan temp-file prefix (`StealthPDF-scan` → `StealthPDF-scan`) and dialog titles. (TWAIN-only scanners are now supported via the new x86 helper — see above.)
-- **Menu headers**: removed the literal `_` prefix that was showing in front of menu names (`_File`, `_Edit`, …). Menus now read as clean "File / Edit / View / Tools / Help".
+- **Scanner selection (WIA)**: the scanner dropdown now also accepts WIA devices that report `Type 0` (some stacks enumerate image devices as untyped). Added a **"Choose at scan time…"** fallback entry in the scan dialog that defers the pick to Windows' native Select-Device dialog, which can surface scanners that WIA enumeration missed. If a previously chosen scanner is unplugged, acquisition now falls back to the native picker instead of failing silently. Scan temp files (`StealthPDF-scan-*.png`) and the scan dialog titles carry the StealthPDF name. (TWAIN-only scanners are now supported via the new x86 helper — see above.)
 - **Compress PDF reworked (rotation + size)**: replaced the old page-rasterize approach with **image-level compression** via a bundled [PyMuPDF](https://github.com/pymupdf/PyMuPDF) helper (AGPL-3.0, compatible with this GPL-3.0 fork). This fixes two serious bugs: (1) **rotation was being changed** — the old code rendered pages through PDFium's unrotated space and re-drew the JPEG full-page, flipping landscape/sideways pages; now only image XObjects are swapped in place and the page `/Rotate`, content stream and text are never touched, so orientation is preserved exactly. (2) **the compressed file was often larger than the source** — the old code re-rasterized the whole page (text + images) at a fixed DPI and re-encoded as one JPEG, which upsamples already-small images and compresses crisp text poorly; now each image is judged at its real on-page DPI and only downsampled if above the target (never upsamples), text-only pages pass through untouched, and the output is linearized + garbage-collected + deflated. Adds a ~55 MB bundled portable Python + PyMuPDF runtime (deployed under `PdfHelper\` next to the app; built via `PdfHelper/fetch-pdfhelper.ps1`).
 - **Compress PDF no longer hangs on large files**: the PyMuPDF helper called `page.get_image_rects()` **per image**, which re-parses the page content and MD5-decodes every image on the page on each call (O(images²) full image decodes per page), decoded every image ~2× even when nothing needed doing, and saved with `clean=True` + `linear=True` (a full content-stream sanitize plus a second full write pass). The reworked pipeline does one metadata-only content pass per page (pages with nothing to compress cost **zero** image decodes), computes effective DPI exactly from each image's transform matrix, decodes each processed image exactly once, skips already-compact bitonal scans, never replaces an image with a larger stream, and linearizes only files ≤ 32 MB. The helper now also streams per-page progress to the busy overlay, and the app no longer freezes the UI on a PdfSharp snapshot save when the document is unmodified — clean documents are compressed straight from the on-disk file. Follow-up hardening for book-scale files: text-only pages are now skipped without any content parsing (the per-page TextPage extraction was the dominant cost on text-heavy books), bitonal (JBIG2/CCITT) scans are left untouched (already optimal — re-encoding them as JPEG used to *grow* them), multi-image pages no longer decode images that can't be over target, and the runaway ceiling is 60 minutes with the last reported page included in the timeout message.
-
 - **Menu headers**: removed the literal `_` prefix that was showing in front of menu names (`_File`, `_Edit`, …). Menus now read as clean "File / Edit / View / Tools / Help".
-- Menu strings for all five menus in en-US (English). Other locales fall back to English until translated.
 - Open menu: the remove (X) button on each recent-files entry was clipped off the right edge of the dropdown; it now stays inside the frame.
+
 ### Changed
 - **Professional UI refresh**: the default Dark and Light themes are now neutral graphite/paper palettes with a single restrained **blue accent** and a flat, clean finish - the film grain, icon glow, and header drop shadows are gone, and the Consolas "terminal" chrome is replaced by the app UI font (Segoe UI) throughout. The look borrows the restraint of professional PDF tools without losing the StealthPDF identity. The legacy KillerTools green survives as an accent choice (Dark/Light), and every accent hue now also drives the wordmark and install-button colour. Black stays the high-contrast theme; Blood/Greed/Cyanotic keep their personalities but lose the grain.
 - **stealthpdf.com is the download home**: the downloadable build now lives on the website; GitHub hosts the source. Landing site, README, Chocolatey package (`stealthpdf`) and WinGet id (`aabhpsy.StealthPDF`) updated to match; release workflows point at the fork.
-- **Rebrand StealthPDF → StealthPDF** (user-visible only): app title, window title, wordmark, About box, tagline, install/uninstall dialogs, install path (`%LOCALAPPDATA%\Programs\StealthPDF\`), Start Menu / Desktop shortcuts, PDF file-handler ProgID (`StealthPDF.pdf`), registry keys, update-check URLs, and the launcher dialog. The internal C# namespace `StealthPDF` is intentionally kept to avoid a risky deep rename.
-- Footer credit now shows: "StealthPDF · fork of StealthPDF by Steve the Killer · maintainer @aabhpsy".
+- **Rebrand KillerPDF → StealthPDF**: app title, window title, wordmark, About box, tagline, install/uninstall dialogs, install path (`%LOCALAPPDATA%\Programs\StealthPDF\`), Start Menu / Desktop shortcuts, PDF file-handler ProgID (`StealthPDF.pdf`), registry keys, update-check URLs, and the launcher dialog. The internal C# namespaces were renamed to `StealthPDF` in the same pass.
+- Footer credit now shows: "StealthPDF · fork of KillerPDF by Steve the Killer".
 - About box tagline link points to the StealthPDF GitHub repo.
 - Output binary is now `StealthPDF.exe` (via `<AssemblyName>StealthPDF</AssemblyName>`).
 - README rewritten for StealthPDF with an install-vs-portable comparison table and credits.

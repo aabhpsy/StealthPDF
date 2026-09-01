@@ -41,15 +41,8 @@
     });
     if (accToggle) { accToggle.style.background = pair[0]; accToggle.title = 'Accent color'; }
     try { localStorage.setItem('kpdf-accent', name); } catch (e) {}
-    updateLogos();
-  }
-  function updateLogos() {
-    var theme = root.getAttribute('data-theme');
-    var variant = (theme === 'light') ? 'light' : 'dark';
-    var color = (NEUTRAL.indexOf(theme) >= 0) ? curAccent : 'green';
-    var src = 'brand/StealthPDF-logo-' + variant + '-' + color + '.svg';
-    var imgs = document.querySelectorAll('img.wm-logo');
-    for (var i = 0; i < imgs.length; i++) imgs[i].src = src;
+    // The wordmark is text styled by --logo-pdf, so it recolours with the accent
+    // on its own - no per-theme/per-accent image swapping needed.
   }
 
   function setTheme(name) {
