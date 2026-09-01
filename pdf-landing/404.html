@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<script>/* Apply saved theme + accent before first paint to avoid a reload flash */(function(){try{var d=document.documentElement,t=localStorage.getItem('kpdf-theme');if(t){d.setAttribute('data-theme',t);if({dark:1,light:1,hc:1}[t]){var v=localStorage.getItem('kpdf-av');if(v){var s=v.split('|');d.style.setProperty('--accent',s[0]);d.style.setProperty('--btn',s[1]);}}}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="darkreader-lock">
+<title>StealthPDF - Page not found</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/x-icon" href="kp-icon.ico">
+<link rel="stylesheet" href="kp.css?v=5">
+<style>
+.page-hero { text-align: center; padding: 60px 16px 8px; }
+.page-hero .wm-logo { font-size: clamp(27px, 4.6vw, 44px); margin: 0 auto 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55)); }
+.page-hero p { color: var(--muted); font-size: 15px; margin-top: 4px; }
+.content-inner { max-width: 680px; margin: 0 auto; padding: 0 28px 56px; text-align: center; }
+.nf-code { font-family: Consolas, monospace; font-size: clamp(56px, 12vw, 104px); line-height: 1; color: var(--accent); letter-spacing: 2px; }
+.nf-links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px; }
+.nf-links a { border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 6px; padding: 8px 16px; font-size: 14px; }
+.nf-links a:hover { background: var(--accent-dim); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<a href="index.html" class="tb-home" title="StealthPDF home">
+<img class="tb-icon" src="kp-icon.png" alt="StealthPDF" width="44" height="44">
+<span class="wm-logo tb-wm">Stealth<span class="wm-pdf">PDF</span></span>
+</a>
+<a class="tb-dl" href="/download/StealthPDF.exe"><svg viewBox="0 0 24 24"><path d="M11 4h2v7h3l-4 5-4-5h3V4zM5 18h14v2H5z"/></svg><span data-i18n="nav_dl">Download</span></a>
+<span class="tb-spacer"></span>
+<nav class="tb-nav">
+<a href="about.html" data-i18n="nav_about">About</a>
+<a href="help.html" data-i18n="nav_help">Help</a>
+<a href="technical.html" data-i18n="nav_tech">Technical</a>
+</nav>
+<div class="tgrp" role="group" aria-label="Theme">
+<button class="swatch sw-dark"     data-theme="dark"     title="Dark"></button>
+<button class="swatch sw-light"    data-theme="light"    title="Light"></button>
+<button class="swatch sw-hc"       data-theme="hc"       title="High Contrast"></button>
+<button class="swatch sw-blood"    data-theme="blood"    title="Blood"></button>
+<button class="swatch sw-greed"    data-theme="greed"    title="Greed"></button>
+<button class="swatch sw-cyanotic" data-theme="cyanotic" title="Cyanotic"></button>
+</div>
+<div class="acc-fly accent-switch" id="accentSwitch">
+<button class="acc-toggle" id="accentToggle" aria-haspopup="true" aria-expanded="false" title="Accent color"></button>
+<div class="acc-pop" id="accentPop" hidden role="group" aria-label="Accent color">
+<span class="acc-pop-label" data-i18n="accent_label">accent:</span>
+<button class="acc" data-accent="red"    style="background:#DD504B;color:#DD504B" title="Red"></button>
+<button class="acc" data-accent="orange" style="background:#E8962C;color:#E8962C" title="Orange"></button>
+<button class="acc" data-accent="green"  style="background:#1EA54C;color:#1EA54C" title="Green"></button>
+<button class="acc" data-accent="teal"   style="background:#1FB8A8;color:#1FB8A8" title="Teal"></button>
+<button class="acc" data-accent="blue"   style="background:#50AEE8;color:#50AEE8" title="Blue"></button>
+<button class="acc" data-accent="purple" style="background:#B982E3;color:#B982E3" title="Purple"></button>
+</div>
+</div>
+<div class="lang-switch" role="group" aria-label="Language">
+<button class="lang-toggle" id="langToggle" aria-haspopup="true" aria-expanded="false" title="Language" aria-label="Language">&#127760;</button>
+<div class="lang-menu" id="langMenu" hidden>
+<button class="lang-item" data-lang="en">English</button>
+<button class="lang-item" data-lang="es">Espanol</button>
+<button class="lang-item" data-lang="de">Deutsch</button>
+<button class="lang-item" data-lang="fr">Francais</button>
+<button class="lang-item" data-lang="tr">Turkce</button>
+<button class="lang-item" data-lang="zh">&#20013;&#25991; (&#32321;&#39636;)</button>
+<button class="lang-item" data-lang="zh-cn">&#20013;&#25991; (&#31616;&#20307;)</button>
+<button class="lang-item" data-lang="bn">&#2476;&#2494;&#2434;&#2482;&#2494;</button>
+</div>
+</div>
+</div>
+
+<div class="frame-shadow" aria-hidden="true"></div>
+<div class="shell">
+<div class="content">
+<div class="content-inner">
+
+<section class="page-hero">
+<span class="nf-code">404</span>
+<span class="page-title">Page not found</span>
+<span class="wm-logo">Stealth<span class="wm-pdf">PDF</span></span>
+<p>That page has moved or never existed. The app itself is still right here.</p>
+</section>
+
+<div class="nf-links">
+<a href="index.html">Home</a>
+<a href="/download/StealthPDF.exe">Download</a>
+<a href="help.html">Help</a>
+<a href="technical.html">Technical</a>
+<a href="about.html">About</a>
+</div>
+
+</div>
+</div>
+</div>
+<footer class="statusbar">
+<span class="left"><a href="https://github.com/aabhpsy/StealthPDF" target="_blank" rel="noopener">Source on GitHub</a> &middot; GPLv3 &middot; <a href="https://stealthpdf.com" target="_blank" rel="noopener">stealthpdf.com</a></span>
+<span class="right"><span id="verEgg" title="click me" data-stamp="version-badge">v2.0.0</span> &middot; &copy; 2026 <b>StealthPDF</b> &middot; fork of KillerPDF by <a href="https://thekiller.net" target="_blank" rel="noopener">Steve the Killer</a></span>
+</footer>
+<div class="egg-toast" id="eggToast"></div>
+<script src="kp.js?v=3"></script>
+</body>
+</html>

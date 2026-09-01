@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.37027.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StealthPDF", "StealthPDF.csproj", "{D7AFAEB6-1B7F-41FB-86C5-A5B17169D42F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StealthPDF.Tests", "StealthPDF.Tests\StealthPDF.Tests.csproj", "{13BF88AA-171F-5CD2-BF0E-5D040800684F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D7AFAEB6-1B7F-41FB-86C5-A5B17169D42F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7AFAEB6-1B7F-41FB-86C5-A5B17169D42F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7AFAEB6-1B7F-41FB-86C5-A5B17169D42F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13BF88AA-171F-5CD2-BF0E-5D040800684F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13BF88AA-171F-5CD2-BF0E-5D040800684F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13BF88AA-171F-5CD2-BF0E-5D040800684F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13BF88AA-171F-5CD2-BF0E-5D040800684F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

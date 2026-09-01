@@ -47,8 +47,8 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      # Restore the app and the (standalone) test project. The test project is
-      # not part of StealthPDF.sln, so restore it explicitly.
+      # Restore the app and the test project. Both are in StealthPDF.sln, but they
+      # are restored by path so this step does not depend on the solution file.
       - name: Restore
         run: |
           dotnet restore StealthPDF.csproj

@@ -96,20 +96,36 @@ If you are just trying StealthPDF, run the portable EXE. If you use it regularly
 ```powershell
 git clone https://github.com/aabhpsy/StealthPDF.git
 cd StealthPDF
-dotnet build KillerPDF/StealthPDF.csproj -c Release
+dotnet build StealthPDF.csproj -c Release
 ```
 
 For a publish bundle with the single bundled EXE and GPL source zip:
 
 ```powershell
-dotnet publish KillerPDF/StealthPDF.csproj -c Release
+dotnet publish StealthPDF.csproj -c Release
 ```
 
-Output lands in `KillerPDF/bin/Release/net48/publish/`. Building requires the .NET SDK even though the app output targets .NET Framework 4.8.
+Output lands in `bin/Release/net48/publish/`. Building requires the .NET SDK even though the app output targets .NET Framework 4.8.
+
+To run the tests:
+
+```powershell
+dotnet test StealthPDF.Tests/StealthPDF.Tests.csproj -c Release
+```
+
+## Releasing
+
+`release.ps1` builds, signs, hashes, writes `SHA256SUMS.txt`, and stamps the
+version, date, EXE size and SHA256 into the landing site. See
+[pdf-landing/DEPLOY.md](pdf-landing/DEPLOY.md) for the full release-to-deploy run.
 
 ## Project naming note
 
-Some internal folders still use the historical `KillerPDF` path for git-history continuity. The shipped application, executable, registry entries, file associations, and user-facing branding are **StealthPDF**.
+The rename from KillerPDF is complete in code — namespaces, the assembly, the
+executable, registry entries, file associations, and all user-facing branding are
+**StealthPDF**. The only remnant is the `kp-` prefix on the icon files
+(`Resources/kp-icon.ico`, `kp-icon.png`) and the site's `kp.css` / `kp.js`, kept
+so existing links and git history stay intact.
 
 ## Credits
 

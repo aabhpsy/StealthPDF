@@ -1,12 +1,12 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    KillerPDF release script: build → sign → verify → hash → update BuildInfo → publish summary.
+    StealthPDF release script: build → sign → verify → hash → update BuildInfo → publish summary.
 .DESCRIPTION
     1. Locates pdfium.dll in the NuGet cache, hashes it, and writes BuildInfo.cs so the
        embedded integrity check at startup knows the expected value.
     2. Publishes using FolderProfile1 (net48, win-x64); bundle-source.ps1 also runs.
-    3. Signs KillerPDF.exe. Prefers CertThumbprint (exact match) over CertName (CN match).
+    3. Signs StealthPDF.exe. Prefers CertThumbprint (exact match) over CertName (CN match).
        Retries the timestamp across three TSA endpoints if the first attempt fails.
     4. Runs "signtool verify /pa /v" as a post-sign gate — aborts if the cert chain
        is not trusted to an accepted root.
@@ -41,10 +41,10 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$proj         = Join-Path $PSScriptRoot "KillerPDF.csproj"
+$proj         = Join-Path $PSScriptRoot "StealthPDF.csproj"
 $buildInfoPath = Join-Path $PSScriptRoot "BuildInfo.cs"
 $publishDir   = Join-Path $PSScriptRoot "bin\Release\net48\publish"
-$exe          = Join-Path $publishDir "KillerPDF.exe"
+$exe          = Join-Path $publishDir "StealthPDF.exe"
 
 # TSA endpoints — tried in order; first success wins.
 $tsaList = @(
@@ -104,7 +104,7 @@ if ($SkipSign) {
 
 Write-Host "`n==> Writing BuildInfo.cs..." -ForegroundColor Cyan
 $buildInfoContent = @"
-namespace KillerPDF
+namespace StealthPDF
 {
     /// <summary>
     /// Build-time constants written or verified by release.ps1.
@@ -179,8 +179,8 @@ if (-not $SkipSign) {
             /tr  $tsa `
             /td  sha256 `
             @certArgs `
-            /d   "KillerPDF" `
-            /du  "https://killerpdf.net" `
+            /d   "StealthPDF" `
+            /du  "https://stealthpdf.com" `
             /v   $exe
 
         if ($LASTEXITCODE -eq 0) {
@@ -228,7 +228,7 @@ if (-not $SkipSign) {
 # ── 4. SHA256 (final EXE) ─────────────────────────────────────────────────
 Write-Host "`n==> Computing final EXE SHA256..." -ForegroundColor Cyan
 $exeHash = (Get-FileHash $exe -Algorithm SHA256).Hash
-Write-Host "    KillerPDF.exe : $exeHash" -ForegroundColor Green
+Write-Host "    StealthPDF.exe : $exeHash" -ForegroundColor Green
 if ($pdfiumPath) {
     Write-Host "    pdfium.dll    : $pdfiumHash" -ForegroundColor Green
 }
@@ -246,18 +246,83 @@ if ($srcZip) {
 # ── 6. Write SHA256SUMS.txt ──────────────────────────────────────────────────
 $sumsPath = Join-Path $PSScriptRoot "SHA256SUMS.txt"
 $lines    = [System.Collections.Generic.List[string]]::new()
-$lines.Add("KillerPDF.exe           $exeHash")
-if ($pdfiumPath) { $lines.Add("pdfium.dll              $pdfiumHash") }
+# Pad to a fixed column, then always emit a separating space: the source zip name
+# ("StealthPDF-2.0.0-src.zip") is itself 24 chars, so padding alone would run the
+# name straight into the hash with nothing between them.
+$lines.Add(("{0} {1}" -f "StealthPDF.exe".PadRight(23), $exeHash))
+if ($pdfiumPath) { $lines.Add(("{0} {1}" -f "pdfium.dll".PadRight(23), $pdfiumHash)) }
 if ($srcZip) {
     $srcHash = (Get-FileHash $srcZip.FullName -Algorithm SHA256).Hash
-    $lines.Add("$($srcZip.Name.PadRight(24))$srcHash")
+    $lines.Add(("{0} {1}" -f $srcZip.Name.PadRight(23), $srcHash))
 }
 [System.IO.File]::WriteAllLines($sumsPath, $lines, [System.Text.UTF8Encoding]::new($false))
 Write-Host "`n==> SHA256SUMS.txt written to: $sumsPath" -ForegroundColor Green
 
+# ── 6b. Stamp the landing page ──────────────────────────────────────
+# pdf-landing carries the download facts in index.html's hero panel and the
+# version badge in every page footer. Each value is marked with data-stamp="..."
+# so this runs off attributes rather than line numbers. The committed files hold
+# REPLACE_* sentinels; pdf-landing/deploy-check.ps1 refuses to deploy while any
+# of them survive, so a release that skips this step cannot ship silently.
+$landingDir    = Join-Path $PSScriptRoot "pdf-landing"
+$landingIndex  = Join-Path $landingDir "index.html"
+$landingStatus = "skipped (pdf-landing not found)"
+
+if (Test-Path $landingIndex) {
+    $projText = [System.IO.File]::ReadAllText($proj)
+    $verMatch = [regex]::Match($projText, '<Version>\s*([^<\s]+)\s*</Version>')
+    if (-not $verMatch.Success) { throw "Could not read <Version> from $proj" }
+    $appVersion = $verMatch.Groups[1].Value
+
+    $exeItem  = Get-Item $exe
+    $sizeText = "~{0:N2} MB exe" -f ($exeItem.Length / 1MB)
+    $dateText = (Get-Date).ToString('yyyy-MM-dd')
+    # Split the hash across two lines so the fixed-width hero panel does not overflow.
+    $hashHtml = $exeHash.ToLower().Insert(32, '<br>')
+
+    $stampValues = [ordered]@{
+        'version'       = "StealthPDF v$appVersion"
+        'released'      = $dateText
+        'size'          = $sizeText
+        'sha256'        = $hashHtml
+        'version-badge' = "v$appVersion"
+    }
+    # Keys that index.html must carry; a rename there would otherwise ship stale facts.
+    $requiredOnIndex = @('version', 'released', 'size', 'sha256')
+
+    $stampedTotal = 0
+    foreach ($page in Get-ChildItem $landingDir -Filter *.html) {
+        $html    = [System.IO.File]::ReadAllText($page.FullName)
+        $changed = $false
+        foreach ($key in $stampValues.Keys) {
+            # Capture the opening tag carrying data-stamp="<key>" and swap only its inner text.
+            $pattern = '(?s)(<span[^>]*\bdata-stamp="' + [regex]::Escape($key) + '"[^>]*>).*?(</span>)'
+            if (-not [regex]::IsMatch($html, $pattern)) {
+                if ($page.Name -eq 'index.html' -and $requiredOnIndex -contains $key) {
+                    throw "index.html is missing its data-stamp=`"$key`" span: $($page.FullName)"
+                }
+                continue
+            }
+            $value   = $stampValues[$key]
+            $html    = [regex]::Replace($html, $pattern, { param($m) $m.Groups[1].Value + $value + $m.Groups[2].Value })
+            $changed = $true
+            $stampedTotal++
+        }
+        if ($changed) {
+            [System.IO.File]::WriteAllText($page.FullName, $html, [System.Text.UTF8Encoding]::new($false))
+            Write-Host "    stamped: $($page.Name)" -ForegroundColor Green
+        }
+    }
+
+    $landingStatus = "v$appVersion / $dateText / $sizeText ($stampedTotal values)"
+    Write-Host "`n==> Landing page stamped: $landingStatus" -ForegroundColor Green
+} else {
+    Write-Host "`n    (pdf-landing not found - skipped landing stamp.)" -ForegroundColor Yellow
+}
+
 # ── 7. Summary ───────────────────────────────────────────────────────────────
 Write-Host "`n╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host   "  KillerPDF release artifacts" -ForegroundColor White
+Write-Host   "  StealthPDF release artifacts" -ForegroundColor White
 Write-Host   "  EXE  : $exe"
 if ($srcZip) { Write-Host "  SRC  : $($srcZip.FullName)" }
 Write-Host   ""
@@ -268,6 +333,5 @@ Write-Host   ""
 Write-Host   "  Signer : $actualCN"
 Write-Host   "  Thumbprint: $actualThumb"
 Write-Host   ""
-Write-Host   "  Paste EXE SHA256 into:"
-Write-Host   "    KillerPDF\pdf-landing\index.html (line ~183)"
+Write-Host   "  Landing page stamped: $landingStatus"
 Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
