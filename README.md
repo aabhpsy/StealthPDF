@@ -60,14 +60,16 @@ StealthPDF is a free and open-source PDF editor for Windows. It can view, annota
 - Print with preview and save flattened output.
 
 ### App and privacy
-- Single portable Windows EXE, or self-install per user to `%LOCALAPPDATA%\Programs\StealthPDF\`.
+- Portable folder, or installer that installs per user to `%LOCALAPPDATA%\Programs\StealthPDF\`.
 - No administrator rights required for normal use or per-user install.
 - Registers as a PDF handler with branded icons when installed.
 - Local-only processing: no account, no telemetry, no phone-home.
 
 ## Portable or installed?
 
-You can use the same EXE either way:
+Both ship the same tree. TWAIN scanning and PDF compression live in
+`TwainHelper\` and `PdfHelper\` beside the executable and are loaded from there,
+so keep the folder together - a lone `StealthPDF.exe` runs, but loses both.
 
 | | Portable | Installed |
 |---|---|---|
@@ -78,7 +80,8 @@ You can use the same EXE either way:
 | Open PDFs by default | No | Yes, if selected |
 | Add/Remove Programs entry | No | Yes |
 
-If you are just trying StealthPDF, run the portable EXE. If you use it regularly, click **Install** for shortcuts, file association, and clean uninstall support.
+If you are just trying StealthPDF, unzip the portable build and run it. If you use it
+regularly, the installer adds shortcuts, file association and clean uninstall support.
 
 ## Requirements
 
