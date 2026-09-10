@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     StealthPDF release script: build → sign → verify → hash → update BuildInfo → publish summary.
@@ -19,7 +19,13 @@
 
 .PARAMETER CertName
     Fallback. CN (Subject) of your certificate as it appears in the Windows cert store.
-    Ignored when CertThumbprint is supplied.
+    Ignored when CertThumbprint is supplied. There is deliberately NO default: this project
+    was forked from KillerPDF and the script used to default to the original author's
+    certificate, which is not ours to sign with.
+
+.PARAMETER SimplySign
+    Wait for Certum SimplySign Desktop before signing. Only needed for that specific token;
+    off by default so the script never blocks on a prompt in CI.
 
 .PARAMETER SkipSign
     Skip signing. Writes all-zeros into BuildInfo.cs (disables runtime pdfium check).
@@ -28,13 +34,14 @@
 .EXAMPLE
     .\release.ps1 -CertThumbprint "AABBCC..."
 .EXAMPLE
-    .\release.ps1 -CertName "Open Source Developer, Stephen Riley"
+    .\release.ps1 -CertName "Open Source Developer, YOUR NAME" -SimplySign
 .EXAMPLE
     .\release.ps1 -SkipSign
 #>
 param(
     [string]$CertThumbprint = "",
-    [string]$CertName       = "Open Source Developer Stephen Riley",
+    [string]$CertName       = "",
+    [switch]$SimplySign,
     [switch]$SkipSign
 )
 
@@ -53,8 +60,26 @@ $tsaList = @(
     "http://ts.ssl.com"
 )
 
-# ── 0. SimplySign preflight ──────────────────────────────────────────────────
-if (-not $SkipSign) {
+# ── 0. Signing identity + token preflight ────────────────────────────────────
+# Fail before doing any work rather than after a full build: an unattended run with no cert
+# selector would otherwise get all the way to signtool and abort there.
+if (-not $SkipSign -and -not $CertThumbprint -and -not $CertName) {
+    throw @"
+No signing certificate specified.
+
+Pass one of:
+  -CertThumbprint "<40 hex chars>"   (preferred - exact match)
+  -CertName       "<certificate CN>"
+
+List what is available with:
+  Get-ChildItem Cert:\CurrentUser\My | Select-Object Thumbprint, Subject
+
+Or use -SkipSign for a local test build (produces an UNSHIPPABLE binary: the installer
+refuses to install an EXE without a valid Authenticode signature).
+"@
+}
+
+if (-not $SkipSign -and $SimplySign) {
     $ssProc = Get-Process -Name "SimplySignDesktop" -ErrorAction SilentlyContinue
     if (-not $ssProc) {
         Write-Host ""
@@ -170,34 +195,50 @@ if (-not $SkipSign) {
         @("/n", $CertName)
     }
 
-    # Timestamp with retry across TSA list
-    $signed = $false
-    foreach ($tsa in $tsaList) {
-        Write-Host "    Trying TSA: $tsa"
-        & $signtool sign `
-            /fd  sha256 `
-            /tr  $tsa `
-            /td  sha256 `
-            @certArgs `
-            /d   "StealthPDF" `
-            /du  "https://stealthpdf.com" `
-            /v   $exe
-
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "    Signed and timestamped via $tsa" -ForegroundColor Green
-            $signed = $true
-            break
-        }
-        Write-Warning "    TSA $tsa failed (exit $LASTEXITCODE). Trying next..."
-        Start-Sleep -Seconds 3
+    # Everything we build gets signed, not only the main EXE. The TWAIN helper is a separate
+    # executable that ships beside it and is launched as its own process, so leaving it unsigned
+    # would be the weak link - the installer's trust gate only inspects the main EXE.
+    $signTargets = @()
+    $twainExe = Join-Path $publishDir "TwainHelper\StealthPDF.TwainHelper.exe"
+    if (Test-Path $twainExe) {
+        $signTargets += $twainExe
+    } else {
+        Write-Warning "TwainHelper missing from the publish output - this build has no TWAIN scanning."
     }
-    if (-not $signed) { throw "Signing failed on all TSA endpoints. Is SimplySign Desktop connected?" }
+    $signTargets += $exe
+
+    foreach ($target in $signTargets) {
+        $name   = [System.IO.Path]::GetFileName($target)
+        $signed = $false
+        foreach ($tsa in $tsaList) {
+            Write-Host "    $name via $tsa"
+            & $signtool sign `
+                /fd  sha256 `
+                /tr  $tsa `
+                /td  sha256 `
+                @certArgs `
+                /d   "StealthPDF" `
+                /du  "https://stealthpdf.com" `
+                /v   $target
+
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "    Signed and timestamped $name via $tsa" -ForegroundColor Green
+                $signed = $true
+                break
+            }
+            Write-Warning "    TSA $tsa failed (exit $LASTEXITCODE). Trying next..."
+            Start-Sleep -Seconds 3
+        }
+        if (-not $signed) { throw "Signing failed on all TSA endpoints for $name." }
+    }
 
     # ── Post-sign verification gate ─────────────────────────────────────────
     Write-Host "`n==> Verifying signature chain (/pa)..." -ForegroundColor Cyan
-    & $signtool verify /pa /v $exe
-    if ($LASTEXITCODE -ne 0) {
-        throw "signtool verify FAILED. The signed EXE does not pass trust validation. DO NOT RELEASE."
+    foreach ($target in $signTargets) {
+        & $signtool verify /pa /v $target
+        if ($LASTEXITCODE -ne 0) {
+            throw "signtool verify FAILED for $target. Does not pass trust validation. DO NOT RELEASE."
+        }
     }
     Write-Host "    Signature chain OK." -ForegroundColor Green
 
