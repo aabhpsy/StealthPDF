@@ -35,6 +35,9 @@ obj/
 # Built locally by PdfHelper/fetch-pdfhelper.ps1 and deployed by the build's
 # CopyPdfHelperOutput target. Only the small compress_pdf.py script is tracked in git.
 /PdfHelper/bundle/
+# AGPL corresponding source for PyMuPDF, downloaded by the same script (~64 MB) and
+# attached to releases rather than committed.
+/PdfHelper/source/
 /PdfHelper/.venv/
 /PdfHelper/.venv-build/
 /brand/

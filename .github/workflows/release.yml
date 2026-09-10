@@ -1,0 +1,253 @@
+name: Release
+
+# Builds the two shipping artifacts - the installer and the portable ZIP - plus the
+# corresponding source archive and hashes, and attaches them to a GitHub release.
+#
+# Why this exists: releases used to be produced locally by release.ps1, which published a
+# bare StealthPDF.exe. That publish output never contained TwainHelper\ or PdfHelper\, so
+# every released copy shipped without TWAIN scanning or PDF compression. Building here means
+# the artifact is produced the same way every time, from a commit anyone can inspect.
+#
+# Signing runs on SignPath and is skipped automatically until the secrets are configured, so
+# a dry run works end to end today and starts signing the moment the project is approved.
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, without the leading v (e.g. 2.0.0)'
+        required: true
+      dry_run:
+        description: 'Build and upload artifacts only - do not create a GitHub release'
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Build, sign and package (Windows)
+    runs-on: windows-latest
+
+    steps:
+      # Full history: bundle-source.ps1 uses `git ls-files` to build the source archive,
+      # so a shallow clone would silently produce an incomplete one.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $v = "${{ github.event.inputs.version }}"
+          } else {
+            $v = "${{ github.ref_name }}" -replace '^v', ''
+          }
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { throw "Version '$v' is not X.Y.Z" }
+          "version=$v" | Out-File $env:GITHUB_OUTPUT -Append
+          Write-Host "Building StealthPDF $v"
+
+      # ~55 MB of portable Python + PyMuPDF. Deliberately not in git, so it is rebuilt here.
+      # Without it the published tree has no PDF compression, and the csproj emits a warning.
+      - name: Fetch PdfHelper bundle (portable Python + PyMuPDF)
+        shell: pwsh
+        run: .\PdfHelper\fetch-pdfhelper.ps1
+
+      - name: Restore
+        run: dotnet restore StealthPDF.csproj
+
+      - name: Publish
+        run: dotnet publish StealthPDF.csproj -c Release -p:PublishProfile=FolderProfile1 --no-restore
+
+      # Fail loudly rather than shipping another crippled build. This is the exact regression
+      # that made TWAIN scanning and compression dead in every previous release.
+      - name: Verify the publish tree is complete
+        shell: pwsh
+        run: |
+          $pub = "bin\Release\net48\publish"
+          $required = @(
+            "$pub\StealthPDF.exe",
+            "$pub\TwainHelper\StealthPDF.TwainHelper.exe",
+            "$pub\TwainHelper\NTwain.dll",
+            "$pub\PdfHelper\compress_pdf.py",
+            "$pub\PdfHelper\python\python.exe"
+          )
+          $missing = $required | Where-Object { -not (Test-Path $_) }
+          if ($missing) { throw "Publish output incomplete:`n" + ($missing -join "`n") }
+          Write-Host "Publish tree complete."
+
+      # ── Signing ───────────────────────────────────────────────────────────────────────
+      # Skipped until the SignPath secrets exist, so a dry run works before approval lands.
+      # Order matters: every executable is signed BEFORE the installer is compiled, and the
+      # installer is signed after. Repackaging a signed file invalidates its signature.
+      - name: Check signing configuration
+        id: signing
+        shell: pwsh
+        run: |
+          $configured = -not [string]::IsNullOrWhiteSpace("${{ secrets.SIGNPATH_API_TOKEN }}")
+          "configured=$($configured.ToString().ToLower())" | Out-File $env:GITHUB_OUTPUT -Append
+          if (-not $configured) {
+            Write-Warning "SIGNPATH_API_TOKEN not set - artifacts will be UNSIGNED. Do not publish them."
+          }
+
+      - name: Upload unsigned application for signing
+        if: steps.signing.outputs.configured == 'true'
+        id: upload-app
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-app
+          path: bin/Release/net48/publish/
+          if-no-files-found: error
+
+      # TODO: fill in organization-id / project-slug / signing-policy-slug from the SignPath
+      # dashboard once the project is approved, and add SIGNPATH_ORG_ID as a repo secret.
+      - name: Sign application (SignPath)
+        if: steps.signing.outputs.configured == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
+          project-slug: stealthpdf
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: app
+          github-artifact-id: ${{ steps.upload-app.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: bin/Release/net48/publish/
+
+      # ── Packaging ─────────────────────────────────────────────────────────────────────
+      - name: Build portable ZIP
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          New-Item -ItemType Directory -Force dist | Out-Null
+          # The source archive is published separately, so keep it out of the portable tree.
+          $staging = "dist\portable"
+          Copy-Item "bin\Release\net48\publish" $staging -Recurse -Force
+          Get-ChildItem "$staging\*-src.zip" -ErrorAction SilentlyContinue | Remove-Item -Force
+          Get-ChildItem "$staging\*.pdb" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
+          Compress-Archive -Path "$staging\*" -DestinationPath "dist\StealthPDF-Portable-$v.zip" -Force
+          Remove-Item $staging -Recurse -Force
+
+      # Inno Setup ships on the GitHub Windows runner image.
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "Inno Setup not found at $iscc" }
+          & $iscc "build\StealthPDF.iss" `
+            "/DAppVersion=${{ steps.ver.outputs.version }}" `
+            "/DSourceDir=..\bin\Release\net48\publish"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
+
+      - name: Upload unsigned installer for signing
+        if: steps.signing.outputs.configured == 'true'
+        id: upload-installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-installer
+          path: dist/StealthPDF-Setup-*.exe
+          if-no-files-found: error
+
+      - name: Sign installer (SignPath)
+        if: steps.signing.outputs.configured == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
+          project-slug: stealthpdf
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.upload-installer.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: dist/
+
+      # ── Supporting files ──────────────────────────────────────────────────────────────
+      - name: Collect source archives and notices
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          Get-ChildItem "bin\Release\net48\publish\*-src.zip" -ErrorAction SilentlyContinue |
+            Copy-Item -Destination dist\ -Force
+          Copy-Item "THIRD-PARTY-NOTICES.txt" dist\ -Force
+          Copy-Item "LICENSE" dist\ -Force
+
+          # PyMuPDF and the MuPDF inside it are AGPL-3.0-or-commercial and we ship their compiled
+          # binaries, so their corresponding source has to accompany the release. StealthPDF's own
+          # source archive cannot carry it: bundle-source.ps1 builds from `git ls-files` and the
+          # PdfHelper bundle is deliberately untracked. fetch-pdfhelper.ps1 downloads the pinned
+          # sdist, hash-checked against PyPI, into PdfHelper\source - ship it as its own asset.
+          if (-not (Test-Path "PdfHelper\source")) {
+            throw "PdfHelper\source is missing - the AGPL corresponding source was not fetched."
+          }
+          Compress-Archive -Path "PdfHelper\source\*" `
+                           -DestinationPath "dist\StealthPDF-$v-thirdparty-src.zip" -Force
+
+      - name: Generate SBOM
+        shell: pwsh
+        run: |
+          .\build\generate-sbom.ps1 -Version "${{ steps.ver.outputs.version }}" -OutFile "dist\SBOM.spdx.json"
+
+      # Hashes are generated last, over the final signed bytes. Anything regenerated after
+      # this point would not match what users verify.
+      - name: Generate SHA256SUMS
+        shell: pwsh
+        run: |
+          Push-Location dist
+          Get-ChildItem -File | Where-Object { $_.Name -ne 'SHA256SUMS.txt' } |
+            ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash, $_.Name } |
+            Out-File SHA256SUMS.txt -Encoding utf8
+          Get-Content SHA256SUMS.txt
+          Pop-Location
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: StealthPDF-${{ steps.ver.outputs.version }}
+          path: dist/
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/v') && steps.signing.outputs.configured == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          draft: true
+          generate_release_notes: true
+          body: |
+            StealthPDF ${{ steps.ver.outputs.version }}
+
+            | Download | Use it for |
+            |---|---|
+            | `StealthPDF-Setup-${{ steps.ver.outputs.version }}.exe` | Normal installation, per user, no admin rights needed |
+            | `StealthPDF-Portable-${{ steps.ver.outputs.version }}.zip` | Run from a folder or a USB stick, nothing written outside it |
+            | `StealthPDF-${{ steps.ver.outputs.version }}-src.zip` | StealthPDF's own source, as GPLv3 requires |
+            | `StealthPDF-${{ steps.ver.outputs.version }}-thirdparty-src.zip` | Source for the bundled AGPL components (PyMuPDF and MuPDF) |
+            | `SBOM.spdx.json` | Software bill of materials for everything in the build |
+
+            Verify your download against `SHA256SUMS.txt`.
+
+            StealthPDF is GPLv3. You can always build it yourself from source at no cost -
+            paying for the official build is for the packaged, signed, supported copy.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -1351,6 +1352,21 @@ namespace StealthPDF
                 }
                 try { File.SetAttributes(InstallExe, FileAttributes.Normal); } catch { }
 
+                // Helper folders. TwainHelper (the out-of-process x86 TWAIN bridge) and PdfHelper
+                // (portable Python + PyMuPDF) are both resolved at runtime from AppContext.BaseDirectory,
+                // so an install that copied only the EXE silently lost TWAIN scanning and PDF compression.
+                // Copy whatever sits beside the running EXE. A bare-EXE download has nothing to copy, and
+                // is reported below rather than left to fail later at the point of use.
+                string srcDir = Path.GetDirectoryName(src) ?? "";
+                var helperProblems = new List<string>();
+                foreach (string helper in new[] { "TwainHelper", "PdfHelper" })
+                {
+                    string from = Path.Combine(srcDir, helper);
+                    if (!Directory.Exists(from)) { helperProblems.Add(helper); continue; }
+                    try { CopyDirectory(from, Path.Combine(InstallDir, helper)); }
+                    catch { helperProblems.Add(helper); }
+                }
+
                 // Shortcuts
                 Directory.CreateDirectory(StartMenuDir);
                 CreateShortcut(StartMenuLnk, InstallExe);
@@ -1387,6 +1403,18 @@ namespace StealthPDF
 
                 // Register as PDF file handler (per-user - no admin needed)
                 RegisterFileHandler();
+
+                if (helperProblems.Count > 0)
+                {
+                    string features = string.Join(" and ", helperProblems
+                        .Select(h => h == "TwainHelper" ? "TWAIN scanning" : "PDF compression"));
+                    MessageBox.Show(
+                        $"StealthPDF is installed, but {features} will be unavailable.\n\n" +
+                        "Those features ship as folders alongside the EXE. Install from the full " +
+                        "package (setup or the portable ZIP) rather than a lone StealthPDF.exe to " +
+                        "get them.",
+                        AppName, MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -1452,6 +1480,25 @@ namespace StealthPDF
 
             // Tell the shell file associations have changed
             SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        // Recursive copy for the install-time helper folders. Clears the read-only attribute before
+        // overwriting for the same reason the EXE copy does: File.Copy(overwrite:true) throws on a
+        // read-only target instead of replacing it, and a prior install can leave one behind.
+        private static void CopyDirectory(string sourceDir, string destDir)
+        {
+            Directory.CreateDirectory(destDir);
+            foreach (string file in Directory.GetFiles(sourceDir))
+            {
+                string target = Path.Combine(destDir, Path.GetFileName(file));
+                if (File.Exists(target))
+                {
+                    try { File.SetAttributes(target, FileAttributes.Normal); } catch { }
+                }
+                File.Copy(file, target, overwrite: true);
+            }
+            foreach (string dir in Directory.GetDirectories(sourceDir))
+                CopyDirectory(dir, Path.Combine(destDir, Path.GetFileName(dir)));
         }
 
         private static void CreateShortcut(string lnkPath, string targetPath)

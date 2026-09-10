@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Builds the bundled PyMuPDF compression helper (portable Python + PyMuPDF) into PdfHelper\bundle\.
@@ -24,6 +24,11 @@ param([switch]$Force)
 $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $bundle = Join-Path $here 'bundle'
+$srcOut = Join-Path $here 'source'
+
+# Pinned once and used for both the binary install and the source download, so the shipped
+# binaries and the shipped corresponding source can never drift apart.
+$pymupdfVer = '1.25.3'
 
 if ((Test-Path $bundle) -and -not $Force) {
     Write-Host "PdfHelper bundle already exists at $bundle"
@@ -51,11 +56,13 @@ Remove-Item (Join-Path $pyDir 'python.cat') -Force -ErrorAction SilentlyContinue
 # ── 2. PyMuPDF via a throwaway venv ─────────────────────────────────────────
 $venv = Join-Path $here '.venv-build'
 if (Test-Path $venv) { Remove-Item $venv -Recurse -Force }
-$sysPy = (Get-Command python.exe -ErrorAction SilentlyContinue) ? 'python.exe' : 'py'
+# if/else rather than a ternary: this script declares #Requires -Version 5.1, and the ternary
+# operator is PowerShell 7 only - under Windows PowerShell the whole file failed to parse.
+$sysPy = if (Get-Command python.exe -ErrorAction SilentlyContinue) { 'python.exe' } else { 'py' }
 & $sysPy -m venv $venv
 $venvPy = Join-Path $venv 'Scripts\python.exe'
 Write-Host "Installing PyMuPDF into build venv..."
-& $venvPy -m pip install --quiet --disable-pip-version-check 'pymupdf==1.25.3'
+& $venvPy -m pip install --quiet --disable-pip-version-check "pymupdf==$pymupdfVer"
 if ($LASTEXITCODE -ne 0) { throw "pip install pymupdf failed" }
 
 $srcPkg = Join-Path $venv 'Lib\site-packages\pymupdf'
@@ -80,6 +87,49 @@ $pthLines = @('python312.zip', '.', 'Lib', 'Lib\site-packages')
 Write-Host "Verifying bundle..."
 & (Join-Path $pyDir 'python.exe') -c "import pymupdf; print('PyMuPDF', pymupdf.__version__, 'OK')"
 if ($LASTEXITCODE -ne 0) { throw "Bundle verification failed" }
+
+# ── 5. Corresponding source for the AGPL components ─────────────────────────
+# PyMuPDF and the MuPDF it embeds are AGPL-3.0-or-commercial. We ship their compiled
+# binaries, so their source has to travel with the release - a link is not enough. Pulled
+# straight from the PyPI file URL rather than through "pip download --no-binary", which
+# would try to BUILD the sdist just to read its metadata and needs the whole MuPDF
+# toolchain to do it. The release workflow attaches whatever lands here.
+if (Test-Path $srcOut) { Remove-Item $srcOut -Recurse -Force }
+New-Item -ItemType Directory -Force -Path $srcOut | Out-Null
+
+Write-Host "Downloading PyMuPDF $pymupdfVer source (AGPL corresponding source)..."
+$meta  = Invoke-RestMethod -Uri "https://pypi.org/pypi/pymupdf/$pymupdfVer/json" -UseBasicParsing
+$sdist = $meta.urls | Where-Object { $_.packagetype -eq 'sdist' } | Select-Object -First 1
+if (-not $sdist) { throw "PyPI lists no source distribution for pymupdf $pymupdfVer" }
+
+$sdistPath = Join-Path $srcOut $sdist.filename
+Invoke-WebRequest -Uri $sdist.url -OutFile $sdistPath -UseBasicParsing
+
+# PyPI publishes the digest, so verify rather than trust the transfer.
+$got = (Get-FileHash $sdistPath -Algorithm SHA256).Hash.ToLower()
+if ($got -ne $sdist.digests.sha256) {
+    throw "PyMuPDF sdist hash mismatch. Expected $($sdist.digests.sha256), got $got"
+}
+Write-Host "    $($sdist.filename) verified (sha256 $got)"
+
+@"
+PyMuPDF $pymupdfVer - corresponding source
+==========================================
+
+StealthPDF ships compiled PyMuPDF and MuPDF binaries under PdfHelper\. Both are licensed
+AGPL-3.0-or-commercial by Artifex Software, so this archive accompanies every release to
+satisfy the obligation to provide their corresponding source.
+
+  $($sdist.filename)
+  sha256 $got
+  from   $($sdist.url)
+
+MuPDF source is included within the PyMuPDF source distribution. Upstream projects:
+  https://github.com/pymupdf/PyMuPDF
+  https://mupdf.com
+
+Rebuild the exact bundle StealthPDF ships with PdfHelper\fetch-pdfhelper.ps1 -Force.
+"@ | Set-Content -Path (Join-Path $srcOut 'README.txt') -Encoding utf8
 
 $total = (Get-ChildItem $bundle -Recurse -File | Measure-Object Length -Sum).Sum
 Write-Host ("PdfHelper bundle ready: {0:N1} MB at {1}" -f ($total/1MB), $bundle)
