@@ -148,6 +148,24 @@
     <EmbeddedResource Include="Resources\pdf-file.ico" />
   </ItemGroup>
 
+  <!-- The publish output is what actually ships, but the two copy targets above land in $(TargetDir)
+       (bin\Release\net48\), not $(PublishDir) (bin\Release\net48\publish\). So every published build
+       shipped without TwainHelper\ and PdfHelper\, and since ScannerService and PdfCompressHelper both
+       resolve from AppContext.BaseDirectory, TWAIN scanning and PDF compression were dead in every
+       released copy. Mirror both folders into the publish output so the shipped tree is complete. -->
+  <Target Name="CopyHelpersToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <_PublishTwainHelper Include="$(TargetDir)TwainHelper\**\*.*" Exclude="$(TargetDir)TwainHelper\**\*.pdb" />
+      <_PublishPdfHelper Include="$(TargetDir)PdfHelper\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PublishTwainHelper)"
+          DestinationFolder="$(PublishDir)TwainHelper\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_PublishPdfHelper)"
+          DestinationFolder="$(PublishDir)PdfHelper\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Warning Condition="!Exists('$(TargetDir)PdfHelper')"
+             Text="PdfHelper bundle missing - the published build will have no PDF compression. Run PdfHelper\fetch-pdfhelper.ps1." />
+  </Target>
+
   <!-- OCR: embed only the native Tesseract libs (x64) so the app still ships as a single exe. Language data
        is NOT bundled - it is downloaded on demand on first OCR (see EnsureOcrModelsReadyAsync), which keeps
        the exe small. OcrNativeBootstrap extracts the natives to a per-version cache under %LOCALAPPDATA% on
