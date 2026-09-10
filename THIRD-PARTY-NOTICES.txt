@@ -23,18 +23,25 @@ This notice is provided for transparency and is not legal advice.
   Licence: GNU Affero General Public License v3.0 (AGPL-3.0), or a commercial
   licence from Artifex Software.
 
-  IMPORTANT - this is the most restrictive component in the package. StealthPDF
-  ships PyMuPDF and MuPDF as compiled binaries under PdfHelper\, invoked as a
-  separate process by Services/PdfCompressHelper.cs. Distributing those binaries
-  carries an obligation to make their corresponding source available.
+  This is the most restrictive component in the package. StealthPDF ships PyMuPDF
+  and MuPDF as compiled binaries under PdfHelper\, invoked as a separate process
+  by Services/PdfCompressHelper.cs. Distributing those binaries carries an
+  obligation to provide their corresponding source.
 
-  The StealthPDF source archive is generated from git-tracked files only, and
-  PdfHelper\bundle\ is deliberately untracked, so the source archive does NOT
-  contain PyMuPDF or MuPDF source. Obtain them from the upstream projects above,
-  or from the Artifex source releases for the exact pinned version.
+  That source ACCOMPANIES EVERY RELEASE as:
 
-  PdfHelper\fetch-pdfhelper.ps1 reproduces the bundle from upstream, pinned to
-  pymupdf==1.25.3.
+      StealthPDF-<version>-thirdparty-src.zip
+
+  It holds the PyMuPDF source distribution for the exact version shipped, with
+  MuPDF source inside it. PdfHelper\fetch-pdfhelper.ps1 downloads it from PyPI and
+  verifies the published SHA-256 before it is packaged, so the source and the
+  binaries can never be from different versions.
+
+  It is a separate archive because StealthPDF's own source archive is built from
+  git-tracked files only and PdfHelper\bundle\ is deliberately untracked (~55 MB of
+  binaries), so it could not carry it.
+
+  Run PdfHelper\fetch-pdfhelper.ps1 -Force to rebuild the exact bundle we ship.
 
   CPython (portable runtime shipped in PdfHelper\python\)
   https://www.python.org  -  Python Software Foundation License 2.0
@@ -98,7 +105,9 @@ StealthPDF is free software under GPLv3. You may use, study, modify and
 redistribute it, including the copy you received. The complete corresponding
 source for StealthPDF itself is published at
 https://github.com/aabhpsy/StealthPDF and accompanies every release as
-StealthPDF-<version>-src.zip.
+StealthPDF-<version>-src.zip, with the third-party AGPL source alongside it as
+StealthPDF-<version>-thirdparty-src.zip. Every release also carries an SPDX
+software bill of materials, SBOM.spdx.json.
 
 Paying for an official build buys a packaged, signed and supported copy. It does
 not buy a licence to use StealthPDF and does not restrict any right the GPL

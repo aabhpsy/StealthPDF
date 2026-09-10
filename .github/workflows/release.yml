@@ -185,13 +185,30 @@ jobs:
           output-artifact-directory: dist/
 
       # ── Supporting files ──────────────────────────────────────────────────────────────
-      - name: Collect source archive and notices
+      - name: Collect source archives and notices
         shell: pwsh
         run: |
+          $v = "${{ steps.ver.outputs.version }}"
           Get-ChildItem "bin\Release\net48\publish\*-src.zip" -ErrorAction SilentlyContinue |
             Copy-Item -Destination dist\ -Force
-          Copy-Item "THIRD-PARTY-NOTICES.txt" dist\ -Force -ErrorAction SilentlyContinue
+          Copy-Item "THIRD-PARTY-NOTICES.txt" dist\ -Force
           Copy-Item "LICENSE" dist\ -Force
+
+          # PyMuPDF and the MuPDF inside it are AGPL-3.0-or-commercial and we ship their compiled
+          # binaries, so their corresponding source has to accompany the release. StealthPDF's own
+          # source archive cannot carry it: bundle-source.ps1 builds from `git ls-files` and the
+          # PdfHelper bundle is deliberately untracked. fetch-pdfhelper.ps1 downloads the pinned
+          # sdist, hash-checked against PyPI, into PdfHelper\source - ship it as its own asset.
+          if (-not (Test-Path "PdfHelper\source")) {
+            throw "PdfHelper\source is missing - the AGPL corresponding source was not fetched."
+          }
+          Compress-Archive -Path "PdfHelper\source\*" `
+                           -DestinationPath "dist\StealthPDF-$v-thirdparty-src.zip" -Force
+
+      - name: Generate SBOM
+        shell: pwsh
+        run: |
+          .\build\generate-sbom.ps1 -Version "${{ steps.ver.outputs.version }}" -OutFile "dist\SBOM.spdx.json"
 
       # Hashes are generated last, over the final signed bytes. Anything regenerated after
       # this point would not match what users verify.
@@ -226,7 +243,9 @@ jobs:
             |---|---|
             | `StealthPDF-Setup-${{ steps.ver.outputs.version }}.exe` | Normal installation, per user, no admin rights needed |
             | `StealthPDF-Portable-${{ steps.ver.outputs.version }}.zip` | Run from a folder or a USB stick, nothing written outside it |
-            | `StealthPDF-${{ steps.ver.outputs.version }}-src.zip` | The corresponding source, as GPLv3 requires |
+            | `StealthPDF-${{ steps.ver.outputs.version }}-src.zip` | StealthPDF's own source, as GPLv3 requires |
+            | `StealthPDF-${{ steps.ver.outputs.version }}-thirdparty-src.zip` | Source for the bundled AGPL components (PyMuPDF and MuPDF) |
+            | `SBOM.spdx.json` | Software bill of materials for everything in the build |
 
             Verify your download against `SHA256SUMS.txt`.
 
