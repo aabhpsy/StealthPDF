@@ -26,7 +26,9 @@ jobs:
         run: |
           $releaseTag = if ("${{ github.event_name }}" -eq "workflow_dispatch") { "${{ github.event.inputs.tag }}" } else { "${{ github.event.release.tag_name }}" }
           $version = $releaseTag.TrimStart('v')
-          $url = "https://github.com/aabhpsy/StealthPDF/releases/download/$releaseTag/StealthPDF.exe"
+          # WinGet installs the setup EXE. A bare StealthPDF.exe is no longer published, and
+          # would install without the TwainHelper and PdfHelper folders even if it were.
+          $url = "https://github.com/aabhpsy/StealthPDF/releases/download/$releaseTag/StealthPDF-Setup-$version.exe"
           komac update aabhpsy.StealthPDF --version $version --urls $url --submit
         env:
           GITHUB_TOKEN: ${{ secrets.WINGET_TOKEN }}

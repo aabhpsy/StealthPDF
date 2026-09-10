@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>stealthpdf</id>
@@ -27,7 +27,7 @@
 - Inline text editing, annotations, stamps, watermarks, and page numbers
 - Fill &amp; Sign: forms, checkmarks, and reusable signatures; digital signing support
 - Merge, split, rotate, crop, reorder, flatten, repair, and unlock PDFs
-- Single portable Windows EXE - or a per-user install with shortcuts and file association
+- Per-user install with shortcuts and file association, or a portable build you can run from a folder
 - GPLv3, local-only, no account, no telemetry
 
 StealthPDF is a community fork/rebrand of KillerPDF by Steve the Killer, maintained by @aabhpsy.
