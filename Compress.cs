@@ -67,7 +67,8 @@ namespace StealthPDF
             dpiRow.Children.Add(dpiLabel);
             panel.Children.Add(dpiRow);
 
-            var grayscaleBox = new CheckBox { Content = Loc("Str_Compress_Grayscale"), Margin = new Thickness(0, 0, 0, 14) };
+            var grayscaleBox = new CheckBox { Content = Loc("Str_Compress_Grayscale"), Margin = new Thickness(0, 0, 0, 14),
+                                              Foreground = (System.Windows.Media.Brush)FindResource("TextPrimary") };
             panel.Children.Add(grayscaleBox);
 
             var note = new TextBlock

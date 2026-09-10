@@ -64,10 +64,12 @@ namespace StealthPDF
             colorBox.SelectedIndex = 1;
             panel.Children.Add(colorBox);
 
-            var duplexBox = new CheckBox { Content = Loc("Str_Scan_Duplex"), Margin = new Thickness(0, 0, 0, 14) };
+            var duplexBox = new CheckBox { Content = Loc("Str_Scan_Duplex"), Margin = new Thickness(0, 0, 0, 14),
+                                           Foreground = (System.Windows.Media.Brush)FindResource("TextPrimary") };
             panel.Children.Add(duplexBox);
 
-            var ocrBox = new CheckBox { Content = Loc("Str_Scan_OcrAfter"), Margin = new Thickness(0, 0, 0, 14) };
+            var ocrBox = new CheckBox { Content = Loc("Str_Scan_OcrAfter"), Margin = new Thickness(0, 0, 0, 14),
+                                        Foreground = (System.Windows.Media.Brush)FindResource("TextPrimary") };
             panel.Children.Add(ocrBox);
 
             var scanBtn = new Button { Content = Loc("Str_Scan_Start"), Padding = new Thickness(20, 6, 20, 6), HorizontalAlignment = HorizontalAlignment.Center };
