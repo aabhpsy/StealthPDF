@@ -361,6 +361,13 @@ You can uninstall via Add/Remove Programs at any time.</sys:String>
     <sys:String x:Key="Str_Stamp_CertBorderNone">None</sys:String>
     <sys:String x:Key="Str_Stamp_PagesHint">Blank = all pages; e.g. 1, 3-5</sys:String>
     <sys:String x:Key="Str_Stamp_Color">Color</sys:String>
+    <sys:String x:Key="Str_Stamp_CertColor">Stamp color</sys:String>
+    <sys:String x:Key="Str_Stamp_InkPresets">Presets</sys:String>
+    <sys:String x:Key="Str_Stamp_InkBlue">Stamp blue</sys:String>
+    <sys:String x:Key="Str_Stamp_InkRed">Stamp red</sys:String>
+    <sys:String x:Key="Str_Stamp_InkGreen">Stamp green</sys:String>
+    <sys:String x:Key="Str_Stamp_InkViolet">Stamp violet</sys:String>
+    <sys:String x:Key="Str_Stamp_InkBlack">Black</sys:String>
     <sys:String x:Key="Str_Stamp_Pages">Pages</sys:String>
     <sys:String x:Key="Str_Stamp_WmText">Text</sys:String>
     <sys:String x:Key="Str_Stamp_WmImage">Image</sys:String>

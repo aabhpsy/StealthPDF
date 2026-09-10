@@ -471,7 +471,8 @@ namespace StealthPDF
             _certLogoScale = logoScaleSl;
             _certBody.Children.Add(logoScaleRow);
             _certBody.Children.Add(BorderStyleRow());
-            _certBody.Children.Add(ColorRow(S("Str_Stamp_Color"), _certColor, out _certSwatch, c => { _certColor = c; Schedule(); }));
+            _certBody.Children.Add(ColorRow(S("Str_Stamp_CertColor"), _certColor, out _certSwatch, c => { _certColor = c; Schedule(); }));
+            _certBody.Children.Add(StampInkPresetRow());
             _certBody.Children.Add(UiKit.GroupLabel(S("Str_Stamp_Position")));
             _certPos = MakePosCombo(_spec.CertPosH, _spec.CertPosV);
             _certPos.SelectionChanged += (_, _2) => Schedule();
@@ -610,7 +611,7 @@ namespace StealthPDF
             _spec.CertShowLogo = _certShowLogo.IsChecked == true; _spec.CertLogoPath = _certLogoPath;
             _spec.CertLogoScale = _certLogoScale.Value / 100.0;
             _spec.CertColor = _certColor; _spec.CertScale = _certScale.Value;
-            _spec.CertBorder = Math.Max(0, Math.Min(2, _certBorder.SelectedIndex));
+            _spec.CertBorder = Math.Max(0, Math.Min(1, _certBorder.SelectedIndex));
             _spec.CertLabel = string.IsNullOrEmpty(_certLabel.Text) ? "Document seen by:" : _certLabel.Text;
             _spec.CertShowName = _certShowName.IsChecked == true; _spec.CertName = _certName.Text;
             _spec.CertShowSig = _certShowSig.IsChecked == true; _spec.CertSigPath = _certSigPath;
@@ -636,6 +637,49 @@ namespace StealthPDF
 
         private void SetStatusMsg(string msg) => _owner.SetStatus(msg);
 
+        // The classic rubber-stamp inks. The full picker above still takes any color; these just save a
+        // trip through the color dialog for the shades people actually stamp with.
+        private static readonly (string key, Color color)[] StampInks =
+        [
+            ("Str_Stamp_InkBlue",   Color.FromRgb(0x1F, 0x3F, 0x9E)),
+            ("Str_Stamp_InkRed",    Color.FromRgb(0xB3, 0x20, 0x2C)),
+            ("Str_Stamp_InkGreen",  Color.FromRgb(0x14, 0x66, 0x3D)),
+            ("Str_Stamp_InkViolet", Color.FromRgb(0x5B, 0x2D, 0x8E)),
+            ("Str_Stamp_InkBlack",  Color.FromRgb(0x22, 0x22, 0x22)),
+        ];
+
+        private FrameworkElement StampInkPresetRow()
+        {
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8), VerticalAlignment = VerticalAlignment.Center };
+            row.Children.Add(new TextBlock { Text = S("Str_Stamp_InkPresets"), Foreground = R("TextSecondary"), FontFamily = UiKit.UiFont, FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
+            foreach (var (key, color) in StampInks)
+            {
+                var picked = color;
+                var dot = new Border
+                {
+                    Width = 22, Height = 22, CornerRadius = UiKit.RadControl, Margin = new Thickness(0, 0, 6, 0),
+                    Background = new SolidColorBrush(picked), BorderBrush = R("BorderDim"), BorderThickness = new Thickness(1),
+                    SnapsToDevicePixels = true
+                };
+                // Same chrome-free button trick as ColorRow - a bare Border's mouse-up is unreliable here.
+                var cp = new FrameworkElementFactory(typeof(ContentPresenter));
+                var btn = new Button
+                {
+                    Content = dot, Cursor = Cursors.Hand, Focusable = false, ToolTip = S(key),
+                    Background = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(0),
+                    Template = new ControlTemplate(typeof(Button)) { VisualTree = cp }
+                };
+                btn.Click += (_, _2) =>
+                {
+                    _certColor = picked;
+                    if (_certSwatch != null) _certSwatch.Background = new SolidColorBrush(picked);
+                    Schedule();
+                };
+                row.Children.Add(btn);
+            }
+            return row;
+        }
+
         private FrameworkElement BorderStyleRow()
         {
             var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8), VerticalAlignment = VerticalAlignment.Center };
@@ -644,8 +688,7 @@ namespace StealthPDF
             if (_darkCombo != null) _certBorder.Style = _darkCombo; else { _certBorder.Background = R("BgCanvas"); _certBorder.Foreground = R("TextPrimary"); }
             _certBorder.Items.Add(S("Str_Stamp_CertBorderRect"));
             _certBorder.Items.Add(S("Str_Stamp_CertBorderRound"));
-            _certBorder.Items.Add(S("Str_Stamp_CertBorderNone"));
-            _certBorder.SelectedIndex = Math.Max(0, Math.Min(2, _spec.CertBorder));
+            _certBorder.SelectedIndex = Math.Max(0, Math.Min(1, _spec.CertBorder));
             _certBorder.SelectionChanged += (_, _2) => Schedule();
             row.Children.Add(_certBorder);
             return row;
@@ -1224,7 +1267,6 @@ namespace StealthPDF
 
             double fontPx = Math.Max(5, 10 * _spec.CertScale * pxPerPt);
             var brush = new SolidColorBrush(_spec.CertColor);
-            var fill = _spec.CertWhiteFill ? new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)) : null;
             double pad = 7 * _spec.CertScale * pxPerPt;
             var inner = new StackPanel { Margin = new Thickness(pad) };
             if (_spec.CertShowLogo && _certLogoSrc != null)
@@ -1251,9 +1293,9 @@ namespace StealthPDF
             }
             var border = _certPreviewBlock = new Border
             {
-                Background = fill,
-                BorderBrush = _spec.CertBorder == 2 ? null : brush,
-                BorderThickness = _spec.CertBorder == 2 ? new Thickness(0) : new Thickness(1.2),
+                Background = null,                 // transparent: the page shows through the stamp
+                BorderBrush = brush,
+                BorderThickness = new Thickness(1.2),
                 CornerRadius = _spec.CertBorder == 1 ? new CornerRadius(6) : new CornerRadius(0),
                 Child = inner,
             };
@@ -1306,7 +1348,7 @@ namespace StealthPDF
             _spec.CertShowSig = _certShowSig.IsChecked == true; _spec.CertSigPath = _certSigPath;
             _spec.CertShowDate = _certShowDate.IsChecked == true; _spec.CertShowTime = _certShowTime.IsChecked == true;
             _spec.CertDate = _certDate.Text?.Trim() ?? ""; _spec.CertScale = _certScale.Value;
-            _spec.CertBorder = Math.Max(0, Math.Min(2, _certBorder.SelectedIndex));
+            _spec.CertBorder = Math.Max(0, Math.Min(1, _certBorder.SelectedIndex));
             _spec.CertColor = _certColor;
             (_spec.CertPosH, _spec.CertPosV) = (Positions[Math.Max(0, _certPos.SelectedIndex)].h, Positions[Math.Max(0, _certPos.SelectedIndex)].v);
         }
@@ -1478,7 +1520,7 @@ namespace StealthPDF
             _spec.CertLogoScale = _certLogoScale.Value / 100.0;
             _spec.CertColor = _certColor;
             _spec.CertScale = _certScale.Value;
-            _spec.CertBorder = Math.Max(0, Math.Min(2, _certBorder.SelectedIndex));
+            _spec.CertBorder = Math.Max(0, Math.Min(1, _certBorder.SelectedIndex));
             _spec.CertLabel = string.IsNullOrEmpty(_certLabel.Text) ? "Document seen by:" : _certLabel.Text;
             _spec.CertShowName = _certShowName.IsChecked == true;
             _spec.CertName = _certName.Text;

@@ -106,12 +106,11 @@ namespace StealthPDF
             _borderCombo = new ComboBox { Height = 26, Margin = new Thickness(0, 0, 0, 10) };
             _borderCombo.Items.Add(S("Str_Stamp_CertBorderRect"));
             _borderCombo.Items.Add(S("Str_Stamp_CertBorderRound"));
-            _borderCombo.Items.Add(S("Str_Stamp_CertBorderNone"));
-            _borderCombo.SelectedIndex = Math.Max(0, Math.Min(2, _defaults.Border));
+            _borderCombo.SelectedIndex = Math.Max(0, Math.Min(1, _defaults.Border));
             panel.Children.Add(_borderCombo);
 
             var colorRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 10) };
-            colorRow.Children.Add(new TextBlock { Text = S("Str_Stamp_Color"), Foreground = R("TextSecondary"), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
+            colorRow.Children.Add(new TextBlock { Text = S("Str_Stamp_CertColor"), Foreground = R("TextSecondary"), FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) });
             _colorSwatch = new Border { Width = 26, Height = 26, CornerRadius = new CornerRadius(3), Background = new SolidColorBrush(_color), BorderBrush = R("BorderDim"), BorderThickness = new Thickness(1) };
             var colorBtn = new Button { Content = _colorSwatch, Width = 32, Height = 32, Background = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(0) };
             colorBtn.Click += (_, _2) => PickColor();
@@ -201,9 +200,8 @@ namespace StealthPDF
                 ShowName = !string.IsNullOrWhiteSpace(_nameField.Text),
                 PosH = posH[idx],
                 PosV = posV[idx],
-                Border = Math.Max(0, Math.Min(2, _borderCombo.SelectedIndex)),
+                Border = Math.Max(0, Math.Min(1, _borderCombo.SelectedIndex)),
                 ColorHex = CertStampStore.ColorToHex(_color),
-                WhiteFill = true,
                 Scale = 1.0,
                 ShowDate = true,
                 ShowTime = false

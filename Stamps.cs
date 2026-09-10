@@ -295,18 +295,18 @@ try { new Services.CertStampStore().SaveFromSpec(spec); } catch { }
             double basePt = 10 * spec.CertScale;
             double fontPx = basePt / ptPerPx;
             var brush = new SolidColorBrush(spec.CertColor);
-            var fill = spec.CertWhiteFill ? new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)) : null;
-            var borderBrush = spec.CertBorder == 2 ? null : new SolidColorBrush(spec.CertColor);
-            double bw = spec.CertBorder == 2 ? 0 : 1.2 / ptPerPx;
+            // No fill and always a box: the page shows through, so it reads as a rubber stamp rather
+            // than a translucent panel laid over the content.
+            var borderBrush = new SolidColorBrush(spec.CertColor);
+            double bw = 1.2 / ptPerPx;
             double corner = spec.CertBorder == 1 ? 5.0 : 0.0;
 
             var block = new Border
             {
-                Background = fill, BorderBrush = borderBrush, BorderThickness = new Thickness(bw),
+                Background = null, BorderBrush = borderBrush, BorderThickness = new Thickness(bw),
                 CornerRadius = new CornerRadius(corner),
                 Padding = new Thickness(10 / ptPerPx, 7 / ptPerPx, 10 / ptPerPx, 7 / ptPerPx),
-                IsHitTestVisible = false,
-                Effect = new System.Windows.Media.Effects.DropShadowEffect { Color = Colors.Black, BlurRadius = 6, ShadowDepth = 2, Direction = 315, Opacity = 0.35 }
+                IsHitTestVisible = false
             };
             var sp = new StackPanel();
             AddCertTopRow(sp, spec, brush, fontPx, ptPerPx);
@@ -589,7 +589,7 @@ private void DrawStampsOnDocument(int? onlyPage = null) => DrawStampsIntoDoc(_do
         // ---- Certification stamp burn to PDF ----
 
         // Burns the composite certification block with XGraphics, mirroring BuildCertBlock's layout
-        // field-for-field: optional white-fill rounded rectangle, logo + label row, name, signature image,
+        // field-for-field: transparent boxed outline, logo + label row, name, signature image,
         // date/time line. Position is the same (x,y) fraction used on screen so the saved PDF matches.
         private static void DrawCertificationPdf(XGraphics gfx, StampSpec spec, int pageIndex, double pw, double ph, double mx, double my, XImage? logo, XImage? sig)
         {
@@ -628,12 +628,9 @@ private void DrawStampsOnDocument(int? onlyPage = null) => DrawStampsIntoDoc(_do
                 by = spec.CertPosV == 0 ? my : spec.CertPosV == 1 ? (ph - blockH) / 2 : ph - blockH - my;
             }
 
-            if (spec.CertWhiteFill) gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(0xCC, 0xFF, 0xFF, 0xFF)), bx, by, blockW, blockH);
-            if (spec.CertBorder != 2)
-            {
-                var pen = new XPen(XColor.FromArgb(255, spec.CertColor.R, spec.CertColor.G, spec.CertColor.B), 1.2);
-                if (spec.CertBorder == 1) gfx.DrawRoundedRectangle(pen, bx, by, blockW, blockH, 5, 5); else gfx.DrawRectangle(pen, bx, by, blockW, blockH);
-            }
+            // Outline only - never a fill - so whatever is under the stamp stays readable.
+            var boxPen = new XPen(XColor.FromArgb(255, spec.CertColor.R, spec.CertColor.G, spec.CertColor.B), 1.2);
+            if (spec.CertBorder == 1) gfx.DrawRoundedRectangle(boxPen, bx, by, blockW, blockH, 5, 5); else gfx.DrawRectangle(boxPen, bx, by, blockW, blockH);
 
             double x = bx + innerPad, y = by + pad;
             if (spec.CertShowLogo && logo is not null && spec.CertLabel.Length > 0)

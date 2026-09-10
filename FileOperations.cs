@@ -1403,9 +1403,14 @@ namespace StealthPDF
             if (!string.IsNullOrEmpty(seed))
             {
                 dlg.FileName = System.IO.Path.GetFileName(seed);
-                var seedDir = System.IO.Path.GetDirectoryName(_originalFile ?? "");
-                if (!string.IsNullOrEmpty(seedDir) && System.IO.Directory.Exists(seedDir))
-                    dlg.InitialDirectory = seedDir;
+                // Only seed the folder from a real saved location. Scanned/imported docs have no
+                // original path, and Path.GetDirectoryName("") throws on .NET Framework.
+                if (!string.IsNullOrEmpty(_originalFile))
+                {
+                    var seedDir = System.IO.Path.GetDirectoryName(_originalFile);
+                    if (!string.IsNullOrEmpty(seedDir) && System.IO.Directory.Exists(seedDir))
+                        dlg.InitialDirectory = seedDir;
+                }
             }
             if (dlg.ShowDialog(this) != true) return;
             try

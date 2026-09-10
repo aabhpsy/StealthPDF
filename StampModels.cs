@@ -59,8 +59,7 @@ namespace StealthPDF
         // Appearance
         public Color   CertColor   = Color.FromRgb(0x22, 0x22, 0x22);   // border + text
         public double  CertScale   = 1.0;          // whole-block scale multiplier
-        public int      CertBorder  = 0;            // 0 rectangle, 1 rounded, 2 none
-        public bool      CertWhiteFill = false;      // off by default so the block is transparent over the page; user can enable a fill in the Stamp window
+        public int      CertBorder  = 0;            // 0 rectangle, 1 rounded - the block is always boxed
         // Placement (one position drives all pages in the range; -1 = custom draggable)
         public int     CertPosH    = 2;            // 0 left, 1 center, 2 right
         public int     CertPosV    = 2;            // 0 top, 1 middle, 2 bottom

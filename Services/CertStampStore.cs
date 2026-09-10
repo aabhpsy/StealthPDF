@@ -50,7 +50,6 @@ namespace StealthPDF.Services
             public string ColorHex { get; set; } = "#222222";
             public double Scale { get; set; } = 1.0;
             public int    Border { get; set; } = 0;
-            public bool   WhiteFill { get; set; } = false;
             public int    PosH { get; set; } = 2;
             public int    PosV { get; set; } = 2;
             public double CustomX { get; set; } = 0.78;
@@ -169,7 +168,7 @@ namespace StealthPDF.Services
             ShowSig = s.CertShowSig, SignatureId = s.CertSignatureId, SigPath = s.CertSigPath,
             ShowDate = s.CertShowDate, ShowTime = s.CertShowTime, Date = s.CertDate ?? "",
             ColorHex = ColorToHex(s.CertColor), Scale = s.CertScale, Border = s.CertBorder,
-            WhiteFill = s.CertWhiteFill, PosH = s.CertPosH, PosV = s.CertPosV,
+            PosH = s.CertPosH, PosV = s.CertPosV,
             CustomX = s.CertCustomX, CustomY = s.CertCustomY,
         };
 
@@ -179,8 +178,10 @@ namespace StealthPDF.Services
             s.CertLabel = d.Label; s.CertShowName = d.ShowName; s.CertName = d.Name;
             s.CertShowSig = d.ShowSig; s.CertSignatureId = d.SignatureId; s.CertSigPath = d.SigPath;
             s.CertShowDate = d.ShowDate; s.CertShowTime = d.ShowTime; s.CertDate = d.Date ?? "";
-            s.CertColor = ColorFromHex(d.ColorHex); s.CertScale = d.Scale; s.CertBorder = d.Border;
-            s.CertWhiteFill = d.WhiteFill; s.CertPosH = d.PosH; s.CertPosV = d.PosV;
+            s.CertColor = ColorFromHex(d.ColorHex); s.CertScale = d.Scale;
+            // Older configs could store 2 ("no border"); the stamp is always boxed now, so fold it to rectangle.
+            s.CertBorder = Math.Max(0, Math.Min(1, d.Border));
+            s.CertPosH = d.PosH; s.CertPosV = d.PosV;
             s.CertCustomX = d.CustomX; s.CertCustomY = d.CustomY;
         }
     }
